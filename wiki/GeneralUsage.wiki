@@ -1,6 +1,6 @@
 #summary General usage information for the CEF framework.
 
-= General Usage =
+== General Usage ==
 
 A fully functional embedded browser window using CEF can be easily created as follows:
 {{{
@@ -17,7 +17,7 @@ CefBrowser::CreateBrowser(info, false, handler, L"http://www.google.com");
 }}}
 See cefclient under the tests directory for an example client application.
 
-= File Structure =
+== File Structure ==
 
 The CEF respository is organized as follows.
 
@@ -27,7 +27,7 @@ The CEF respository is organized as follows.
   * *tests* -- This folder contains test applications.
     * *cefclient* -- A simple CEF client application.
 
-= Browser Notifications =
+== Browser Notifications ==
 
 Browser notifications are delivered from the browser to the client via registered delegate interfaces.  CefHandler is the primary delegate interface and CefJSHandler may be used to implement custom JavaScript objects.
 
@@ -55,7 +55,7 @@ The following notifications are supported by CefV8Handler.
 
   * Execute Method (Execute). The application executes the specified method.  All JavaScript arguments are provided with this event and the application can specify a return value.
 
-= Browser Events =
+== Browser Events ==
 
 Browser events are delivered to the browser by the client via CefBrowser and CefFrame methods.
 
@@ -69,31 +69,31 @@ Browser events are delivered to the browser by the client via CefBrowser and Cef
   * Load Request. Load the specified request (URL, method, request data and headers) into the target frame.
   * Execute JavaScript.  Execute an arbitrary JavaScript command in the target frame.
 
-= Embedded NPAPI Plugins =
+== Embedded NPAPI Plugins ==
 
 CEF supports the creation of embedded Netscape-style plugins.  Embedded plugins behave the same as normal DLL-based plugins and use the same NPAPI.  Instead of existing as a separate DLL, however, embedded plugins are created by the container application and registered with the system via a call to CefRegisterPlugin().  You will need to include cef_nplugin.h directly to access this functionality.
 
-= Framework Implementation Overview =
+== Framework Implementation Overview ==
 
 All classes that belong to the chromium embedded framework are prefixed with "Cef".
 
-== Framework Setup and Tear Down ==
+=== Framework Setup and Tear Down ===
 
 The UI message loop is hosted in a single thread created by the framework.  The client is responsible for setting up and shutting down this thread for each process that uses the framework by calling CefInitialize() and CefShutdown() respectively.
 
-== Reference Counting ==
+=== Reference Counting ===
 
 All framework classes implement the CefBase interface and all instance pointers are handled using the CefRefPtr smart pointer implementation that automatically handles reference counting via calls to AddRef() and Release().
 
-== Platform Neutrality ==
+=== Platform Neutrality ===
 
 The CEF framework is designed to be platform neutral.  While we currently only support Windows there are plans to add support for other platforms in the future.  In order to make multi-platform support as painless as possible the framework defines a set of implementation-neutral interfaces and typedef's that wrap platform-dependent behavior.
 
-== Thread Safety ==
+=== Thread Safety ===
 
 All implementations of framework interfaces must be safe for access from multiple threads.  The CefThreadSafeBase template provides atomic AddRef() and Release() implementations.  It also provides Lock() and Unlock() methods for synchronizing access to blocks of code.
 
-== Framework Interfaces ==
+=== Framework Interfaces ===
 
 The framework defines the following interfaces.
 
@@ -103,5 +103,5 @@ The framework defines the following interfaces.
   * *CefRequest* represents request data such as url, method, post data and headers.
   * *CefPostData* and *CefPostDataElement* represent the post data that may be part of a request.
   * *CefSchemeHandlerFactory* and *CefSchemeHandler* are used to handle requests using custom schemes such as myscheme://mydomain.
-  * *CefStreamReader* and *CefStreamWriter* are simple interfaces for reading and writing data respectively.
+  * *CefStreamReader*, *CefStreamWriter*, *CefReadHandler* and *CefWriteHandler* are simple interfaces for reading and writing data.
   * *CefV8Handler* and *CefV8Value* are used to create and access JavaScript objects.
