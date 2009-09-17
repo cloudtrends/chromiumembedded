@@ -1,0 +1,74 @@
+#summary General usage information for the CEF framework.
+
+= General Usage =
+
+A fully functional embedded browser window using CEF can be easily created as follows:
+{{{
+// Define an instance of our CefHandler implementation. Various methods in the MyHandler
+// instance will be called to customize browser behavior. 
+CefRefPtr<CefHandler> handler(new MyHandler());
+
+// Provide information about the parent window, client rectangle, etc.
+CefWindowInfo info = {...};
+
+// Create the new browser window object, which eventually results in a call to
+// MyHandler::HandleAfterCreated().
+CefBrowser::CreateBrowser(info, false, handler, L"http://www.google.com");
+}}}
+See cefclient under the tests directory for an example client application.
+
+= File Structure =
+
+The CEF respository is organized as follows.
+
+  * *include* -- This folder contains the include files that are used by CEF client applications.
+  * *libcef* -- This folder contains the libcef implementation.
+  * *libcef_dll* -- This folder contains the libcef C API and DLL implementation.
+  * *tests* -- This folder contains test applications.
+    * *cefclient* -- A simple CEF client application.
+
+= Browser Notifications =
+
+Browser notifications are delivered from the browser to the client via registered delegate interfaces.  CefHandler is the primary delegate interface and CefJSHandler may be used to implement custom JavaScript objects.
+
+The following notifications are supported by CefHandler.
+
+  * Before Window Creation (HandleBeforeCreated). The application can cancel or customize the creation of browser windows.
+  * After Window Creation (HandleAfterCreated).  The application can register custom CefJSHandler objects.
+  * Update Address Bar (HandleAddressChange).  Change the address bar to the specified string.  This is sent after navigation is committed and before the page has begun loading.
+  * Update Title (HandleTitleChange).  Change the title to the specified string.  This is sent while the page is loading.
+  * Before Browse (HandleBeforeBrowse). The application can cancel navigation. Information provided with this event includes the URL, post data and request headers.
+  * Load Start (HandleLoadStart). The browser is about to begin loading a URL.
+  * Load End (HandleLoadEnd). The browser has finished loading a URL.
+  * Load Error (HandleLoadError). An error has occurred during the load.  The application can provide custom error pages.
+  * Before Resource Load (HandleBeforeResourceLoad).  The browser is about to begin loading a resource. The application can provide an alternate data source (in-memory buffer, for instance) or cancel the load.
+  * Before Menu (HandleBeforeMenu).  The browser is about to show a context menu. The application can either cancel the menu or show a custom menu in its place.  The default behavior of the browser implementation is to show a basic context menu based on the disposition type.
+  * Get Menu Label (HandleGetMenuLabel).  Called one time for each item in a default context menu before that menu is displayed.  The application can change the text from the English default to something else (a different language, for instance).
+  * Menu Action (HandleMenuAction).  The user has selected an action from the default context menu.  The application can choose to handle the action in a custom manner.
+  * Print Header & Footer (HandlePrintHeaderFooter).  Called after the web view is rendered to the print context but before the page is ended.  The application can insert a custom header/footer string at any of six predefined locations (top left, top center, top right, bottom left, bottom center, bottom right) or do custom drawing on the print context.  Information provided with this event includes the current URL, title, page number, total pages, print context, page bounding box and DPI scale factor.
+  * JavaScript Alert (HandleJSAlert). The application can customize the display of JavaScript alert messages.
+  * JavaScript Confirm (HandleJSConfirm). The application can customize the display of JavaScript confirm messages.
+  * JavaScript Prompt (HandleJSPrompt). The application can customize the display of JavaScript prompt messages.
+  * JavaScript Object Binding (HandleJSBinding).  The application can add values to the JavaScript 'window' object for a frame.
+
+The following notifications are supported by CefV8Handler.
+
+  * Execute Method (Execute). The application executes the specified method.  All JavaScript arguments are provided with this event and the application can specify a return value.
+
+= Browser Events =
+
+Browser events are delivered to the browser by the client via CefBrowser and CefFrame methods.
+
+  * Back, Forward, Reload and Stop Load. Control navigation of browser.
+  * Undo, Redo, Cut, Copy, Paste, Delete, Select All. Control selection on the target frame.
+  * Print. Print the target frame.
+  * View Source. Save the target frame's HTML source to a temporary file and open it in the default text viewing application.
+  * Load URL. Load the specified URL into the target frame.
+  * Load String. Load the specified string into the target frame with an optionally specified dummy URL.
+  * Load Stream. Load the specified binary data into the target frame with an optionally specified dummy URL.
+  * Load Request. Load the specified request (URL, method, request data and headers) into the target frame.
+  * Execute JavaScript.  Execute an arbitrary JavaScript command in the target frame.
+
+= Embedded NPAPI Plugins =
+
+CEF supports the creation of embedded Netscape-style plugins.  Embedded plugins behave the same as normal DLL-based plugins and use the same NPAPI.  Instead of existing as a separate DLL, however, embedded plugins are created by the container application and registered with the system via a call to CefRegisterPlugin().  You will need to include cef_nplugin.h directly to access this functionality.
