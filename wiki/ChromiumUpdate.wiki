@@ -1,0 +1,29 @@
+#summary How to update CEF to use the newest Chromium revision.
+
+The Chromium developers work very hard to introduce new features and capabilities as quickly as possible. Consiquently, projects like CEF that depend on Chromium must also be updated regularly. The update process can be complicated and must be done carefully to avoid introducing new bugs and breakage. Below are the steps to follow when updating CEF to work with a new Chromium revision.
+
+1. Update to the last "green" Chromium revision by viewing the [http://build.chromium.org/buildbot/waterfall/console Chromium build waterfall]. Choose the most recent revision that is green for all of the Windows builders and tests.
+
+2. Create a diff of the webkit/tools/test_shell directory between the last Chromium revision and new Chromium revision.
+
+{{{
+svn diff -r oldrev:newrev > diff_oldrev-newrev.txt
+}}}
+
+This will be your guide to identifying what has changed. CEF began life as a customized version of test_shell and there's still a one-to-one relationship between many of the files.
+
+3. Make the necessary changes to CEF, build (clean if necessary) and fix whatever is broken.
+
+4. Run the various CEF tests to make sure everything still works. This step will hopefully be automated at some point in the future.
+
+Looking at the [http://build.chromium.org/buildbot/waterfall.fyi/waterfall?branch=&builder=Chromium+Embedded CEF Build Bot] stdio log will give you a sense of what you can expect to find broken when you update. In most cases (say, 90% of the time) the breakage is due to naming changes, minor code reorganization and/or project name/location changes. The remaining 10% can require pretty significant changes to CEF, usually due to the ongoing refactoring of webkit/glue to webkit/api. If you identify a change to Chromium that has broken a required feature for CEF, and you can't work around the breakage by making reasonable changes to CEF, then you should work with the Chromium team to resolve the problem.
+
+1. Identify the specific Chromium revision that broke the feature and make sure you understand why the change was made.
+
+2. Post a message to the chromium-dev mailing list explaining why the change broke CEF and either seeking additional information or suggesting a fix that works for both CEF and Chromium.
+
+3. After feedback from the Chromium developers create a code review issue with the fix and publish it with the appropriate (responsible) developer(s) as reviewers.
+
+4. Follow through with the Chromium developer(s) to get the code review committed.
+
+The CEF build currently contains a patch capability that should be used only as a last resort or as a stop-gap measure if you expect the code review to take a while. The best course of action is always to get your Chromium changes accepted into the Chromium trunk if possible.
