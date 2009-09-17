@@ -72,3 +72,36 @@ Browser events are delivered to the browser by the client via CefBrowser and Cef
 = Embedded NPAPI Plugins =
 
 CEF supports the creation of embedded Netscape-style plugins.  Embedded plugins behave the same as normal DLL-based plugins and use the same NPAPI.  Instead of existing as a separate DLL, however, embedded plugins are created by the container application and registered with the system via a call to CefRegisterPlugin().  You will need to include cef_nplugin.h directly to access this functionality.
+
+= Framework Implementation Overview =
+
+All classes that belong to the chromium embedded framework are prefixed with "Cef".
+
+== Framework Setup and Tear Down ==
+
+The UI message loop is hosted in a single thread created by the framework.  The client is responsible for setting up and shutting down this thread for each process that uses the framework by calling CefInitialize() and CefShutdown() respectively.
+
+== Reference Counting ==
+
+All framework classes implement the CefBase interface and all instance pointers are handled using the CefRefPtr smart pointer implementation that automatically handles reference counting via calls to AddRef() and Release().
+
+== Platform Neutrality ==
+
+The CEF framework is designed to be platform neutral.  While we currently only support Windows there are plans to add support for other platforms in the future.  In order to make multi-platform support as painless as possible the framework defines a set of implementation-neutral interfaces and typedef's that wrap platform-dependent behavior.
+
+== Thread Safety ==
+
+All implementations of framework interfaces must be safe for access from multiple threads.  The CefThreadSafeBase template provides atomic AddRef() and Release() implementations.  It also provides Lock() and Unlock() methods for synchronizing access to blocks of code.
+
+== Framework Interfaces ==
+
+The framework defines the following interfaces.
+
+  * *CefBrowser* is the main browser window host class. A new browser window is created by calling the static CefBrowser::CreateBrowser() method.
+  * *CefFrame* represents a single frame in the browser window.  Each browser window also has a top-level main frame that can be accessed via the CefBrowser::GetMainFrame() method.
+  * *CefHandler* is the main browser delegate interface passed into the CefBrowser::CreateBrowser() method.
+  * *CefRequest* represents request data such as url, method, post data and headers.
+  * *CefPostData* and *CefPostDataElement* represent the post data that may be part of a request.
+  * *CefSchemeHandlerFactory* and *CefSchemeHandler* are used to handle requests using custom schemes such as myscheme://mydomain.
+  * *CefStreamReader* and *CefStreamWriter* are simple interfaces for reading and writing data respectively.
+  * *CefV8Handler* and *CefV8Value* are used to create and access JavaScript objects.
