@@ -26,6 +26,7 @@ The CEF respository is organized as follows.
   * *libcef_dll* -- This folder contains the libcef C API and DLL implementation.
   * *tests* -- This folder contains test applications.
     * *cefclient* -- A simple CEF client application.
+    * *unittests* -- Unit tests for CEF interfaces.
 
 == Browser Notifications ==
 
@@ -49,7 +50,10 @@ The following notifications are supported by CefHandler.
   * JavaScript Alert (HandleJSAlert). The application can customize the display of JavaScript alert messages.
   * JavaScript Confirm (HandleJSConfirm). The application can customize the display of JavaScript confirm messages.
   * JavaScript Prompt (HandleJSPrompt). The application can customize the display of JavaScript prompt messages.
-  * JavaScript Object Binding (HandleJSBinding).  The application can add values to the JavaScript 'window' object for a frame.
+  * Before Window Close (HandleBeforeWindowClose). Called just before a browser window is closed.
+  * Take Focus (HandleTakeFocus). Called when the browser component is about to loose focus.
+  * Set Focus (HandleSetFocus). Called when the browser component is requesting focus.
+  * Key Event (HandleKeyEvent). Called when the browser component receives a keyboard event.
 
 The following notifications are supported by CefV8Handler.
 
@@ -72,6 +76,14 @@ Browser events are delivered to the browser by the client via CefBrowser and Cef
 == Embedded NPAPI Plugins ==
 
 CEF supports the creation of embedded Netscape-style plugins.  Embedded plugins behave the same as normal DLL-based plugins and use the same NPAPI.  Instead of existing as a separate DLL, however, embedded plugins are created by the container application and registered with the system via a call to CefRegisterPlugin().  You will need to include cef_nplugin.h directly to access this functionality.
+
+== JavaScript Extensions ==
+
+CEF supports JavaScript extensions that can interface with native application code. See the CefRegisterExtension() function in cef.h and the "JavaScript Extension Handler" and "UI App Example" tests in the cefclient application for example usage.
+
+== Custom Schemes ==
+
+CEF supports registration and handling of custom schemes such as myscheme://mydomain.  See the CefRegisterScheme() function in cef.h and the "Scheme Handler" test in the cefclient application for example usage.
 
 == Framework Implementation Overview ==
 
