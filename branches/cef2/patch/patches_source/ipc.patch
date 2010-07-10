@@ -1,0 +1,13 @@
+Index: ipc_message_utils.h
+===================================================================
+--- ipc_message_utils.h	(revision 46337)
++++ ipc_message_utils.h	(working copy)
+@@ -53,6 +53,8 @@
+   GpuMsgStart,
+   GpuHostMsgStart,
+   GpuChannelMsgStart,
++  CefMsgStart,
++  CefHostMsgStart,
+   // NOTE: When you add a new message class, also update
+   // IPCStatusView::IPCStatusView to ensure logging works.
+   LastMsgIndex

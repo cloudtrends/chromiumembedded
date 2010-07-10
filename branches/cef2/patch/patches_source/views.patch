@@ -1,0 +1,15 @@
+Index: window/window.h
+===================================================================
+--- window/window.h	(revision 46337)
++++ window/window.h	(working copy)
+@@ -129,6 +129,10 @@
+   // application to exit.
+   virtual bool IsAppWindow() const { return false; }
+ 
++  // Returns true if the window is an embedded child of a CEF client
++  // application.
++  virtual bool IsAppCefChild() const { return false; }
++
+   // Toggles the enable state for the Close button (and the Close menu item in
+   // the system menu).
+   virtual void EnableClose(bool enable) = 0;

@@ -1,0 +1,32 @@
+Index: chrome.gyp
+===================================================================
+--- chrome.gyp	(revision 46337)
++++ chrome.gyp	(working copy)
+@@ -1361,6 +1361,11 @@
+             '../v8/tools/gyp/v8.gyp:v8_shell',
+           ],
+           'conditions': [
++            ['cef2_directory!=""', {
++              'dependencies': [
++                '../<(cef2_directory)/cef2.gyp:*',
++              ],
++            }],
+             ['win_use_allocator_shim==1', {
+               'dependencies': [
+                 '../base/allocator/allocator.gyp:*',
+Index: chrome_dll.gypi
+===================================================================
+--- chrome_dll.gypi	(revision 46337)
++++ chrome_dll.gypi	(working copy)
+@@ -71,6 +71,11 @@
+             '<@(chromium_dependencies)',
+           ],
+           'conditions': [
++            ['cef2_directory!=""', {
++              'dependencies': [
++                '../<(cef2_directory)/cef2_browser.gyp:cef2_browser',
++              ],
++            }],
+             ['OS=="win"', {
+               'product_name': 'chrome',
+               'msvs_guid': 'C0A7EE2C-2A6D-45BE-BA78-6D006FDF52D9',

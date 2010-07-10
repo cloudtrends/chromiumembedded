@@ -1,4 +1,4 @@
-# Copyright (c) 2009 The Chromium Embedded Framework Authors. All rights
+# Copyright (c) 2010 The Chromium Embedded Framework Authors. All rights
 # reserved. Use of this source code is governed by a BSD-style license that
 # can be found in the LICENSE file.
 
@@ -45,7 +45,7 @@ def make_capi_header(header):
     
     # header string
     result = \
-"""// Copyright (c) 2009 Marshall A. Greenblatt. All rights reserved.
+"""// Copyright (c) 2010 Marshall A. Greenblatt. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -81,18 +81,16 @@ def make_capi_header(header):
 // more information.
 //
 
-#ifndef _CEF_CAPI_H
-#define _CEF_CAPI_H
+#ifndef _CEF2_CAPI_H
+#define _CEF2_CAPI_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include "cef_export.h"
-#include "cef_string.h"
-#include "cef_string_list.h"
-#include "cef_string_map.h"
-#include "cef_types.h"
+#include "cef2_export.h"
+#include "cef2_string.h"
+#include "cef2_types.h"
 
 """
 
@@ -156,7 +154,7 @@ typedef struct _cef_base_t
 }
 #endif
 
-#endif // _CEF_CAPI_H
+#endif // _CEF2_CAPI_H
 """
     
     return result

@@ -1,0 +1,19 @@
+The Chromium Embedded Framework (CEF) project is built on top of the Chromium
+project source tree.  Because of the Chromium project's constant state of flux
+certain revisions of the CEF project may not be compatible with all Chromium
+revisions, and visa-versa. This document tracks the combination of CEF
+revision and Chromium revision that have been officially tested by the CEF
+development team.  The current CEF revision may be newer than the last CEF
+revision listed in this document.  In that case, it means that the current CEF
+revision is compatible with the last listed Chromium revision.
+
+To update Chromium to a specific revision run the following command, where ####
+is the Chromium revision number that you wish to download.
+
+gclient sync --revision src@#### --force
+
+
+
+Date       | CEF Revision                    | Chromium Revision
+-------------------------------------------------------------------------------
+2010-07-09 | /cef2@86                        | /trunk@46337

@@ -1,0 +1,607 @@
+Index: browser/browser.cc
+===================================================================
+--- browser/browser.cc	(revision 46337)
++++ browser/browser.cc	(working copy)
+@@ -12,6 +12,8 @@
+ #include <algorithm>
+ #include <string>
+ 
++#include "browser/cef_service.h"
++
+ #include "app/animation.h"
+ #include "app/l10n_util.h"
+ #include "base/base_paths.h"
+@@ -175,6 +177,9 @@
+       last_blocked_command_disposition_(CURRENT_TAB),
+       pending_web_app_action_(NONE),
+       extension_app_(NULL) {
++  if(profile_->HasCefService())
++    set_cef_connector(profile_->GetCefService()->AssignPending(this));
++
+   tabstrip_model_.AddObserver(this);
+ 
+   registrar_.Add(this, NotificationType::SSL_VISIBLE_STATE_CHANGED,
+@@ -214,9 +219,14 @@
+ 
+ Browser::~Browser() {
+   // The tab strip should not have any significant tabs at this point.
+-  DCHECK(!tabstrip_model_.HasNonPhantomTabs());
++  //DCHECK(!tabstrip_model_.HasNonPhantomTabs());
+   tabstrip_model_.RemoveObserver(this);
+ 
++  if (cef_connector_.get()) {
++    cef_connector_->Destroy();
++    cef_connector_ = NULL;
++  }
++
+   BrowserList::RemoveBrowser(this);
+ 
+ #if defined(OS_WIN) || defined(OS_LINUX)
+@@ -1318,7 +1328,8 @@
+   hide_ui_for_fullscreen = window_ && window_->IsFullscreen();
+ #endif
+   if (!hide_ui_for_fullscreen) {
+-    if (type() != TYPE_NORMAL && type() != TYPE_EXTENSION_APP)
++    if (type() != TYPE_NORMAL && type() != TYPE_EXTENSION_APP &&
++        (!window_ || !window_->IsAppCefChild()))
+       features |= FEATURE_TITLEBAR;
+ 
+     if (type() == TYPE_NORMAL || type() == TYPE_EXTENSION_APP)
+Index: browser/browser.h
+===================================================================
+--- browser/browser.h	(revision 46337)
++++ browser/browser.h	(working copy)
+@@ -9,6 +9,8 @@
+ #include <set>
+ #include <vector>
+ 
++#include "browser/cef_connector.h"
++
+ #include "base/basictypes.h"
+ #include "base/scoped_ptr.h"
+ #include "base/task.h"
+@@ -188,6 +190,11 @@
+     return extension_shelf_model_.get();
+   }
+ 
++  CefConnector* cef_connector() { return cef_connector_.get(); }
++  void set_cef_connector(CefConnector* connector) {
++    cef_connector_ = connector;
++  }
++
+   // Get the FindBarController for this browser, creating it if it does not
+   // yet exist.
+   FindBarController* GetFindBarController();
+@@ -905,6 +912,8 @@
+   // positions.
+   std::wstring app_name_;
+ 
++  scoped_refptr<CefConnector> cef_connector_;
++
+   // Unique identifier of this browser for session restore. This id is only
+   // unique within the current session, and is not guaranteed to be unique
+   // across sessions.
+Index: browser/browser_init.cc
+===================================================================
+--- browser/browser_init.cc	(revision 46337)
++++ browser/browser_init.cc	(working copy)
+@@ -4,10 +4,13 @@
+ 
+ #include "chrome/browser/browser_init.h"
+ 
++#include "browser/cef_service.h"
++
+ #include "app/l10n_util.h"
+ #include "app/resource_bundle.h"
+ #include "base/event_recorder.h"
+ #include "base/path_service.h"
++#include "base/string_tokenizer.h"
+ #include "base/sys_info.h"
+ #include "chrome/browser/automation/automation_provider.h"
+ #include "chrome/browser/automation/chrome_frame_automation_provider.h"
+@@ -487,6 +490,51 @@
+         switches::kUserAgent));
+   }
+ 
++  if (command_line_.HasSwitch(switches::kAppCef)) {
++    gfx::NativeWindow parent = NULL;
++    gfx::Rect bounds;
++    std::string channel_id;
++    std::string browser_id;
++
++    // Parse the CEF switch arguments.
++    std::string embedded_str(
++        command_line_.GetSwitchValueASCII(switches::kAppCef));
++    StringTokenizer str_tok(embedded_str, ",");
++    int count = 0;
++    for (; str_tok.GetNext() && count < 7; ++count) {
++      std::string arg = str_tok.token();
++      switch(count) {
++        case 0:
++          parent = reinterpret_cast<gfx::NativeWindow>(atol(arg.c_str()));
++          break;
++        case 1:
++          bounds.set_x(atoi(arg.c_str()));
++          break;
++        case 2:
++          bounds.set_y(atoi(arg.c_str()));
++          break;
++        case 3:
++          bounds.set_width(atoi(arg.c_str()));
++          break;
++        case 4:
++          bounds.set_height(atoi(arg.c_str()));
++          break;
++        case 5:
++          channel_id = arg.c_str();
++          break;
++         case 6:
++          browser_id = arg.c_str();
++          break;
++      }
++    }
++
++    if (count == 7) {
++      // Valid argument count
++      profile->GetCefService()->SetPending(parent, bounds, channel_id,
++          browser_id);
++    }
++  }
++
+   // Open the required browser windows and tabs.
+   // First, see if we're being run as an application window.
+   if (!OpenApplicationWindow(profile)) {
+Index: browser/browser_window.h
+===================================================================
+--- browser/browser_window.h	(revision 46337)
++++ browser/browser_window.h	(working copy)
+@@ -118,6 +118,10 @@
+   virtual void SetFullscreen(bool fullscreen) = 0;
+   virtual bool IsFullscreen() const = 0;
+ 
++  // Returns true if the window is an embedded child of a CEF client
++  // application.
++  virtual bool IsAppCefChild() const = 0;
++
+   // Returns true if the fullscreen bubble is visible.
+   virtual bool IsFullscreenBubbleVisible() const = 0;
+ 
+Index: browser/profile.cc
+===================================================================
+--- browser/profile.cc	(revision 46337)
++++ browser/profile.cc	(working copy)
+@@ -4,6 +4,8 @@
+ 
+ #include "chrome/browser/profile.h"
+ 
++#include "browser/cef_service.h"
++
+ #include "app/resource_bundle.h"
+ #include "app/theme_provider.h"
+ #include "base/command_line.h"
+@@ -274,6 +276,14 @@
+     return profile_;
+   }
+ 
++  virtual bool HasCefService() {
++    return profile_->HasCefService();
++  }
++
++  virtual CefService* GetCefService() {
++    return profile_->GetCefService();
++  }
++
+   virtual webkit_database::DatabaseTracker* GetDatabaseTracker() {
+     if (!db_tracker_)
+       db_tracker_ = new webkit_database::DatabaseTracker(FilePath());
+@@ -902,6 +912,17 @@
+   return this;
+ }
+ 
++bool ProfileImpl::HasCefService() {
++  return (cef_service_.get() != NULL);
++}
++
++CefService* ProfileImpl::GetCefService() {
++  if (!cef_service_.get()) {
++    cef_service_.reset(new CefService());
++  }
++  return cef_service_.get();
++}
++
+ webkit_database::DatabaseTracker* ProfileImpl::GetDatabaseTracker() {
+   if (!db_tracker_)
+     db_tracker_ = new webkit_database::DatabaseTracker(GetPath());
+Index: browser/profile.h
+===================================================================
+--- browser/profile.h	(revision 46337)
++++ browser/profile.h	(working copy)
+@@ -37,6 +37,7 @@
+ class ChromeURLRequestContextGetter;
+ class DesktopNotificationService;
+ class DownloadManager;
++class CefService;
+ class Extension;
+ class ExtensionDevToolsManager;
+ class ExtensionProcessManager;
+@@ -147,6 +148,13 @@
+   // profile is not off the record.
+   virtual Profile* GetOriginalProfile() = 0;
+ 
++  // Returns true if a CEF service exists.
++  virtual bool HasCefService() = 0;
++
++  // Returns the CEF service for this profile.  The CEF service is lazily
++  // created the first time that this method is called.
++  virtual CefService* GetCefService() = 0;
++
+   // Returns a pointer to the DatabaseTracker instance for this profile.
+   virtual webkit_database::DatabaseTracker* GetDatabaseTracker() = 0;
+ 
+@@ -460,6 +468,8 @@
+   virtual Profile* GetOffTheRecordProfile();
+   virtual void DestroyOffTheRecordProfile();
+   virtual Profile* GetOriginalProfile();
++  virtual bool HasCefService();
++  virtual CefService* GetCefService();
+   virtual webkit_database::DatabaseTracker* GetDatabaseTracker();
+   virtual VisitedLinkMaster* GetVisitedLinkMaster();
+   virtual UserScriptMaster* GetUserScriptMaster();
+@@ -555,6 +565,7 @@
+ 
+   FilePath path_;
+   FilePath base_cache_path_;
++  scoped_ptr<CefService> cef_service_;
+   scoped_ptr<VisitedLinkEventListener> visited_link_event_listener_;
+   scoped_ptr<VisitedLinkMaster> visited_link_master_;
+   scoped_refptr<ExtensionsService> extensions_service_;
+Index: browser/views/frame/browser_frame_win.cc
+===================================================================
+--- browser/views/frame/browser_frame_win.cc	(revision 46337)
++++ browser/views/frame/browser_frame_win.cc	(working copy)
+@@ -9,6 +9,9 @@
+ 
+ #include <set>
+ 
++#include "browser/cef_connector.h"
++#include "browser/cef_service.h"
++
+ #include "app/resource_bundle.h"
+ #include "app/theme_provider.h"
+ #include "app/win_util.h"
+@@ -56,13 +59,23 @@
+       frame_initialized_(false),
+       profile_(profile) {
+   browser_view_->set_frame(this);
++  CefConnector* connector = browser_view_->browser()->cef_connector();
++  if (connector && connector->parent())
++    set_window_style(WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS);
+   GetNonClientView()->SetFrameView(CreateFrameViewForWindow());
+   // Don't focus anything on creation, selecting a tab will set the focus.
+   set_focus_on_creation(false);
+ }
+ 
+ void BrowserFrameWin::Init() {
+-  WindowWin::Init(NULL, gfx::Rect());
++  CefConnector* connector = browser_view_->browser()->cef_connector();
++  if (connector) {
++    WindowWin::Init(connector->parent(), connector->bounds());
++    connector->NotifyBrowserInitialized(GetWindow()->GetNativeWindow());
++  } else {
++    WindowWin::Init(NULL, gfx::Rect());
++  }
++  frame_initialized_ = true;
+ }
+ 
+ BrowserFrameWin::~BrowserFrameWin() {
+@@ -140,6 +153,9 @@
+ // BrowserFrame, views::WindowWin overrides:
+ 
+ gfx::Insets BrowserFrameWin::GetClientAreaInsets() const {
++  if (IsAppCefChild())
++    return gfx::Insets();
++
+   // Use the default client insets for an opaque frame or a glass popup/app
+   // frame.
+   if (!GetNonClientView()->UseNativeFrame() ||
+@@ -214,6 +230,9 @@
+ }
+ 
+ void BrowserFrameWin::OnWindowPosChanged(WINDOWPOS* window_pos) {
++  if (!frame_initialized_)
++    return;
++  
+   // Windows lies to us about the position of the minimize button before a
+   // window is visible. We use the position of the minimize button to place the
+   // distributor logo in official builds. When the window is shown, we need to
+@@ -262,8 +281,12 @@
+   WindowWin::Activate();
+ }
+ 
++bool BrowserFrameWin::IsAppCefChild() const {
++  return !!(window_style() & WS_CHILD);
++}
++
+ views::NonClientFrameView* BrowserFrameWin::CreateFrameViewForWindow() {
+-  if (AlwaysUseNativeFrame())
++  if (AlwaysUseNativeFrame() || IsAppCefChild())
+     browser_frame_view_ = new GlassBrowserFrameView(this, browser_view_);
+   else if (browser_view_->IsBrowserTypePanel())
+     browser_frame_view_ = new AppPanelBrowserFrameView(this, browser_view_);
+@@ -291,6 +314,8 @@
+   // Nothing to do yet, or we're not showing a DWM frame.
+   if (!GetClientView() || !AlwaysUseNativeFrame())
+     return;
++  if (::GetWindowLong(GetNativeView(), GWL_STYLE) & WS_CHILD)
++    return;
+ 
+   MARGINS margins = { 0 };
+   if (browser_view_->IsBrowserTypeNormal()) {
+Index: browser/views/frame/browser_frame_win.h
+===================================================================
+--- browser/views/frame/browser_frame_win.h	(revision 46337)
++++ browser/views/frame/browser_frame_win.h	(working copy)
+@@ -70,6 +70,7 @@
+   virtual int GetShowState() const;
+   virtual void Activate();
+   virtual bool IsAppWindow() const { return true; }
++  virtual bool IsAppCefChild() const;
+   virtual views::NonClientFrameView* CreateFrameViewForWindow();
+   virtual void UpdateFrameAfterFrameChange();
+   virtual views::RootView* CreateRootView();
+Index: browser/views/frame/browser_view.cc
+===================================================================
+--- browser/views/frame/browser_view.cc	(revision 46337)
++++ browser/views/frame/browser_view.cc	(working copy)
+@@ -189,7 +189,8 @@
+ 
+   virtual void Paint(gfx::Canvas* canvas) {
+     views::Window* window = GetWindow();
+-    if (!window || (window->IsMaximized() || window->IsFullscreen()))
++    if (!window || (window->IsMaximized() || window->IsFullscreen() ||
++        window->IsAppCefChild()))
+       return;
+ 
+     SkBitmap* bitmap = ResourceBundle::GetSharedInstance().GetBitmapNamed(
+@@ -217,7 +218,8 @@
+ 
+   virtual gfx::Size GetPreferredSize() {
+     views::Window* window = GetWindow();
+-    return (!window || window->IsMaximized() || window->IsFullscreen()) ?
++    return (!window || window->IsMaximized() || window->IsFullscreen() ||
++        window->IsAppCefChild()) ?
+         gfx::Size() : GetSize();
+   }
+ 
+@@ -476,6 +478,9 @@
+ }
+ 
+ void BrowserView::WindowMoved() {
++  if (!initialized_)
++    return;
++  
+   // Cancel any tabstrip animations, some of them may be invalidated by the
+   // window being repositioned.
+   // Comment out for one cycle to see if this fixes dist tests.
+@@ -792,6 +797,9 @@
+   if (IsFullscreen() == fullscreen)
+     return;  // Nothing to do.
+ 
++  if (IsAppCefChild())
++    return;  // Not supported for embedded apps.
++
+ #if defined(OS_WIN)
+   ProcessFullscreen(fullscreen);
+ #else
+@@ -805,6 +813,10 @@
+   return frame_->GetWindow()->IsFullscreen();
+ }
+ 
++bool BrowserView::IsAppCefChild() const {
++  return frame_->GetWindow()->IsAppCefChild();
++}
++
+ bool BrowserView::IsFullscreenBubbleVisible() const {
+   return fullscreen_bubble_.get() ? true : false;
+ }
+@@ -902,7 +914,9 @@
+ }
+ 
+ gfx::Rect BrowserView::GetRootWindowResizerRect() const {
+-  if (frame_->GetWindow()->IsMaximized() || frame_->GetWindow()->IsFullscreen())
++  if (frame_->GetWindow()->IsMaximized() ||
++      frame_->GetWindow()->IsFullscreen() ||
++      frame_->GetWindow()->IsAppCefChild())
+     return gfx::Rect();
+ 
+   // We don't specify a resize corner size if we have a bottom shelf either.
+@@ -1548,6 +1562,7 @@
+   // independent of layout and also depends on the ResizeCorner which
+   // is private.
+   if (!frame_->GetWindow()->IsMaximized() &&
++      !frame_->GetWindow()->IsAppCefChild() &&
+       !frame_->GetWindow()->IsFullscreen()) {
+     CRect client_rect;
+     ::GetClientRect(frame_->GetWindow()->GetNativeWindow(), &client_rect);
+@@ -1811,7 +1826,8 @@
+   // In restored mode, the client area has a client edge between it and the
+   // frame.
+   int overlap = StatusBubbleViews::kShadowThickness +
+-      (IsMaximized() ? 0 : views::NonClientFrameView::kClientEdgeThickness);
++      ((IsMaximized() || IsAppCefChild()) ?
++          0 : views::NonClientFrameView::kClientEdgeThickness);
+   int height = status_bubble_->GetPreferredSize().height();
+   gfx::Point origin(-overlap, top - height + overlap);
+   ConvertPointToView(this, GetParent(), &origin);
+Index: browser/views/frame/browser_view.h
+===================================================================
+--- browser/views/frame/browser_view.h	(revision 46337)
++++ browser/views/frame/browser_view.h	(working copy)
+@@ -278,6 +278,7 @@
+   virtual bool IsMaximized() const;
+   virtual void SetFullscreen(bool fullscreen);
+   virtual bool IsFullscreen() const;
++  virtual bool IsAppCefChild() const;
+   virtual LocationBar* GetLocationBar() const;
+   virtual void SetFocusToLocationBar(bool select_all);
+   virtual void UpdateStopGoState(bool is_loading, bool force);
+Index: browser/views/frame/browser_view_layout.cc
+===================================================================
+--- browser/views/frame/browser_view_layout.cc	(revision 46337)
++++ browser/views/frame/browser_view_layout.cc	(working copy)
+@@ -163,7 +163,7 @@
+     // The top few pixels of the TabStrip are a drop-shadow - as we're pretty
+     // starved of dragable area, let's give it to window dragging (this also
+     // makes sense visually).
+-    if (!browser_view_->IsMaximized() &&
++    if (!browser_view_->IsMaximized() && !browser_view_->IsAppCefChild() &&
+         (point_in_browser_view_coords.y() <
+          (tabstrip_->y() + kTabShadowSize))) {
+       // We return HTNOWHERE as this is a signal to our containing
+Index: browser/views/frame/glass_browser_frame_view.cc
+===================================================================
+--- browser/views/frame/glass_browser_frame_view.cc	(revision 46337)
++++ browser/views/frame/glass_browser_frame_view.cc	(working copy)
+@@ -15,6 +15,7 @@
+ #include "gfx/icon_util.h"
+ #include "grit/app_resources.h"
+ #include "grit/theme_resources.h"
++#include "skia/ext/skia_utils_win.h"
+ #include "views/window/client_view.h"
+ #include "views/window/window_resources.h"
+ 
+@@ -82,7 +83,8 @@
+     return gfx::Rect(0, NonClientTopBorderHeight(), ps.width(),
+                      browser_view_->height());
+   }
+-  int minimize_button_offset = frame_->GetMinimizeButtonOffset();
++  int minimize_button_offset = (GetWindow()->IsAppCefChild() ?
++      bounds().width() : frame_->GetMinimizeButtonOffset());
+   int tabstrip_x = browser_view_->ShouldShowOffTheRecordAvatar() ?
+       (otr_avatar_bounds_.right() + kOTRSideSpacing) :
+       NonClientBorderThickness();
+@@ -170,6 +172,9 @@
+ }
+ 
+ int GlassBrowserFrameView::NonClientHitTest(const gfx::Point& point) {
++  if (GetWindow()->IsAppCefChild())
++    return HTNOWHERE;
++
+   // If the browser isn't in normal mode, we haven't customized the frame, so
+   // Windows can figure this out.  If the point isn't within our bounds, then
+   // it's in the native portion of the frame, so again Windows can figure it
+@@ -207,6 +212,12 @@
+   if (!browser_view_->IsTabStripVisible())
+     return;  // Nothing is visible, so don't bother to paint.
+ 
++  if (frame_->GetWindow()->IsAppCefChild()) {
++    // Fill the toolbar background with the 3d face color.
++    canvas->FillRectInt(skia::COLORREFToSkColor(GetSysColor(COLOR_3DFACE)), 0,
++        0, width(), height());
++  }
++
+   PaintToolbarBackground(canvas);
+   PaintOTRAvatar(canvas);
+   if (!frame_->GetWindow()->IsMaximized())
+@@ -241,8 +252,9 @@
+   // at the top (see AeroGlassFrame::OnGetMinMaxInfo()).
+   const int kRestoredHeight = browser_view_->UseVerticalTabs() ?
+       -2 : kNonClientRestoredExtraThickness;
+-  return GetSystemMetrics(SM_CXSIZEFRAME) + (browser_view_->IsMaximized() ?
+-      -kTabstripTopShadowThickness : kRestoredHeight);
++  return GetSystemMetrics(SM_CXSIZEFRAME) +
++      ((browser_view_->IsMaximized() || browser_view_->IsAppCefChild()) ?
++          -kTabstripTopShadowThickness : kRestoredHeight);
+ }
+ 
+ void GlassBrowserFrameView::PaintToolbarBackground(gfx::Canvas* canvas) {
+@@ -280,15 +292,19 @@
+   // Mask out the top left corner.
+   int left_x = toolbar_bounds.x() - kContentEdgeShadowThickness -
+                kClientEdgeThickness;
+-  canvas->DrawBitmapInt(*toolbar_left_mask,
+-                        left_x, toolbar_bounds.y(), paint);
++  if (!frame_->GetWindow()->IsAppCefChild()) {
++    canvas->DrawBitmapInt(*toolbar_left_mask,
++                          left_x, toolbar_bounds.y(), paint);
++  }
+ 
+   // Mask out the top right corner.
+   int right_x = toolbar_bounds.right() - toolbar_right_mask->width() +
+                 kContentEdgeShadowThickness + kClientEdgeThickness;
+-  canvas->DrawBitmapInt(*toolbar_right_mask,
+-                        right_x, toolbar_bounds.y(),
+-                        paint);
++  if (!frame_->GetWindow()->IsAppCefChild()) {
++    canvas->DrawBitmapInt(*toolbar_right_mask,
++                          right_x, toolbar_bounds.y(),
++                          paint);
++  }
+ 
+   // Draw left edge.
+   SkBitmap* toolbar_left = tp->GetBitmapNamed(IDR_CONTENT_TOP_LEFT_CORNER);
+Index: browser/views/tabs/tab_strip.cc
+===================================================================
+--- browser/views/tabs/tab_strip.cc	(revision 46337)
++++ browser/views/tabs/tab_strip.cc	(working copy)
+@@ -486,7 +486,8 @@
+     }
+   }
+ 
+-  if (GetWindow()->GetNonClientView()->UseNativeFrame()) {
++  if (GetWindow()->GetNonClientView()->UseNativeFrame() &&
++      !GetParent()->GetWindow()->IsAppCefChild()) {
+     // Make sure unselected tabs are somewhat transparent.
+     SkPaint paint;
+     paint.setColor(SkColorSetARGB(200, 255, 255, 255));
+Index: browser/views/toolbar_view.cc
+===================================================================
+--- browser/views/toolbar_view.cc	(revision 46337)
++++ browser/views/toolbar_view.cc	(working copy)
+@@ -436,7 +436,9 @@
+     return;
+ 
+   if (!IsDisplayModeNormal()) {
+-    int edge_width = (browser_->window() && browser_->window()->IsMaximized()) ?
++    int edge_width = (browser_->window() &&
++        (browser_->window()->IsMaximized() ||
++         browser_->window()->IsAppCefChild())) ?
+         0 : kPopupBackgroundEdge->width();  // See Paint().
+     location_bar_->SetBounds(edge_width, PopupTopSpacing(),
+         width() - (edge_width * 2), location_bar_->GetPreferredSize().height());
+@@ -456,7 +458,8 @@
+   //                Layout() in this case.
+   //                http://crbug.com/5540
+   int back_width = back_->GetPreferredSize().width();
+-  if (browser_->window() && browser_->window()->IsMaximized())
++  if (browser_->window() && (browser_->window()->IsMaximized() ||
++      browser_->window()->IsAppCefChild()))
+     back_->SetBounds(0, child_y, back_width + kControlIndent, child_height);
+   else
+     back_->SetBounds(kControlIndent, child_y, back_width, child_height);
+Index: common/chrome_switches.cc
+===================================================================
+--- common/chrome_switches.cc	(revision 46337)
++++ common/chrome_switches.cc	(working copy)
+@@ -32,6 +32,9 @@
+ // Specifies that the associated value should be launched in "application" mode.
+ const char kApp[]                           = "app";
+ 
++// Causes the specified app to be embedded in a CEF client application window.
++const char kAppCef[]                        = "app-cef";
++
+ // Specifies that the extension-app with the specified id should be launched
+ // according to its configuration.
+ const char kAppId[]                         = "app-id";
+Index: common/chrome_switches.h
+===================================================================
+--- common/chrome_switches.h	(revision 46337)
++++ common/chrome_switches.h	(working copy)
+@@ -24,6 +24,7 @@
+ extern const char kAllowSandboxDebugging[];
+ extern const char kAlwaysEnableDevTools[];
+ extern const char kApp[];
++extern const char kAppCef[];
+ extern const char kAppId[];
+ extern const char kAppLaunchAsPanel[];
+ extern const char kAppLauncherForNewTab[];

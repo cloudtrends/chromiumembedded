@@ -1,4 +1,4 @@
-# Copyright (c) 2009 The Chromium Embedded Framework Authors. All rights
+# Copyright (c) 2010 The Chromium Embedded Framework Authors. All rights
 # reserved. Use of this source code is governed by a BSD-style license that
 # can be found in the LICENSE file.
 
@@ -14,7 +14,7 @@ def make_cpptoc_header(header, clsname):
     capiname = cls.get_capi_name()
     
     result = \
-"""// Copyright (c) 2009 The Chromium Embedded Framework Authors. All rights
+"""// Copyright (c) 2010 The Chromium Embedded Framework Authors. All rights
 // reserved. Use of this source code is governed by a BSD-style license that
 // can be found in the LICENSE file.
 //
@@ -30,20 +30,20 @@ def make_cpptoc_header(header, clsname):
     
     if dllside:
         result += """
-#ifndef BUILDING_CEF_SHARED
+#ifndef BUILDING_CEF2_SHARED
 #pragma message("Warning: "__FILE__" may be accessed DLL-side only")
-#else // BUILDING_CEF_SHARED
+#else // BUILDING_CEF2_SHARED
 """
     else:
         result += """
-#ifndef USING_CEF_SHARED
+#ifndef USING_CEF2_SHARED
 #pragma message("Warning: "__FILE__" may be accessed wrapper-side only")
-#else // USING_CEF_SHARED
+#else // USING_CEF2_SHARED
 """
 
     result += """
-#include "include/cef.h"
-#include "include/cef_capi.h"
+#include "include/cef2.h"
+#include "include/cef2_capi.h"
 #include "libcef_dll/cpptoc/cpptoc.h"
 
 // Wrap a C++ class with a C structure.
