@@ -253,7 +253,7 @@ typedef struct _cef_tab_t
   // Base structure.
   cef_base_t base;
 
-  // Returns the cef_browser_t that owns this cef_tab_t object.
+  // Returns the cef_browser_t that owns this tab.
   struct _cef_browser_t* (CEF_CALLBACK *get_browser)(struct _cef_tab_t* self);
 
   // Destroy the tab.
@@ -280,7 +280,7 @@ typedef struct _cef_tab_t
   // Navigate backwards.
   void (CEF_CALLBACK *go_forward)(struct _cef_tab_t* self);
 
-  // Returns trie of this tab is currently loading.
+  // Returns true (1) if this tab is currently loading.
   int (CEF_CALLBACK *is_loading)(struct _cef_tab_t* self);
 
   // Reload the current page.

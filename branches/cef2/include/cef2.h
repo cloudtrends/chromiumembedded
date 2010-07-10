@@ -238,7 +238,7 @@ public:
 class CefTab : public CefBase
 {
 public:
-  // Returns the CefBrowser that owns this CefTab object.
+  // Returns the CefBrowser that owns this tab.
   /*--cef()--*/
   virtual CefRefPtr<CefBrowser> GetBrowser() =0;
 
@@ -269,7 +269,7 @@ public:
   // Navigate backwards.
   /*--cef()--*/
   virtual void GoForward() =0;
-  // Returns trie of this tab is currently loading.
+  // Returns true if this tab is currently loading.
   /*--cef()--*/
   virtual bool IsLoading() =0;
   // Reload the current page.
