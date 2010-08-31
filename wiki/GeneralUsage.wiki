@@ -46,14 +46,19 @@ The following notifications are supported by CefHandler.
   * Before Menu (HandleBeforeMenu).  The browser is about to show a context menu. The application can either cancel the menu or show a custom menu in its place.  The default behavior of the browser implementation is to show a basic context menu based on the disposition type.
   * Get Menu Label (HandleGetMenuLabel).  Called one time for each item in a default context menu before that menu is displayed.  The application can change the text from the English default to something else (a different language, for instance).
   * Menu Action (HandleMenuAction).  The user has selected an action from the default context menu.  The application can choose to handle the action in a custom manner.
+  * Print Options (HandlePrintOptions). Called before the print settings dialog is displayed to allow customization of paper size, orientation and margins.
   * Print Header & Footer (HandlePrintHeaderFooter).  Called after the web view is rendered to the print context but before the page is ended.  The application can insert a custom header/footer string at any of six predefined locations (top left, top center, top right, bottom left, bottom center, bottom right) or do custom drawing on the print context.  Information provided with this event includes the current URL, title, page number, total pages, print context, page bounding box and DPI scale factor.
   * JavaScript Alert (HandleJSAlert). The application can customize the display of JavaScript alert messages.
   * JavaScript Confirm (HandleJSConfirm). The application can customize the display of JavaScript confirm messages.
   * JavaScript Prompt (HandleJSPrompt). The application can customize the display of JavaScript prompt messages.
+  * JavaScript Window Object Binding (HandleJSBinding). The application can attach user-defined method and variable handlers to a frame's JavaScript 'window' object.
   * Before Window Close (HandleBeforeWindowClose). Called just before a browser window is closed.
   * Take Focus (HandleTakeFocus). Called when the browser component is about to loose focus.
   * Set Focus (HandleSetFocus). Called when the browser component is requesting focus.
   * Key Event (HandleKeyEvent). Called when the browser component receives a keyboard event.
+  * Tooltips (HandleTooltip). Called to allow modification of tooltip text.
+  * Console Messages (HandleConsoleMessage). Called to display a console message.
+  * Find Results (HandleFindResult). Called to report find results for custom handling by the application.
 
 The following notifications are supported by CefV8Handler.
 
