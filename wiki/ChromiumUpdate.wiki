@@ -4,10 +4,20 @@ The Chromium developers work very hard to introduce new features and capabilitie
 
 1. Update to the last "green" Chromium revision by viewing the [http://build.chromium.org/buildbot/waterfall/console Chromium build waterfall]. Choose the most recent revision that is green for all of the Windows builders and tests.
 
-2. Create a diff of the webkit/tools/test_shell directory between the last Chromium revision and new Chromium revision.
+2. Create a diff of relevant directories between the last Chromium revision and new Chromium revision.
 
 {{{
 svn diff -r oldrev:newrev > diff_oldrev-newrev.txt
+}}}
+
+The following files should be evaluated for changes:
+
+{{{
+chrome/browser/net/sqlite_persistent_cookie_store.*
+content/browser/in_process_webkit/*
+third_party/WebKit/Source/WebKit/chromium/public/*
+webkit/support/simple_database_system.*
+webkit/tools/test_shell/*
 }}}
 
 This will be your guide to identifying what has changed. CEF began life as a customized version of test_shell and there's still a one-to-one relationship between many of the files.
