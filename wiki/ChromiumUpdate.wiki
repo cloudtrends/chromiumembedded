@@ -16,6 +16,7 @@ The following files should be evaluated for changes:
 chrome/browser/net/sqlite_persistent_cookie_store.*
 content/browser/in_process_webkit/*
 third_party/WebKit/Source/WebKit/chromium/public/*
+webkit/glue/webpreferences.h (watch for new WebKit features that may need to be enabled)
 webkit/support/simple_database_system.*
 webkit/tools/test_shell/*
 }}}
