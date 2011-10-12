@@ -21,6 +21,24 @@ webkit/support/simple_database_system.*
 webkit/tools/test_shell/*
 }}}
 
+On Windows you can create a batch script called "diff.bat" in the CEF directory:
+
+{{{
+@echo off
+set TARGET="%1-%2.diff"
+call svn diff -r %1:%2 ../chrome/browser/net/sqlite_persistent_cookie_store.* > %TARGET%
+call svn diff -r %1:%2 ../content/browser/in_process_webkit >> %TARGET%
+call svn diff -r %1:%2 ../webkit/glue/webpreferences.h >> %TARGET%
+call svn diff -r %1:%2 ../webkit/support/simple_database_system.* >> %TARGET%
+call svn diff -r %1:%2 ../webkit/tools/test_shell >> %TARGET%
+}}}
+
+And run it as follows:
+
+{{{
+diff.bat OLDREV NEWREV
+}}}
+
 This will be your guide to identifying what has changed. CEF began life as a customized version of test_shell and there's still a one-to-one relationship between many of the files.
 
 3. Make the necessary changes to CEF, build (clean if necessary) and fix whatever is broken.
