@@ -130,7 +130,7 @@ CefString strVal = val.GetStringValue();
 
 = JS Arrays =
 
-Arrays are created using the CefV8Value::CreateArray() static method. Arrays can be only be created and used from within a context (see the "Working with Contexts" section for more information).
+Arrays are created using the CefV8Value::CreateArray() static method. Arrays can only be created and used from within a context (see the "Working with Contexts" section for more information).
 
 {{{
 CefRefPtr<CefV8Value> arr = CefV8Value::CreateArray();
@@ -338,7 +338,7 @@ Native code can execute JS functions by using the ExecuteFunction() and ExecuteF
 
 == Using JS Callbacks ==
 
-When registering a JS function callback with native code you should store a reference to both the current context and the JS function in your native code. This could be implemented as follows.
+When registering a JS function callback with native code the application should store a reference to both the current context and the JS function in the native code. This could be implemented as follows.
 
 1. Create a "register" function in OnJSBinding().
 
@@ -470,4 +470,4 @@ This can be implemented by having two varieties of call sites for EF in the nati
 
 2. Only called natively. This covers EF1 in stack 2. Rethrow is always false.
 
-Be very careful when rethrowing exceptions. Incorrect usage (for example, calling ExecuteFunction() immediately an exception has been rethrown) may cause your application to crash or malfunction in hard to debug ways.
+Be very careful when rethrowing exceptions. Incorrect usage (for example, calling ExecuteFunction() immediately after exception has been rethrown) may cause your application to crash or malfunction in hard to debug ways.
