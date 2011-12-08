@@ -28,6 +28,14 @@ void RunScript(CefRefPtr<CefBrowser> browser)
 }
 }}}
 
+The interface described below has been further improved in newer revisions of CEF. This document will be updated to reflect those changes once a new binary release is available. In summary:
+
+1. OnJSBinding() has been replaced with OnContextCreated() and OnContextReleased(). These two methods define the complete life span for the V8 context associated with a frame.
+
+2. Do not hold onto or use a V8 context reference past the call to OnContextReleased() for that context.
+
+3. The lifespan of all V8 objects is unspecified (up to the GC). Be careful when maintaining references directly from V8 objects to your own internal implementation objects. In many cases it may be better to use a proxy object that your application associates with the V8 context and which can be "disconnected" (allowing your internal implementation object to be freed) when OnContextReleased() is called for the context.
+
 See the comments in cef.h and examples in tests/unittests/v8_unittest.cc and tests/cefclient/cefclient.cpp for additional information beyond what is presented in this document.
 
 = ExecuteJavaScript =
