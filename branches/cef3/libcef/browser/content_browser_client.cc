@@ -39,7 +39,7 @@ content::WebContentsView* CefContentBrowserClient::CreateWebContentsView(
 #if defined(OS_WIN)
   return new TabContentsViewWin(web_contents);
 #elif defined(OS_LINUX)
-  return new TabContentsViewGtk(web_contents, NULL);
+  return new content::TabContentsViewGtk(web_contents, NULL);
 #else
   return NULL;
 #endif

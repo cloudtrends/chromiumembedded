@@ -56,7 +56,7 @@ int CefExecuteProcess(const CefMainArgs& args) {
 #if defined(OS_WIN)
   command_line.ParseFromString(::GetCommandLineW());
 #else
-  command_line.InitFromArgv(argc, argv);
+  command_line.InitFromArgv(args.argc, args.argv);
 #endif
 
   // If no process type is specified then it represents the browser process and
@@ -80,7 +80,8 @@ int CefExecuteProcess(const CefMainArgs& args) {
 
   return content::ContentMain(args.instance, &sandbox_info, &main_delegate);
 #else
-  return content::ContentMain(args.argc, args.argv, &main_delegate);
+  return content::ContentMain(args.argc, const_cast<const char**>(args.argv),
+                              &main_delegate);
 #endif
 }
 
@@ -214,7 +215,8 @@ bool CefContext::Initialize(const CefMainArgs& args,
   exit_code = main_runner_->Initialize(args.instance, &sandbox_info,
                                        main_delegate_.get());
 #else
-  exit_code = main_runner_->Initialize(args.argc, args.argv,
+  exit_code = main_runner_->Initialize(args.argc,
+                                       const_cast<const char**>(args.argv),
                                        main_delegate_.get());
 #endif
 
@@ -291,7 +293,6 @@ bool CefContext::AddBrowser(CefRefPtr<CefBrowserImpl> browser) {
 
 bool CefContext::RemoveBrowser(CefRefPtr<CefBrowserImpl> browser) {
   bool deleted = false;
-  bool empty = false;
 
   {
     AutoLock lock_scope(this);
@@ -305,10 +306,8 @@ bool CefContext::RemoveBrowser(CefRefPtr<CefBrowserImpl> browser) {
       }
     }
 
-    if (browserlist_.empty()) {
+    if (browserlist_.empty())
       next_browser_id_ = kNextBrowserIdReset;
-      empty = true;
-    }
   }
 
   return deleted;

@@ -96,7 +96,7 @@ void CefMainDelegate::ZygoteForked() {
   const CommandLine& command_line = *CommandLine::ForCurrentProcess();
   std::string process_type =
       command_line.GetSwitchValueASCII(switches::kProcessType);
-  InitializeCefContentClient(process_type);
+  InitializeContentClient(process_type);
 }
 #endif  // OS_MACOSX
 

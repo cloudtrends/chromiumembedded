@@ -31,15 +31,6 @@ base::StringPiece ResourceProvider(int resource_id) {
 
 }
 
-static GURL GetStartupURL() {
-  const CommandLine::StringVector& args =
-      CommandLine::ForCurrentProcess()->GetArgs();
-  if (args.empty())
-    return GURL("http://www.google.com/");
-
-  return GURL(args[0]);
-}
-
 CefBrowserMainParts::CefBrowserMainParts(
     const content::MainFunctionParams& parameters)
     : BrowserMainParts(),

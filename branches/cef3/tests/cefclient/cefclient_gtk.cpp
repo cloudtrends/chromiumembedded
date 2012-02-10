@@ -276,7 +276,7 @@ static gboolean HandleFocus(GtkWidget* widget,
   return TRUE;
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
   CefMainArgs main_args(argc, argv);
 
   // Execute the secondary process, if any.

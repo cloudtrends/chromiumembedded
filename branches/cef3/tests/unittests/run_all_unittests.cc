@@ -43,7 +43,7 @@ class CefTestThread : public base::Thread {
 }  // namespace
 
 
-int main(int argc, char** argv) {
+int main(int argc, char* argv[]) {
 #if defined(OS_WIN)
   CefMainArgs main_args(::GetModuleHandle(NULL));
 #else

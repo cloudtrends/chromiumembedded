@@ -169,7 +169,7 @@ net::NetworkDelegate::AuthRequiredResponse CefNetworkDelegate::OnAuthRequired(
       if (handler.get()) {
         CefRefPtr<CefFrame> frame = browser->GetFrameForRequest(request);
 
-        CefRefPtr<CefAuthCallbackImpl> callback(
+        CefRefPtr<CefAuthCallbackImpl> callbackPtr(
             new CefAuthCallbackImpl(callback, credentials));
         if (handler->GetAuthCredentials(browser.get(),
                                         frame,
@@ -178,10 +178,10 @@ net::NetworkDelegate::AuthRequiredResponse CefNetworkDelegate::OnAuthRequired(
                                         auth_info.challenger.port(),
                                         auth_info.realm,
                                         auth_info.scheme,
-                                        callback.get())) {
+                                        callbackPtr.get())) {
           return AUTH_REQUIRED_RESPONSE_IO_PENDING;
         } else {
-          callback->Disconnect();
+          callbackPtr->Disconnect();
         }
       }
     }

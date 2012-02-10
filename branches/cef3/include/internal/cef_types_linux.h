@@ -51,7 +51,7 @@ extern "C" {
 ///
 typedef struct _cef_main_args_t {
   int argc;
-  const char** argv;
+  char** argv;
 } cef_main_args_t;
 
 ///

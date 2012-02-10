@@ -5,7 +5,7 @@
 
 #include "libcef/browser/browser_impl.h"
 
-void CefBrowserImpl::PlatformViewText(const std::string& text) {
+bool CefBrowserImpl::PlatformViewText(const std::string& text) {
   NOTIMPLEMENTED();
   return false;
 }

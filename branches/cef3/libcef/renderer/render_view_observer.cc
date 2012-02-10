@@ -24,6 +24,7 @@
 #include "third_party/WebKit/Source/WebKit/chromium/public/WebScriptSource.h"
 #include "third_party/WebKit/Source/WebKit/chromium/public/WebSecurityPolicy.h"
 #include "third_party/WebKit/Source/WebKit/chromium/public/WebView.h"
+#include "webkit/glue/webkit_glue.h"
 
 using WebKit::WebFrame;
 using WebKit::WebScriptSource;
@@ -201,7 +202,7 @@ void CefRenderViewObserver::OnLoadRequest(
                     element.bytes().size());
         body.appendData(data);
       } else if (element.type() == net::UploadData::TYPE_FILE) {
-        body.appendFile(element.file_path().value());
+        body.appendFile(webkit_glue::FilePathToWebString(element.file_path()));
       } else {
         NOTREACHED();
       }
