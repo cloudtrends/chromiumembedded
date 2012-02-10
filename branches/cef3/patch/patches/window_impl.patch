@@ -1,0 +1,13 @@
+Index: window_impl.cc
+===================================================================
+--- window_impl.cc	(revision 121456)
++++ window_impl.cc	(working copy)
+@@ -124,6 +124,8 @@
+ }
+ 
+ WindowImpl::~WindowImpl() {
++  if (::IsWindow(hwnd_))
++    ui::SetWindowUserData(hwnd_, NULL);
+ }
+ 
+ void WindowImpl::Init(HWND parent, const gfx::Rect& bounds) {
