@@ -17,10 +17,6 @@
         # Don't use the chrome style plugin with CEF.
         'clang_use_chrome_plugins': 0,
       }],
-      [ 'OS=="linux"', {
-        # Required for drag and drop helpers.
-        'toolkit_views': 1,
-      }],
     ]
   },
 }
