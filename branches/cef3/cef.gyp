@@ -367,32 +367,59 @@
         'repack_path': '<(DEPTH)/tools/grit/grit/format/repack.py',
         'repack_locales_cmd': ['python', 'tools/repack_locales.py'],
       },
-      'actions': [
-        {
-          'action_name': 'repack_locales',
-          'process_outputs_as_mac_bundle_resources': 1,
-          'inputs': [
-            'tools/repack_locales.py',
-            # NOTE: Ideally the common command args would be shared
-            # amongst inputs/outputs/action, but the args include shell
-            # variables which need to be passed intact, and command
-            # expansion wants to expand the shell variables. Adding the
-            # explicit quoting here was the only way it seemed to work.
-            '>!@(<(repack_locales_cmd) -i -g <(grit_out_dir) -s <(SHARED_INTERMEDIATE_DIR) -x <(INTERMEDIATE_DIR) <(locales))',
-          ],
-          'outputs': [
-            '>!@(<(repack_locales_cmd) -o -g <(grit_out_dir) -s <(SHARED_INTERMEDIATE_DIR) -x <(INTERMEDIATE_DIR) <(locales))',
-          ],
-          'action': [
-            '<@(repack_locales_cmd)',
-            '-g', '<(grit_out_dir)',
-            '-s', '<(SHARED_INTERMEDIATE_DIR)',
-            '-x', '<(INTERMEDIATE_DIR)',
-            '<@(locales)',
-          ],
-        },
-      ],
       'conditions': [
+        ['OS=="win"', {
+          'actions': [
+            {
+              'action_name': 'repack_locales',
+              'inputs': [
+                'tools/repack_locales.py',
+                # NOTE: Ideally the common command args would be shared
+                # amongst inputs/outputs/action, but the args include shell
+                # variables which need to be passed intact, and command
+                # expansion wants to expand the shell variables. Adding the
+                # explicit quoting here was the only way it seemed to work.
+                '>!@(<(repack_locales_cmd) -i -g \"<(grit_out_dir)\" -s \"<(SHARED_INTERMEDIATE_DIR)\" -x \"<(INTERMEDIATE_DIR)\" <(locales))',
+              ],
+              'outputs': [
+                '>!@(<(repack_locales_cmd) -o -g \"<(grit_out_dir)\" -s \"<(SHARED_INTERMEDIATE_DIR)\" -x \"<(INTERMEDIATE_DIR)\" <(locales))',
+              ],
+              'action': [
+                '<@(repack_locales_cmd)',
+                '-g', '<(grit_out_dir)',
+                '-s', '<(SHARED_INTERMEDIATE_DIR)',
+                '-x', '<(INTERMEDIATE_DIR)',
+                '<@(locales)',
+              ],
+            },
+          ],
+        }, { # OS!="win"
+          'actions': [
+            {
+              'action_name': 'repack_locales',
+              'process_outputs_as_mac_bundle_resources': 1,
+              'inputs': [
+                'tools/repack_locales.py',
+                # NOTE: Ideally the common command args would be shared
+                # amongst inputs/outputs/action, but the args include shell
+                # variables which need to be passed intact, and command
+                # expansion wants to expand the shell variables. Adding the
+                # explicit quoting here was the only way it seemed to work.
+                '>!@(<(repack_locales_cmd) -i -g \'<(grit_out_dir)\' -s \'<(SHARED_INTERMEDIATE_DIR)\' -x \'<(INTERMEDIATE_DIR)\' <(locales))',
+              ],
+              'outputs': [
+                '>!@(<(repack_locales_cmd) -o -g \'<(grit_out_dir)\' -s \'<(SHARED_INTERMEDIATE_DIR)\' -x \'<(INTERMEDIATE_DIR)\' <(locales))',
+              ],
+              'action': [
+                '<@(repack_locales_cmd)',
+                '-g', '<(grit_out_dir)',
+                '-s', '<(SHARED_INTERMEDIATE_DIR)',
+                '-x', '<(INTERMEDIATE_DIR)',
+                '<@(locales)',
+              ],
+            },
+          ],
+        }],
         ['OS != "mac"', {
           'copies': [
             {
