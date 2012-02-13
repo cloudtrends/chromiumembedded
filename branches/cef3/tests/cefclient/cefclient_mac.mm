@@ -381,6 +381,11 @@ NSButton* MakeButton(NSRect* rect, NSString* title, NSView* parent) {
     RunJavaScriptExecuteTest(g_handler->GetBrowser());
 }
 
+- (IBAction)testRequest:(id)sender {
+  if (g_handler.get() && g_handler->GetBrowserHwnd())
+    RunRequestTest(g_handler->GetBrowser());
+}
+
 - (IBAction)testLocalStorage:(id)sender {
   if (g_handler.get() && g_handler->GetBrowserHwnd())
     RunLocalStorageTest(g_handler->GetBrowser());

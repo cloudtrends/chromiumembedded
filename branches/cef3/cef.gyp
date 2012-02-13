@@ -20,7 +20,7 @@
   'includes': [
     # Bring in the source file lists.
     'cef_paths2.gypi',
-   ],
+  ],
   'targets': [
     {
       'target_name': 'cefclient',
@@ -48,6 +48,8 @@
       ],
       'mac_bundle_resources': [
         '<@(cefclient_bundle_resources_mac)',
+        '<(PRODUCT_DIR)/cef.pak',
+        '<!@pymod_do_main(repack_locales -o -g <(grit_out_dir) -s <(SHARED_INTERMEDIATE_DIR) -x <(INTERMEDIATE_DIR) <(locales))',
       ],
       'mac_bundle_resources!': [
         # TODO(mark): Come up with a fancier way to do this (mac_info_plist?)
@@ -364,7 +366,6 @@
         '<(DEPTH)/webkit/support/webkit_support.gyp:webkit_strings',
       ],
       'variables': {
-        'repack_path': '<(DEPTH)/tools/grit/grit/format/repack.py',
         'repack_locales_cmd': ['python', 'tools/repack_locales.py'],
       },
       'conditions': [
@@ -397,7 +398,6 @@
           'actions': [
             {
               'action_name': 'repack_locales',
-              'process_outputs_as_mac_bundle_resources': 1,
               'inputs': [
                 'tools/repack_locales.py',
                 # NOTE: Ideally the common command args would be shared
@@ -475,7 +475,6 @@
       'actions': [
         {
           'action_name': 'repack_cef_pack',
-          'process_outputs_as_mac_bundle_resources': 1,
           'variables': {
             'pak_inputs': [
               '<(SHARED_INTERMEDIATE_DIR)/content/content_resources.pak',

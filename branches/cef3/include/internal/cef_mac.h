@@ -93,9 +93,9 @@ class CefMainArgs : public CefStructBase<CefMainArgsTraits> {
   CefMainArgs() : parent() {}
   explicit CefMainArgs(const cef_main_args_t& r) : parent(r) {}
   explicit CefMainArgs(const CefMainArgs& r) : parent(r) {}
-  CefMainArgs(int argc_arg, char** argv_arg) : parent() {
-    argc = argc_arg;
-    argv = argv_arg;
+  CefMainArgs(int argc, char** argv) : parent() {
+    this->argc = argc;
+    this->argv = argv;
   }
 };
 
@@ -134,10 +134,10 @@ class CefWindowInfo : public CefStructBase<CefWindowInfoTraits> {
   void SetAsChild(CefWindowHandle ParentView, int x, int y, int width,
                   int height) {
     parent_view = ParentView;
-    x = x;
-    y = y;
-    width = width;
-    height = height;
+    this->x = x;
+    this->y = y;
+    this->width = width;
+    this->height = height;
     hidden = false;
   }
 };
