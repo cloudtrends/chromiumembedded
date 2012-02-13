@@ -17,6 +17,7 @@
 #include "content/browser/browser_process_sub_thread.h"
 #include "content/browser/download/download_file_manager.h"
 #include "content/browser/download/save_file_manager.h"
+#include "content/browser/gpu/gpu_data_manager.h"
 #include "content/browser/plugin_service_impl.h"
 #include "content/public/common/content_switches.h"
 #include "net/base/net_module.h"
@@ -57,7 +58,10 @@ void CefBrowserMainParts::PreMainMessageLoopRun() {
   
   PlatformInitialize();
   net::NetModule::SetResourceProvider(&ResourceProvider);
-      
+
+  // Initialize the GpuDataManager before IO access restrictions are applied.
+  GpuDataManager::GetInstance();
+
   const CommandLine& command_line = *CommandLine::ForCurrentProcess();
   if (command_line.HasSwitch(switches::kRemoteDebuggingPort)) {
     std::string port_str =

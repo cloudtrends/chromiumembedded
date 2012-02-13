@@ -13,5 +13,4 @@ void CefBrowserMainParts::PlatformInitialize() {
 }
 
 void CefBrowserMainParts::PlatformCleanup() {
-  NOTIMPLEMENTED();
 }
