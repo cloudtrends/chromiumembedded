@@ -49,6 +49,8 @@ class CefRenderViewObserver
   virtual void DidStartProvisionalLoad(WebKit::WebFrame* frame) OVERRIDE;
   virtual void FrameDetached(WebKit::WebFrame* frame) OVERRIDE;
   virtual void FocusedNodeChanged(const WebKit::WebNode& node) OVERRIDE;
+  virtual void DidCreateDataSource(WebKit::WebFrame* frame,
+                                   WebKit::WebDataSource* ds) OVERRIDE;
   virtual bool OnMessageReceived(const IPC::Message& message) OVERRIDE;
 
   // Message handlers.

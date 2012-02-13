@@ -13,10 +13,13 @@
 
 #include "base/string16.h"
 #include "base/utf_string_conversions.h"
+#include "content/public/renderer/document_state.h"
+#include "content/public/renderer/navigation_state.h"
 #include "content/public/renderer/render_view.h"
 #include "net/http/http_util.h"
 #include "third_party/WebKit/Source/WebKit/chromium/public/platform/WebString.h"
 #include "third_party/WebKit/Source/WebKit/chromium/public/platform/WebURL.h"
+#include "third_party/WebKit/Source/WebKit/chromium/public/WebDataSource.h"
 #include "third_party/WebKit/Source/WebKit/chromium/public/WebDocument.h"
 #include "third_party/WebKit/Source/WebKit/chromium/public/WebElement.h"
 #include "third_party/WebKit/Source/WebKit/chromium/public/WebFrame.h"
@@ -105,6 +108,20 @@ void CefRenderViewObserver::FocusedNodeChanged(const WebKit::WebNode& node) {
   Send(new CefHostMsg_FrameFocusChange(routing_id(), frame_id));
 }
 
+void CefRenderViewObserver::DidCreateDataSource(WebKit::WebFrame* frame,
+                                                WebKit::WebDataSource* ds) {
+  const WebKit::WebURLRequest& request = ds->request();
+  if (request.requestorID() == -1) {
+    // Mark the request as browser-initiated so
+    // RenderViewImpl::decidePolicyForNavigation won't attempt to fork it.
+    content::DocumentState* document_state =
+        content::DocumentState::FromDataSource(ds);
+    document_state->set_navigation_state(
+        content::NavigationState::CreateBrowserInitiated(-1, -1,
+            content::PAGE_TRANSITION_LINK));
+  }
+}
+
 bool CefRenderViewObserver::OnMessageReceived(const IPC::Message& message) {
   bool handled = true;
   IPC_BEGIN_MESSAGE_MAP(CefRenderViewObserver, message)
@@ -147,8 +164,7 @@ void CefRenderViewObserver::OnLoadRequest(
 
   WebKit::WebURLRequest request(params.url);
 
-  // Necessary for RenderViewImpl::decidePolicyForNavigation to avoid forking
-  // this request.
+  // DidCreateDataSource checks for this value.
   request.setRequestorID(-1);
 
   if (!params.method.empty())
