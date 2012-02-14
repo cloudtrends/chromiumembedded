@@ -66,12 +66,7 @@ int CefExecuteProcess(const CefMainArgs& args) {
   if (process_type.empty())
     return -1;
 
-  // Check if a locale override has been specified on the command-line.
-  std::string locale = command_line.GetSwitchValueASCII(switches::kLang);
-  if (locale.empty())
-    locale = "en-US";
-
-  CefMainDelegate main_delegate(locale);
+  CefMainDelegate main_delegate;
 
   // Execute the secondary process.
 #if defined(OS_WIN)
@@ -202,7 +197,7 @@ bool CefContext::Initialize(const CefMainArgs& args,
     return false;
   }
 
-  main_delegate_.reset(new CefMainDelegate(locale()));
+  main_delegate_.reset(new CefMainDelegate);
   main_runner_.reset(content::ContentMainRunner::Create());
 
   int exit_code;
@@ -346,14 +341,6 @@ string16 CefContext::GetLocalizedString(int message_id) const {
 
 base::StringPiece CefContext::GetDataResource(int resource_id) const {
   return main_delegate_->content_client()->GetDataResource(resource_id);
-}
-
-std::string CefContext::locale() const {
-  std::string localeStr = CefString(&settings_.locale);
-  if (!localeStr.empty())
-    return localeStr;
-
-  return "en-US";
 }
 
 CefBrowserContext* CefContext::browser_context() const {

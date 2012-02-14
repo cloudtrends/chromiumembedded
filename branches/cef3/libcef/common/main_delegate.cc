@@ -20,7 +20,7 @@
 #include "ui/base/resource/resource_bundle.h"
 #include "ui/base/ui_base_paths.h"
 
-CefMainDelegate::CefMainDelegate(const std::string& locale) : locale_(locale) {
+CefMainDelegate::CefMainDelegate() {
 }
 
 CefMainDelegate::~CefMainDelegate() {
@@ -38,9 +38,14 @@ bool CefMainDelegate::BasicStartupComplete(int* exit_code) {
     if (settings.user_agent.length > 0) {
       command_line->AppendSwitchASCII(switches::kUserAgent,
           CefString(&settings.user_agent));
-    } else if(settings.product_version.length > 0) {
+    } else if (settings.product_version.length > 0) {
       command_line->AppendSwitchASCII(switches::kProductVersion,
           CefString(&settings.product_version));
+    }
+
+    if (settings.locale.length > 0) {
+      command_line->AppendSwitchASCII(switches::kLocale,
+          CefString(&settings.locale));
     }
 
     if (settings.pack_file_path.length > 0) {
@@ -183,9 +188,13 @@ void CefMainDelegate::InitializeResourceBundle() {
   if (!locales_dir.empty())
     PathService::Override(ui::DIR_LOCALES, locales_dir);
 
+  std::string locale = command_line.GetSwitchValueASCII(switches::kLocale);
+  if (locale.empty())
+    locale = "en-US";
+
   const std::string loaded_locale =
-      ui::ResourceBundle::InitSharedInstanceWithLocale(locale_);
-  CHECK(!loaded_locale.empty()) << "Locale could not be found for " << locale_;
+      ui::ResourceBundle::InitSharedInstanceWithLocale(locale);
+  CHECK(!loaded_locale.empty()) << "Locale could not be found for " << locale;
 
 #if defined(OS_WIN)
   // Explicitly load cef.pak on Windows.

@@ -110,6 +110,7 @@ void CefContentBrowserClient::AppendExtraCommandLineSwitches(
       // with any associated values) if present in the browser command line.
       static const char* const kSwitchNames[] = {
         switches::kProductVersion,
+        switches::kLocale,
         switches::kPackFilePath,
         switches::kLocalesDirPath,
       };

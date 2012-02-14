@@ -11,9 +11,6 @@ namespace cefclient {
 // CefSettings attributes.
 const char kMultiThreadedMessageLoop[] = "multi-threaded-message-loop";
 const char kCachePath[] = "cache-path";
-const char kUserAgent[] = "user-agent";
-const char kProductVersion[] = "product-version";
-const char kLocale[] = "locale";
 const char kLogFile[] = "log-file";
 const char kLogSeverity[] = "log-severity";
 const char kLogSeverity_Verbose[] = "verbose";

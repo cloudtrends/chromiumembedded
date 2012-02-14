@@ -11,6 +11,7 @@
 namespace switches {
 
 extern const char kProductVersion[];
+extern const char kLocale[];
 extern const char kPackFilePath[];
 extern const char kLocalesDirPath[];
 

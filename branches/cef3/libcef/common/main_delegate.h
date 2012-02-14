@@ -26,7 +26,7 @@ class MessageLoop;
 
 class CefMainDelegate : public content::ContentMainDelegate {
  public:
-  explicit CefMainDelegate(const std::string& locale);
+  CefMainDelegate();
   virtual ~CefMainDelegate();
 
   virtual bool BasicStartupComplete(int* exit_code) OVERRIDE;
@@ -56,8 +56,6 @@ class CefMainDelegate : public content::ContentMainDelegate {
  private:
   void InitializeContentClient(const std::string& process_type);
   void InitializeResourceBundle();
-
-  std::string locale_;
 
   scoped_ptr<content::BrowserMainRunner> browser_runner_;
   scoped_ptr<CefContentBrowserClient> browser_client_;

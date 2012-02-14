@@ -69,9 +69,6 @@ class CefContext : public CefBase {
   const CefSettings& settings() const { return settings_; }
   CefRefPtr<CefApp> application() const { return application_; }
 
-  // Return the locale specified in CefSettings or the default value of "en-US".
-  std::string locale() const;
-
   CefBrowserContext* browser_context() const;
   CefDevToolsDelegate* devtools_delegate() const;
 

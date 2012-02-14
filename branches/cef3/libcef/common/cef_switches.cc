@@ -9,6 +9,9 @@ namespace switches {
 // Product version string.
 const char kProductVersion[]        = "product-version";
 
+// Locale string.
+const char kLocale[]                = "locale";
+
 // Path to cef.pak file.
 const char kPackFilePath[]          = "pack-file-path";
 

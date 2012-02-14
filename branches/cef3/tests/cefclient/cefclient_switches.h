@@ -13,9 +13,6 @@ namespace cefclient {
 // CefSettings attributes.
 extern const char kMultiThreadedMessageLoop[];
 extern const char kCachePath[];
-extern const char kUserAgent[];
-extern const char kProductVersion[];
-extern const char kLocale[];
 extern const char kLogFile[];
 extern const char kLogSeverity[];
 extern const char kLogSeverity_Verbose[];

@@ -48,12 +48,6 @@ void CefTestSuite::GetSettings(CefSettings& settings) {
 
   CefString(&settings.cache_path) =
       commandline_->GetSwitchValueASCII(cefclient::kCachePath);
-  CefString(&settings.user_agent) =
-      commandline_->GetSwitchValueASCII(cefclient::kUserAgent);
-  CefString(&settings.product_version) =
-      commandline_->GetSwitchValueASCII(cefclient::kProductVersion);
-  CefString(&settings.locale) =
-      commandline_->GetSwitchValueASCII(cefclient::kLocale);
   CefString(&settings.log_file) =
       commandline_->GetSwitchValueASCII(cefclient::kLogFile);
 

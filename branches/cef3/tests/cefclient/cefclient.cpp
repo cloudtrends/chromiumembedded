@@ -101,12 +101,6 @@ void AppGetSettings(CefSettings& settings, CefRefPtr<CefApp>& app) {
 
   CefString(&settings.cache_path) =
       g_command_line->GetSwitchValue(cefclient::kCachePath);
-  CefString(&settings.user_agent) =
-      g_command_line->GetSwitchValue(cefclient::kUserAgent);
-  CefString(&settings.product_version) =
-      g_command_line->GetSwitchValue(cefclient::kProductVersion);
-  CefString(&settings.locale) =
-      g_command_line->GetSwitchValue(cefclient::kLocale);
   CefString(&settings.log_file) =
       g_command_line->GetSwitchValue(cefclient::kLogFile);
 
