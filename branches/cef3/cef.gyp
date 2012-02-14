@@ -619,6 +619,8 @@
         'libcef/common/cef_message_generator.cc',
         'libcef/common/cef_message_generator.h',
         'libcef/common/cef_messages.h',
+        'libcef/common/cef_switches.cc',
+        'libcef/common/cef_switches.h',
         'libcef/common/content_client.cc',
         'libcef/common/content_client.h',
         'libcef/common/http_header_utils.cc',

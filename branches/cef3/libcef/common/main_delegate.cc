@@ -4,6 +4,8 @@
 
 #include "libcef/common/main_delegate.h"
 #include "libcef/browser/content_browser_client.h"
+#include "libcef/browser/context.h"
+#include "libcef/common/cef_switches.h"
 #include "libcef/plugin/content_plugin_client.h"
 #include "libcef/renderer/content_renderer_client.h"
 #include "libcef/utility/content_utility_client.h"
@@ -25,12 +27,38 @@ CefMainDelegate::~CefMainDelegate() {
 }
 
 bool CefMainDelegate::BasicStartupComplete(int* exit_code) {
-  // Pre-process the global command-line object.
   CommandLine* command_line = CommandLine::ForCurrentProcess();
+  std::string process_type =
+      command_line->GetSwitchValueASCII(switches::kProcessType);
 
-  // TODO(cef): Figure out how to support the sandbox.
-  if (!command_line->HasSwitch(switches::kNoSandbox))
-    command_line->AppendSwitch(switches::kNoSandbox);
+  if (process_type.empty()) {
+    // In the browser process. Populate the global command-line object.
+    const CefSettings& settings = _Context->settings();
+
+    if (settings.user_agent.length > 0) {
+      command_line->AppendSwitchASCII(switches::kUserAgent,
+          CefString(&settings.user_agent));
+    } else if(settings.product_version.length > 0) {
+      command_line->AppendSwitchASCII(switches::kProductVersion,
+          CefString(&settings.product_version));
+    }
+
+    if (settings.pack_file_path.length > 0) {
+      FilePath file_path = FilePath(CefString(&settings.pack_file_path));
+      if (!file_path.empty())
+        command_line->AppendSwitchPath(switches::kPackFilePath, file_path);
+    }
+
+    if (settings.locales_dir_path.length > 0) {
+      FilePath file_path = FilePath(CefString(&settings.locales_dir_path));
+      if (!file_path.empty())
+        command_line->AppendSwitchPath(switches::kLocalesDirPath, file_path);
+    }
+
+    // TODO(cef): Figure out how to support the sandbox.
+    if (!command_line->HasSwitch(switches::kNoSandbox))
+      command_line->AppendSwitch(switches::kNoSandbox);
+  }
 
   return false;
 }
@@ -133,11 +161,27 @@ void CefMainDelegate::InitializeContentClient(
 }
 
 void CefMainDelegate::InitializeResourceBundle() {
-  FilePath pak_dir;
-  PathService::Get(base::DIR_MODULE, &pak_dir);
+  const CommandLine& command_line = *CommandLine::ForCurrentProcess();
 
-  FilePath pak_file = pak_dir.Append(FILE_PATH_LITERAL("cef.pak"));
-  PathService::Override(ui::FILE_RESOURCES_PAK, pak_file);
+  FilePath pak_file, locales_dir;
+
+  if (command_line.HasSwitch(switches::kPackFilePath))
+    pak_file = command_line.GetSwitchValuePath(switches::kPackFilePath);
+
+  if (pak_file.empty()) {
+    FilePath pak_dir;
+    PathService::Get(base::DIR_MODULE, &pak_dir);
+    pak_file = pak_dir.Append(FILE_PATH_LITERAL("cef.pak"));
+  }
+
+  if (!pak_file.empty())
+    PathService::Override(ui::FILE_RESOURCES_PAK, pak_file);
+
+  if (command_line.HasSwitch(switches::kLocalesDirPath))
+    locales_dir = command_line.GetSwitchValuePath(switches::kLocalesDirPath);
+
+  if (!locales_dir.empty())
+    PathService::Override(ui::DIR_LOCALES, locales_dir);
 
   const std::string loaded_locale =
       ui::ResourceBundle::InitSharedInstanceWithLocale(locale_);

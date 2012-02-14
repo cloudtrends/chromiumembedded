@@ -240,6 +240,8 @@ struct CefSettingsTraits {
       cef_string_list_free(s->extra_plugin_paths);
     cef_string_clear(&s->log_file);
     cef_string_clear(&s->javascript_flags);
+    cef_string_clear(&s->pack_file_path);
+    cef_string_clear(&s->locales_dir_path);
   }
 
   static inline void set(const struct_type* src, struct_type* target,
@@ -267,6 +269,10 @@ struct CefSettingsTraits {
     target->session_storage_quota = src->session_storage_quota;
     cef_string_set(src->javascript_flags.str, src->javascript_flags.length,
         &target->javascript_flags, copy);
+    cef_string_set(src->pack_file_path.str, src->pack_file_path.length,
+        &target->pack_file_path, copy);
+    cef_string_set(src->locales_dir_path.str, src->locales_dir_path.length,
+        &target->locales_dir_path, copy);
 
 #if defined(OS_WIN)
     target->auto_detect_proxy_settings_enabled =

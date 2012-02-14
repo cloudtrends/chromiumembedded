@@ -170,6 +170,18 @@ typedef struct _cef_settings_t {
   ///
   bool auto_detect_proxy_settings_enabled;
 #endif
+
+  ///
+  // The fully qualified path for the cef.pak file. If this value is empty
+  // the cef.pak file must be located in the module directory.
+  ///
+  cef_string_t pack_file_path;
+
+  ///
+  // The fully qualified path for the locales directory. If this value is empty
+  // the locales directory must be located in the module directory.
+  ///
+  cef_string_t locales_dir_path;
 } cef_settings_t;
 
 ///

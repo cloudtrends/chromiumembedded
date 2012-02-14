@@ -8,9 +8,12 @@
 #include "libcef/browser/browser_message_filter.h"
 #include "libcef/browser/browser_settings.h"
 #include "libcef/browser/resource_dispatcher_host_delegate.h"
+#include "libcef/common/cef_switches.h"
 
+#include "base/command_line.h"
 #include "base/file_path.h"
 #include "content/browser/renderer_host/resource_dispatcher_host.h"
+#include "content/public/common/content_switches.h"
 #include "googleurl/src/gurl.h"
 #include "third_party/skia/include/core/SkBitmap.h"
 
@@ -100,6 +103,20 @@ std::string CefContentBrowserClient::GetCanonicalEncodingNameByAliasName(
 
 void CefContentBrowserClient::AppendExtraCommandLineSwitches(
     CommandLine* command_line, int child_process_id) {
+  std::string process_type =
+      command_line->GetSwitchValueASCII(switches::kProcessType);
+  if (process_type == switches::kRendererProcess) {
+      // Propagate the following switches to the renderer command line (along
+      // with any associated values) if present in the browser command line.
+      static const char* const kSwitchNames[] = {
+        switches::kProductVersion,
+        switches::kPackFilePath,
+        switches::kLocalesDirPath,
+      };
+      const CommandLine& browser_cmd = *CommandLine::ForCurrentProcess();
+      command_line->CopySwitchesFrom(browser_cmd, kSwitchNames,
+                                     arraysize(kSwitchNames));
+  }
 }
 
 std::string CefContentBrowserClient::GetApplicationLocale() {

@@ -4,9 +4,12 @@
 
 #include "libcef/common/content_client.h"
 #include "include/cef_version.h"
+#include "libcef/common/cef_switches.h"
 
+#include "base/command_line.h"
 #include "base/string_piece.h"
 #include "base/stringprintf.h"
+#include "content/public/common/content_switches.h"
 #include "ui/base/resource/resource_bundle.h"
 #include "webkit/glue/user_agent.h"
 
@@ -32,11 +35,26 @@ bool CefContentClient::CanHandleWhileSwappedOut(const IPC::Message& msg) {
 }
 
 std::string CefContentClient::GetUserAgent(bool* overriding) const {
-  *overriding = false;
-  std::string product_version = base::StringPrintf("Chrome/%d.%d.%d.%d",
-      CHROME_VERSION_MAJOR, CHROME_VERSION_MINOR, CHROME_VERSION_BUILD,
-      CHROME_VERSION_PATCH);
-  return webkit_glue::BuildUserAgentFromProduct(product_version);
+  static CommandLine& command_line = *CommandLine::ForCurrentProcess();
+  if (command_line.HasSwitch(switches::kUserAgent)) {
+    *overriding = true;
+    return command_line.GetSwitchValueASCII(switches::kUserAgent);
+  } else {
+    std::string product_version;
+
+    if (command_line.HasSwitch(switches::kProductVersion)) {
+      *overriding = true;
+      product_version =
+          command_line.GetSwitchValueASCII(switches::kProductVersion);
+    } else {
+      *overriding = false;
+      product_version = base::StringPrintf("Chrome/%d.%d.%d.%d",
+          CHROME_VERSION_MAJOR, CHROME_VERSION_MINOR, CHROME_VERSION_BUILD,
+          CHROME_VERSION_PATCH);
+    }
+
+    return webkit_glue::BuildUserAgentFromProduct(product_version);
+  }
 }
 
 string16 CefContentClient::GetLocalizedString(int message_id) const {
