@@ -51,7 +51,8 @@ class DestructionObserver : public MessageLoop::DestructionObserver {
 
 }  // namespace
 
-int CefExecuteProcess(const CefMainArgs& args) {
+int CefExecuteProcess(const CefMainArgs& args,
+                      CefRefPtr<CefApp> application) {
   CommandLine command_line(CommandLine::NO_PROGRAM);
 #if defined(OS_WIN)
   command_line.ParseFromString(::GetCommandLineW());
@@ -66,7 +67,7 @@ int CefExecuteProcess(const CefMainArgs& args) {
   if (process_type.empty())
     return -1;
 
-  CefMainDelegate main_delegate;
+  CefMainDelegate main_delegate(application);
 
   // Execute the secondary process.
 #if defined(OS_WIN)
@@ -187,7 +188,6 @@ bool CefContext::Initialize(const CefMainArgs& args,
                             CefRefPtr<CefApp> application) {
   init_thread_id_ = base::PlatformThread::CurrentId();
   settings_ = settings;
-  application_ = application;
 
   cache_path_ = FilePath(CefString(&settings.cache_path));
 
@@ -197,7 +197,7 @@ bool CefContext::Initialize(const CefMainArgs& args,
     return false;
   }
 
-  main_delegate_.reset(new CefMainDelegate);
+  main_delegate_.reset(new CefMainDelegate(application));
   main_runner_.reset(content::ContentMainRunner::Create());
 
   int exit_code;
@@ -335,12 +335,8 @@ CefRefPtr<CefBrowserImpl> CefContext::GetBrowserByRoutingID(
   return NULL;
 }
 
-string16 CefContext::GetLocalizedString(int message_id) const {
-  return main_delegate_->content_client()->GetLocalizedString(message_id);
-}
-
-base::StringPiece CefContext::GetDataResource(int resource_id) const {
-  return main_delegate_->content_client()->GetDataResource(resource_id);
+CefRefPtr<CefApp> CefContext::application() const {
+  return main_delegate_->content_client()->application();
 }
 
 CefBrowserContext* CefContext::browser_context() const {

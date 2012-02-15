@@ -20,7 +20,8 @@
 #include "ui/base/resource/resource_bundle.h"
 #include "ui/base/ui_base_paths.h"
 
-CefMainDelegate::CefMainDelegate() {
+CefMainDelegate::CefMainDelegate(CefRefPtr<CefApp> application)
+    : content_client_(application) {
 }
 
 CefMainDelegate::~CefMainDelegate() {
@@ -48,16 +49,20 @@ bool CefMainDelegate::BasicStartupComplete(int* exit_code) {
           CefString(&settings.locale));
     }
 
-    if (settings.pack_file_path.length > 0) {
-      FilePath file_path = FilePath(CefString(&settings.pack_file_path));
-      if (!file_path.empty())
-        command_line->AppendSwitchPath(switches::kPackFilePath, file_path);
-    }
+    if (settings.pack_loading_disabled) {
+      command_line->AppendSwitch(switches::kPackLoadingDisabled);
+    } else {
+      if (settings.pack_file_path.length > 0) {
+        FilePath file_path = FilePath(CefString(&settings.pack_file_path));
+        if (!file_path.empty())
+          command_line->AppendSwitchPath(switches::kPackFilePath, file_path);
+      }
 
-    if (settings.locales_dir_path.length > 0) {
-      FilePath file_path = FilePath(CefString(&settings.locales_dir_path));
-      if (!file_path.empty())
-        command_line->AppendSwitchPath(switches::kLocalesDirPath, file_path);
+      if (settings.locales_dir_path.length > 0) {
+        FilePath file_path = FilePath(CefString(&settings.locales_dir_path));
+        if (!file_path.empty())
+          command_line->AppendSwitchPath(switches::kLocalesDirPath, file_path);
+      }
     }
 
     // TODO(cef): Figure out how to support the sandbox.
@@ -76,7 +81,10 @@ void CefMainDelegate::PreSandboxStartup() {
   content::SetContentClient(&content_client_);
   InitializeContentClient(process_type);
 
-  InitializeResourceBundle();
+  if (command_line.HasSwitch(switches::kPackLoadingDisabled))
+    content_client_.set_pack_loading_disabled(true);
+  else
+    InitializeResourceBundle();
 }
 
 void CefMainDelegate::SandboxInitialized(const std::string& process_type) {
@@ -102,7 +110,8 @@ int CefMainDelegate::RunProcess(
 }
 
 void CefMainDelegate::ProcessExiting(const std::string& process_type) {
-  ResourceBundle::CleanupSharedInstance();
+  if (!content_client_.pack_loading_disabled())
+    ResourceBundle::CleanupSharedInstance();
 }
 
 #if defined(OS_MACOSX)

@@ -182,6 +182,14 @@ typedef struct _cef_settings_t {
   // the locales directory must be located in the module directory.
   ///
   cef_string_t locales_dir_path;
+
+  ///
+  // Set to true (1) to disable loading of pack files for resources and locales.
+  // A resource bundle handler must be provided for the browser and renderer
+  // processes via CefApp::GetResourceBundleHandler() if loading of pack files
+  // is disabled.
+  ///
+  bool pack_loading_disabled;
 } cef_settings_t;
 
 ///

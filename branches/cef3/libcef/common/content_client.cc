@@ -3,15 +3,22 @@
 // found in the LICENSE file.
 
 #include "libcef/common/content_client.h"
+#include "include/cef_stream.h"
 #include "include/cef_version.h"
 #include "libcef/common/cef_switches.h"
 
 #include "base/command_line.h"
+#include "base/logging.h"
 #include "base/string_piece.h"
 #include "base/stringprintf.h"
 #include "content/public/common/content_switches.h"
 #include "ui/base/resource/resource_bundle.h"
 #include "webkit/glue/user_agent.h"
+
+CefContentClient::CefContentClient(CefRefPtr<CefApp> application)
+    : application_(application),
+      pack_loading_disabled_(false) {
+}
 
 CefContentClient::~CefContentClient() {
 }
@@ -58,11 +65,48 @@ std::string CefContentClient::GetUserAgent(bool* overriding) const {
 }
 
 string16 CefContentClient::GetLocalizedString(int message_id) const {
-  return ResourceBundle::GetSharedInstance().GetLocalizedString(message_id);
+  string16 value;
+
+  if (application_.get()) {
+    CefRefPtr<CefResourceBundleHandler> handler =
+        application_->GetResourceBundleHandler();
+    if (handler.get()) {
+      CefString cef_str;
+      if (handler->GetLocalizedString(message_id, cef_str))
+        value = cef_str;
+    }
+  }
+
+  if (value.empty() && !pack_loading_disabled_)
+    value = ResourceBundle::GetSharedInstance().GetLocalizedString(message_id);
+
+  if (value.empty())
+    LOG(ERROR) << "No localized string available for id " << message_id;
+
+  return value;
 }
 
 base::StringPiece CefContentClient::GetDataResource(int resource_id) const {
-  return ResourceBundle::GetSharedInstance().GetRawDataResource(resource_id);
+  base::StringPiece value;
+
+  if (application_.get()) {
+    CefRefPtr<CefResourceBundleHandler> handler =
+        application_->GetResourceBundleHandler();
+    if (handler.get()) {
+      void* data = NULL;
+      size_t data_size = 0;
+      if (handler->GetDataResource(resource_id, data, data_size))
+        value = base::StringPiece(static_cast<char*>(data), data_size);
+    }
+  }
+
+  if (value.empty() && !pack_loading_disabled_)
+    value = ResourceBundle::GetSharedInstance().GetRawDataResource(resource_id);
+
+  if (value.empty())
+    LOG(ERROR) << "No data resource available for id " << resource_id;
+
+  return value;
 }
 
 #if defined(OS_WIN)

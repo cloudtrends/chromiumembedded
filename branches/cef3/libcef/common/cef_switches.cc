@@ -18,4 +18,7 @@ const char kPackFilePath[]          = "pack-file-path";
 // Path to locales directory.
 const char kLocalesDirPath[]        = "locales-dir-path";
 
+// Path to locales directory.
+const char kPackLoadingDisabled[]   = "pack-loading-disabled";
+
 }  // namespace switches

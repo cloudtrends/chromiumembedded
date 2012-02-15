@@ -41,6 +41,7 @@
 
 #include "include/cef_base.h"
 #include "include/cef_proxy_handler.h"
+#include "include/cef_resource_bundle_handler.h"
 
 class CefApp;
 
@@ -52,10 +53,10 @@ class CefApp;
 // for the browser process (identified by no "type" command-line value) it will
 // return immediately with a value of -1. If called for a recognized secondary
 // process it will block until the process should exit and then return the
-// process exit code.
+// process exit code. The |application| parameter may be empty.
 ///
-/*--cef()--*/
-int CefExecuteProcess(const CefMainArgs& args);
+/*--cef(revision_check,optional_param=application)--*/
+int CefExecuteProcess(const CefMainArgs& args, CefRefPtr<CefApp> application);
 
 ///
 // This function should be called on the main application thread to initialize
@@ -104,17 +105,32 @@ void CefRunMessageLoop();
 void CefQuitMessageLoop();
 
 ///
-// Implement this interface to provide handler implementations.
+// Implement this interface to provide handler implementations. Methods will be
+// called by the process and/or thread indicated.
 ///
 /*--cef(source=client,no_debugct_check)--*/
 class CefApp : public virtual CefBase {
  public:
   ///
-  // Return the handler for proxy events. If not handler is returned the default
-  // system handler will be used.
+  // Return the handler for resource bundle events. If
+  // CefSettings.pack_loading_disabled is true a handler must be returned. If no
+  // handler is returned resources will be loaded from pack files. This method
+  // is called by the browser and renderer processes on multiple threads.
   ///
   /*--cef()--*/
-  virtual CefRefPtr<CefProxyHandler> GetProxyHandler() { return NULL; }
+  virtual CefRefPtr<CefResourceBundleHandler> GetResourceBundleHandler() {
+    return NULL;
+  }
+
+  ///
+  // Return the handler for proxy events. If no handler is returned the default
+  // system handler will be used. This method is called by the browser process
+  // IO thread.
+  ///
+  /*--cef()--*/
+  virtual CefRefPtr<CefProxyHandler> GetProxyHandler() {
+    return NULL;
+  }
 };
 
 #endif  // CEF_INCLUDE_CEF_APP_H_

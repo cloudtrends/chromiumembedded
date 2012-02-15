@@ -59,16 +59,12 @@ class CefContext : public CefBase {
                                                   int render_view_id);
   BrowserList* GetBrowserList() { return &browserlist_; }
 
-  string16 GetLocalizedString(int message_id) const;
-  base::StringPiece GetDataResource(int resource_id) const;
-
   // Retrieve the path at which cache data will be stored on disk.  If empty,
   // cache data will be stored in-memory.
   const FilePath& cache_path() const { return cache_path_; }
 
   const CefSettings& settings() const { return settings_; }
-  CefRefPtr<CefApp> application() const { return application_; }
-
+  CefRefPtr<CefApp> application() const;
   CefBrowserContext* browser_context() const;
   CefDevToolsDelegate* devtools_delegate() const;
 
@@ -89,7 +85,6 @@ class CefContext : public CefBase {
   base::PlatformThreadId init_thread_id_;
 
   CefSettings settings_;
-  CefRefPtr<CefApp> application_;
   FilePath cache_path_;
 
   // Map of browsers that currently exist.

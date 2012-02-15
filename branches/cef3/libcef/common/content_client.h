@@ -9,11 +9,14 @@
 #include <string>
 #include <vector>
 
+#include "include/cef_app.h"
+
 #include "base/compiler_specific.h"
 #include "content/public/common/content_client.h"
 
 class CefContentClient : public content::ContentClient {
  public:
+  explicit CefContentClient(CefRefPtr<CefApp> application);
   virtual ~CefContentClient();
 
   virtual void SetActiveURL(const GURL& url) OVERRIDE;
@@ -37,6 +40,15 @@ class CefContentClient : public content::ContentClient {
       int sandbox_type,
       int* sandbox_profile_resource_id) const OVERRIDE;
 #endif
+
+  CefRefPtr<CefApp> application() const { return application_; }
+
+  void set_pack_loading_disabled(bool val) { pack_loading_disabled_ = val; }
+  bool pack_loading_disabled() const { return pack_loading_disabled_; }
+
+ private:
+  CefRefPtr<CefApp> application_;
+  bool pack_loading_disabled_;
 };
 
 #endif  // CEF_LIBCEF_COMMON_CONTENT_CLIENT_H_

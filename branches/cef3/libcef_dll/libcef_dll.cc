@@ -39,6 +39,7 @@
 #include "libcef_dll/ctocpp/proxy_handler_ctocpp.h"
 #include "libcef_dll/ctocpp/read_handler_ctocpp.h"
 #include "libcef_dll/ctocpp/request_handler_ctocpp.h"
+#include "libcef_dll/ctocpp/resource_bundle_handler_ctocpp.h"
 #include "libcef_dll/ctocpp/resource_handler_ctocpp.h"
 #include "libcef_dll/ctocpp/scheme_handler_factory_ctocpp.h"
 #include "libcef_dll/ctocpp/string_visitor_ctocpp.h"
@@ -48,13 +49,15 @@
 
 // GLOBAL FUNCTIONS - Body may be edited by hand.
 
-CEF_EXPORT int cef_execute_process(const struct _cef_main_args_t* args) {
+CEF_EXPORT int cef_execute_process(const struct _cef_main_args_t* args,
+    struct _cef_app_t* application) {
   // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
 
   // Verify param: args; type: struct_byref_const
   DCHECK(args);
   if (!args)
     return 0;
+  // Unverified params: application
 
   // Translate param: args; type: struct_byref_const
   CefMainArgs argsObj;
@@ -63,7 +66,8 @@ CEF_EXPORT int cef_execute_process(const struct _cef_main_args_t* args) {
 
   // Execute
   int _retval = CefExecuteProcess(
-      argsObj);
+      argsObj,
+      CefAppCToCpp::Wrap(application));
 
   // Return type: simple
   return _retval;
@@ -123,6 +127,7 @@ CEF_EXPORT void cef_shutdown() {
   DCHECK_EQ(CefReadHandlerCToCpp::DebugObjCt, 0);
   DCHECK_EQ(CefRequestCppToC::DebugObjCt, 0);
   DCHECK_EQ(CefRequestHandlerCToCpp::DebugObjCt, 0);
+  DCHECK_EQ(CefResourceBundleHandlerCToCpp::DebugObjCt, 0);
   DCHECK_EQ(CefResourceHandlerCToCpp::DebugObjCt, 0);
   DCHECK_EQ(CefResponseCppToC::DebugObjCt, 0);
   DCHECK_EQ(CefSchemeHandlerFactoryCToCpp::DebugObjCt, 0);

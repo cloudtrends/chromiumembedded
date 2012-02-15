@@ -28,6 +28,7 @@
 #include "libcef_dll/cpptoc/proxy_handler_cpptoc.h"
 #include "libcef_dll/cpptoc/read_handler_cpptoc.h"
 #include "libcef_dll/cpptoc/request_handler_cpptoc.h"
+#include "libcef_dll/cpptoc/resource_bundle_handler_cpptoc.h"
 #include "libcef_dll/cpptoc/resource_handler_cpptoc.h"
 #include "libcef_dll/cpptoc/scheme_handler_factory_cpptoc.h"
 #include "libcef_dll/cpptoc/string_visitor_cpptoc.h"
@@ -52,12 +53,23 @@
 
 // GLOBAL METHODS - Body may be edited by hand.
 
-CEF_GLOBAL int CefExecuteProcess(const CefMainArgs& args) {
+CEF_GLOBAL int CefExecuteProcess(const CefMainArgs& args,
+    CefRefPtr<CefApp> application) {
+  int build_revision = cef_build_revision();
+  if (build_revision != CEF_REVISION) {
+    // The libcef build revision does not match the CEF API revision.
+    DCHECK(false);
+    return 0;
+  }
+
   // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
+
+  // Unverified params: application
 
   // Execute
   int _retval = cef_execute_process(
-      &args);
+      &args,
+      CefAppCppToC::Wrap(application));
 
   // Return type: simple
   return _retval;
@@ -107,6 +119,7 @@ CEF_GLOBAL void CefShutdown() {
   DCHECK_EQ(CefReadHandlerCppToC::DebugObjCt, 0);
   DCHECK_EQ(CefRequestCToCpp::DebugObjCt, 0);
   DCHECK_EQ(CefRequestHandlerCppToC::DebugObjCt, 0);
+  DCHECK_EQ(CefResourceBundleHandlerCppToC::DebugObjCt, 0);
   DCHECK_EQ(CefResourceHandlerCppToC::DebugObjCt, 0);
   DCHECK_EQ(CefResponseCToCpp::DebugObjCt, 0);
   DCHECK_EQ(CefSchemeHandlerFactoryCppToC::DebugObjCt, 0);

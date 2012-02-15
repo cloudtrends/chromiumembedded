@@ -113,6 +113,7 @@ void CefContentBrowserClient::AppendExtraCommandLineSwitches(
         switches::kLocale,
         switches::kPackFilePath,
         switches::kLocalesDirPath,
+        switches::kPackLoadingDisabled,
       };
       const CommandLine& browser_cmd = *CommandLine::ForCurrentProcess();
       command_line->CopySwitchesFrom(browser_cmd, kSwitchNames,

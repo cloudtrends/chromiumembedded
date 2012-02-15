@@ -9,6 +9,7 @@
 
 #include "content/public/browser/devtools_http_handler.h"
 #include "content/public/browser/web_contents.h"
+#include "content/public/common/content_client.h"
 #include "grit/cef_resources.h"
 #include "net/url_request/url_request_context_getter.h"
 #include "ui/base/resource/resource_bundle.h"
@@ -49,7 +50,7 @@ CefDevToolsDelegate::GetInspectableTabs() {
 }
 
 std::string CefDevToolsDelegate::GetDiscoveryPageHTML() {
-  return ResourceBundle::GetSharedInstance().GetRawDataResource(
+  return content::GetContentClient()->GetDataResource(
       IDR_CEF_DEVTOOLS_DISCOVERY_PAGE).as_string();
 }
 

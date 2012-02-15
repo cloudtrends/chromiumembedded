@@ -9,6 +9,7 @@
 #include <string>
 
 #include "libcef/common/content_client.h"
+#include "include/cef_app.h"
 
 #include "base/compiler_specific.h"
 #include "base/memory/scoped_ptr.h"
@@ -26,7 +27,7 @@ class MessageLoop;
 
 class CefMainDelegate : public content::ContentMainDelegate {
  public:
-  CefMainDelegate();
+  explicit CefMainDelegate(CefRefPtr<CefApp> application);
   virtual ~CefMainDelegate();
 
   virtual bool BasicStartupComplete(int* exit_code) OVERRIDE;

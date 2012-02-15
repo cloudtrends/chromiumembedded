@@ -57,7 +57,7 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
   CefMainArgs main_args(hInstance);
 
   // Execute the secondary process, if any.
-  int exit_code = CefExecuteProcess(main_args);
+  int exit_code = CefExecuteProcess(main_args, NULL);
   if (exit_code >= 0)
     return exit_code;
 

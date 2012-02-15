@@ -53,9 +53,10 @@ extern "C" {
 // for the browser process (identified by no "type" command-line value) it will
 // return immediately with a value of -1. If called for a recognized secondary
 // process it will block until the process should exit and then return the
-// process exit code.
+// process exit code. The |application| parameter may be NULL.
 ///
-CEF_EXPORT int cef_execute_process(const struct _cef_main_args_t* args);
+CEF_EXPORT int cef_execute_process(const struct _cef_main_args_t* args,
+    struct _cef_app_t* application);
 
 ///
 // This function should be called on the main application thread to initialize
@@ -100,7 +101,8 @@ CEF_EXPORT void cef_run_message_loop();
 CEF_EXPORT void cef_quit_message_loop();
 
 ///
-// Implement this structure to provide handler implementations.
+// Implement this structure to provide handler implementations. Methods will be
+// called by the process and/or thread indicated.
 ///
 typedef struct _cef_app_t {
   ///
@@ -109,8 +111,19 @@ typedef struct _cef_app_t {
   cef_base_t base;
 
   ///
-  // Return the handler for proxy events. If not handler is returned the default
-  // system handler will be used.
+  // Return the handler for resource bundle events. If
+  // CefSettings.pack_loading_disabled is true (1) a handler must be returned.
+  // If no handler is returned resources will be loaded from pack files. This
+  // function is called by the browser and renderer processes on multiple
+  // threads.
+  ///
+  struct _cef_resource_bundle_handler_t* (
+      CEF_CALLBACK *get_resource_bundle_handler)(struct _cef_app_t* self);
+
+  ///
+  // Return the handler for proxy events. If no handler is returned the default
+  // system handler will be used. This function is called by the browser process
+  // IO thread.
   ///
   struct _cef_proxy_handler_t* (CEF_CALLBACK *get_proxy_handler)(
       struct _cef_app_t* self);

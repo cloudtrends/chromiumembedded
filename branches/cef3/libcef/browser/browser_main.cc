@@ -19,6 +19,7 @@
 #include "content/browser/download/save_file_manager.h"
 #include "content/browser/gpu/gpu_data_manager.h"
 #include "content/browser/plugin_service_impl.h"
+#include "content/public/common/content_client.h"
 #include "content/public/common/content_switches.h"
 #include "net/base/net_module.h"
 #include "ui/base/clipboard/clipboard.h"
@@ -27,7 +28,7 @@
 namespace {
 
 base::StringPiece ResourceProvider(int resource_id) {
-  return ResourceBundle::GetSharedInstance().GetRawDataResource(resource_id);
+  return content::GetContentClient()->GetDataResource(resource_id);
 }
 
 }
