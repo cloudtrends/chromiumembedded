@@ -48,6 +48,7 @@
       ],
       'mac_bundle_resources': [
         '<@(cefclient_bundle_resources_mac)',
+        # TODO(cef): Needs to be called chrome.pak instead of cef.pak on Mac OS X.
         '<(PRODUCT_DIR)/cef.pak',
         '<!@pymod_do_main(repack_locales -o -g <(grit_out_dir) -s <(SHARED_INTERMEDIATE_DIR) -x <(INTERMEDIATE_DIR) <(locales))',
       ],

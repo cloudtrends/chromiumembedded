@@ -117,7 +117,9 @@ typedef struct _cef_settings_t {
 
   ///
   // The locale string that will be passed to WebKit. If empty the default
-  // locale of "en-US" will be used.
+  // locale of "en-US" will be used. This value is ignored on Linux where locale
+  // is determined using environment variable parsing with the precedence order:
+  // LANGUAGE, LC_ALL, LC_MESSAGES and LANG.
   ///
   cef_string_t locale;
 
@@ -173,13 +175,17 @@ typedef struct _cef_settings_t {
 
   ///
   // The fully qualified path for the cef.pak file. If this value is empty
-  // the cef.pak file must be located in the module directory.
+  // the cef.pak file must be located in the module directory. This value is
+  // ignored on Mac OS X where pack files are always loaded from the app bundle
+  // resource directory.
   ///
   cef_string_t pack_file_path;
 
   ///
   // The fully qualified path for the locales directory. If this value is empty
-  // the locales directory must be located in the module directory.
+  // the locales directory must be located in the module directory. This value
+  // is ignored on Mac OS X where pack files are always loaded from the app
+  // bundle resource directory.
   ///
   cef_string_t locales_dir_path;
 
