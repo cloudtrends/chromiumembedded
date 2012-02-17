@@ -39,12 +39,12 @@
 #pragma once
 
 #include "include/cef_base.h"
+#include "include/cef_browser.h"
+#include "include/cef_frame.h"
+#include "include/cef_request.h"
+#include "include/cef_response.h"
+#include "include/cef_resource_handler.h"
 
-class CefBrowser;
-class CefFrame;
-class CefRequest;
-class CefResponse;
-class CefResourceHandler;
 class CefSchemeHandlerFactory;
 
 ///

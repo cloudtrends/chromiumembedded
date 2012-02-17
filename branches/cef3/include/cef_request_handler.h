@@ -39,12 +39,11 @@
 #pragma once
 
 #include "include/cef_base.h"
+#include "include/cef_browser.h"
+#include "include/cef_frame.h"
 #include "include/cef_resource_handler.h"
 #include "include/cef_response.h"
 #include "include/cef_request.h"
-
-class CefBrowser;
-class CefFrame;
 
 ///
 // Callback interface used for asynchronous continuation of authentication

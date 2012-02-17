@@ -39,11 +39,11 @@
 #pragma once
 
 #include "include/cef_base.h"
+#include "include/cef_request.h"
+#include "include/cef_stream.h"
 #include "include/cef_string_visitor.h"
 
 class CefBrowser;
-class CefRequest;
-class CefStreamReader;
 
 ///
 // Class used to represent a frame in the browser window. The methods of this

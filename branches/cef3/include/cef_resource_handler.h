@@ -39,12 +39,10 @@
 #pragma once
 
 #include "include/cef_base.h"
-
-class CefBrowser;
-class CefCallback;
-class CefRequest;
-class CefResponse;
-class CefResourceHandler;
+#include "include/cef_browser.h"
+#include "include/cef_callback.h"
+#include "include/cef_request.h"
+#include "include/cef_response.h"
 
 ///
 // Class used to implement a custom request handler interface. The methods of
