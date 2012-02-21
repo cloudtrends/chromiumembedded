@@ -36,6 +36,7 @@ class CefCommandLineCToCpp
   // CefCommandLine methods
   virtual void InitFromArgv(int argc, const char* const* argv) OVERRIDE;
   virtual void InitFromString(const CefString& command_line) OVERRIDE;
+  virtual void Reset() OVERRIDE;
   virtual CefString GetCommandLineString() OVERRIDE;
   virtual CefString GetProgram() OVERRIDE;
   virtual void SetProgram(const CefString& program) OVERRIDE;

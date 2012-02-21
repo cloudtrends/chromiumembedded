@@ -67,6 +67,12 @@ void VerifyCommandLine(CefRefPtr<CefCommandLine> command_line) {
   EXPECT_EQ("arg1", arg0);
   std::string arg1 = args[1];
   EXPECT_EQ("arg 2", arg1);
+
+  command_line->Reset();
+  EXPECT_FALSE(command_line->HasSwitches());
+  EXPECT_FALSE(command_line->HasArguments());
+  std::string cur_program = command_line->GetProgram();
+  EXPECT_EQ(program, cur_program);
 }
 
 }  // namespace

@@ -89,16 +89,38 @@ typedef struct _cef_settings_t {
   size_t size;
 
   ///
-  // Set to true (1) to have the message loop run in a separate thread. If
-  // false (0) than the CefDoMessageLoopWork() function must be called from
-  // your application message loop.
+  // Set to true (1) to use a single process for the browser and renderer. This
+  // run mode is not officially supported by Chromium and is less stable than
+  // the multi-process default.
+  ///
+  bool single_process;
+
+  ///
+  // The path to a separate executable that will be launched for sub-processes.
+  // By default the browser process executable is used. See the comments on
+  // CefExecuteProcess() for details.
+  ///
+  cef_string_t browser_subprocess_path;
+
+  ///
+  // Set to true (1) to have the browser process message loop run in a separate
+  // thread. If false (0) than the CefDoMessageLoopWork() function must be
+  // called from your application message loop.
   ///
   bool multi_threaded_message_loop;
 
   ///
-  // The location where cache data will be stored on disk. If empty an
-  // in-memory cache will be used. HTML5 databases such as localStorage will
-  // only persist across sessions if a cache path is specified.
+  // Set to true (1) to disable configuration of browser process features using
+  // standard CEF and Chromium command-line arguments. Configuration can still
+  // be specified using CEF data structures or via the
+  // CefApp::OnBeforeCommandLineProcessing() method.
+  ///
+  bool command_line_args_disabled;
+
+  ///
+  // The location where cache data will be stored on disk. If empty an in-memory
+  // cache will be used. HTML5 databases such as localStorage will only persist
+  // across sessions if a cache path is specified.
   ///
   cef_string_t cache_path;
 

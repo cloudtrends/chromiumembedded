@@ -10,12 +10,32 @@
 // for more information.
 //
 
+#include "libcef_dll/cpptoc/command_line_cpptoc.h"
 #include "libcef_dll/ctocpp/app_ctocpp.h"
 #include "libcef_dll/ctocpp/proxy_handler_ctocpp.h"
 #include "libcef_dll/ctocpp/resource_bundle_handler_ctocpp.h"
 
 
 // VIRTUAL METHODS - Body may be edited by hand.
+
+void CefAppCToCpp::OnBeforeCommandLineProcessing(const CefString& process_type,
+    CefRefPtr<CefCommandLine> command_line) {
+  if (CEF_MEMBER_MISSING(struct_, on_before_command_line_processing))
+    return;
+
+  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
+
+  // Verify param: command_line; type: refptr_diff
+  DCHECK(command_line.get());
+  if (!command_line.get())
+    return;
+  // Unverified params: process_type
+
+  // Execute
+  struct_->on_before_command_line_processing(struct_,
+      process_type.GetStruct(),
+      CefCommandLineCppToC::Wrap(command_line));
+}
 
 CefRefPtr<CefResourceBundleHandler> CefAppCToCpp::GetResourceBundleHandler() {
   if (CEF_MEMBER_MISSING(struct_, get_resource_bundle_handler))

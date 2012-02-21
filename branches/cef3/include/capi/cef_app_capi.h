@@ -49,11 +49,11 @@ extern "C" {
 // This function should be called from the application entry point function to
 // execute a secondary process. It can be used to run secondary processes from
 // the browser client executable (default behavior) or from a separate
-// executable specified by the CefSettings.secondary_executable value. If called
-// for the browser process (identified by no "type" command-line value) it will
-// return immediately with a value of -1. If called for a recognized secondary
-// process it will block until the process should exit and then return the
-// process exit code. The |application| parameter may be NULL.
+// executable specified by the CefSettings.browser_subprocess_path value. If
+// called for the browser process (identified by no "type" command-line value)
+// it will return immediately with a value of -1. If called for a recognized
+// secondary process it will block until the process should exit and then return
+// the process exit code. The |application| parameter may be NULL.
 ///
 CEF_EXPORT int cef_execute_process(const struct _cef_main_args_t* args,
     struct _cef_app_t* application);
@@ -109,6 +109,21 @@ typedef struct _cef_app_t {
   // Base structure.
   ///
   cef_base_t base;
+
+  ///
+  // Provides an opportunity to view and/or modify command-line arguments before
+  // processing by CEF and Chromium. The |process_type| value will be NULL for
+  // the browser process. Do not keep a reference to the cef_command_line_t
+  // object passed to this function. The CefSettings.command_line_args_disabled
+  // value can be used to start with an NULL command-line object. Any values
+  // specified in CefSettings that equate to command-line arguments will be set
+  // before this function is called. Be cautious when using this function to
+  // modify command-line arguments for non-browser processes as this may result
+  // in undefined behavior including crashes.
+  ///
+  void (CEF_CALLBACK *on_before_command_line_processing)(
+      struct _cef_app_t* self, const cef_string_t* process_type,
+      struct _cef_command_line_t* command_line);
 
   ///
   // Return the handler for resource bundle events. If

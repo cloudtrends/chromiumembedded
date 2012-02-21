@@ -70,6 +70,16 @@ void CefCommandLineCToCpp::InitFromString(const CefString& command_line) {
       command_line.GetStruct());
 }
 
+void CefCommandLineCToCpp::Reset() {
+  if (CEF_MEMBER_MISSING(struct_, reset))
+    return;
+
+  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
+
+  // Execute
+  struct_->reset(struct_);
+}
+
 CefString CefCommandLineCToCpp::GetCommandLineString() {
   if (CEF_MEMBER_MISSING(struct_, get_command_line_string))
     return CefString();

@@ -40,6 +40,7 @@
 #pragma once
 
 #include "include/cef_base.h"
+#include "include/cef_command_line.h"
 #include "include/cef_proxy_handler.h"
 #include "include/cef_resource_bundle_handler.h"
 
@@ -49,11 +50,11 @@ class CefApp;
 // This function should be called from the application entry point function to
 // execute a secondary process. It can be used to run secondary processes from
 // the browser client executable (default behavior) or from a separate
-// executable specified by the CefSettings.secondary_executable value. If called
-// for the browser process (identified by no "type" command-line value) it will
-// return immediately with a value of -1. If called for a recognized secondary
-// process it will block until the process should exit and then return the
-// process exit code. The |application| parameter may be empty.
+// executable specified by the CefSettings.browser_subprocess_path value. If
+// called for the browser process (identified by no "type" command-line value)
+// it will return immediately with a value of -1. If called for a recognized
+// secondary process it will block until the process should exit and then return
+// the process exit code. The |application| parameter may be empty.
 ///
 /*--cef(revision_check,optional_param=application)--*/
 int CefExecuteProcess(const CefMainArgs& args, CefRefPtr<CefApp> application);
@@ -111,6 +112,23 @@ void CefQuitMessageLoop();
 /*--cef(source=client,no_debugct_check)--*/
 class CefApp : public virtual CefBase {
  public:
+  ///
+  // Provides an opportunity to view and/or modify command-line arguments before
+  // processing by CEF and Chromium. The |process_type| value will be empty for
+  // the browser process. Do not keep a reference to the CefCommandLine object
+  // passed to this method. The CefSettings.command_line_args_disabled value
+  // can be used to start with an empty command-line object. Any values
+  // specified in CefSettings that equate to command-line arguments will be set
+  // before this method is called. Be cautious when using this method to modify
+  // command-line arguments for non-browser processes as this may result in
+  // undefined behavior including crashes.
+  ///
+  /*--cef(optional_param=process_type)--*/
+  virtual void OnBeforeCommandLineProcessing(
+      const CefString& process_type,
+      CefRefPtr<CefCommandLine> command_line) {
+  }
+
   ///
   // Return the handler for resource bundle events. If
   // CefSettings.pack_loading_disabled is true a handler must be returned. If no

@@ -20,6 +20,166 @@
 #include "ui/base/resource/resource_bundle.h"
 #include "ui/base/ui_base_paths.h"
 
+namespace {
+
+class CefCommandLineRefImpl : public CefCommandLine {
+ public:
+  explicit CefCommandLineRefImpl(CommandLine* command_line)
+    : command_line_(command_line),
+      supported_thread_id_(base::PlatformThread::CurrentId()) {
+  }
+
+  virtual void InitFromArgv(int argc, const char* const* argv) OVERRIDE {
+#if !defined(OS_WIN)
+    if (!VerifyContext())
+      return;
+    command_line_->InitFromArgv(argc, argv);
+#else
+    NOTREACHED() << "method not supported on this platform";
+#endif
+  }
+
+  virtual void InitFromString(const CefString& command_line) OVERRIDE {
+#if defined(OS_WIN)
+    if (!VerifyContext())
+      return;
+    command_line_->ParseFromString(command_line);
+#else
+    NOTREACHED() << "method not supported on this platform";
+#endif
+  }
+
+  virtual void Reset() OVERRIDE {
+    if (!VerifyContext())
+      return;
+
+    CommandLine::StringVector argv;
+    argv.push_back(command_line_->GetProgram().value());
+    command_line_->InitFromArgv(argv);
+
+    const CommandLine::SwitchMap& map = command_line_->GetSwitches();
+    const_cast<CommandLine::SwitchMap*>(&map)->clear();
+  }
+
+  virtual CefString GetCommandLineString() OVERRIDE {
+    if (!VerifyContext())
+      return CefString();
+
+    return command_line_->GetCommandLineString();
+  }
+
+  virtual CefString GetProgram() OVERRIDE {
+    if (!VerifyContext())
+      return CefString();
+
+    return command_line_->GetProgram().value();
+  }
+
+  virtual void SetProgram(const CefString& program) OVERRIDE {
+    if (!VerifyContext())
+      return;
+
+    command_line_->SetProgram(FilePath(program));
+  }
+
+  virtual bool HasSwitches() OVERRIDE {
+    if (!VerifyContext())
+      return false;
+
+    return (command_line_->GetSwitches().size() > 0);
+  }
+
+  virtual bool HasSwitch(const CefString& name) OVERRIDE {
+    if (!VerifyContext())
+      return false;
+
+    return command_line_->HasSwitch(name);
+  }
+
+  virtual CefString GetSwitchValue(const CefString& name) OVERRIDE {
+    if (!VerifyContext())
+      return CefString();
+
+    return command_line_->GetSwitchValueNative(name);
+  }
+
+  virtual void GetSwitches(SwitchMap& switches) OVERRIDE {
+    if (!VerifyContext())
+      return;
+
+    const CommandLine::SwitchMap& map = command_line_->GetSwitches();
+    CommandLine::SwitchMap::const_iterator it = map.begin();
+    for (; it != map.end(); ++it)
+      switches.insert(std::make_pair(it->first, it->second));
+  }
+
+  virtual void AppendSwitch(const CefString& name) OVERRIDE {
+    if (!VerifyContext())
+      return;
+
+    command_line_->AppendSwitch(name);
+  }
+
+  virtual void AppendSwitchWithValue(const CefString& name,
+                                     const CefString& value) OVERRIDE {
+    if (!VerifyContext())
+      return;
+
+    command_line_->AppendSwitchNative(name, value);
+  }
+
+  virtual bool HasArguments() OVERRIDE {
+    if (!VerifyContext())
+      return false;
+
+    return (command_line_->GetArgs().size() > 0);
+  }
+
+  virtual void GetArguments(ArgumentList& arguments) OVERRIDE {
+    if (!VerifyContext())
+      return;
+
+    const CommandLine::StringVector& vec = command_line_->GetArgs();
+    CommandLine::StringVector::const_iterator it = vec.begin();
+    for (; it != vec.end(); ++it)
+      arguments.push_back(*it);
+  }
+
+  virtual void AppendArgument(const CefString& argument) OVERRIDE {
+    if (!VerifyContext())
+      return;
+
+    command_line_->AppendArgNative(argument);
+  }
+
+  void Detach() { command_line_ = NULL; }
+
+  // Verify that the object exists and is being accessed on the correct thread.
+  bool VerifyContext() {
+    if (base::PlatformThread::CurrentId() != supported_thread_id_) {
+      // This object should only be accessed from the thread that created it.
+      NOTREACHED() << "object accessed from incorrect thread.";
+      return false;
+    }
+
+    if (!command_line_) {
+      // This object should not be accessed after being detached.
+      NOTREACHED() << "object accessed after being detached.";
+      return false;
+    }
+
+    return true;
+  }
+
+ private:
+  CommandLine* command_line_;
+  base::PlatformThreadId supported_thread_id_;
+
+  IMPLEMENT_REFCOUNTING(CefCommandLineRefImpl);
+};
+
+}  // namespace
+
 CefMainDelegate::CefMainDelegate(CefRefPtr<CefApp> application)
     : content_client_(application) {
 }
@@ -35,6 +195,28 @@ bool CefMainDelegate::BasicStartupComplete(int* exit_code) {
   if (process_type.empty()) {
     // In the browser process. Populate the global command-line object.
     const CefSettings& settings = _Context->settings();
+
+    if (settings.command_line_args_disabled) {
+      // Remove any existing command-line arguments.
+      CommandLine::StringVector argv;
+      argv.push_back(command_line->GetProgram().value());
+      command_line->InitFromArgv(argv);
+
+      const CommandLine::SwitchMap& map = command_line->GetSwitches();
+      const_cast<CommandLine::SwitchMap*>(&map)->clear();
+    }
+
+    if (settings.single_process)
+      command_line->AppendSwitch(switches::kSingleProcess);
+
+    if (settings.browser_subprocess_path.length > 0) {
+      FilePath file_path =
+          FilePath(CefString(&settings.browser_subprocess_path));
+      if (!file_path.empty()) {
+        command_line->AppendSwitchPath(switches::kBrowserSubprocessPath,
+                                       file_path);
+      }
+    }
 
     if (settings.user_agent.length > 0) {
       command_line->AppendSwitchASCII(switches::kUserAgent,
@@ -68,6 +250,15 @@ bool CefMainDelegate::BasicStartupComplete(int* exit_code) {
     // TODO(cef): Figure out how to support the sandbox.
     if (!command_line->HasSwitch(switches::kNoSandbox))
       command_line->AppendSwitch(switches::kNoSandbox);
+  }
+
+  if (content_client_.application().get()) {
+    // Give the application a chance to view/modify the command line.
+    CefRefPtr<CefCommandLineRefImpl> commandLinePtr(
+        new CefCommandLineRefImpl(command_line));
+    content_client_.application()->OnBeforeCommandLineProcessing(
+        CefString(process_type), commandLinePtr.get());
+    commandLinePtr->Detach();
   }
 
   return false;

@@ -33,6 +33,16 @@ class CefCommandLineImpl : public CefCommandLine {
 #endif
   }
 
+  virtual void Reset() OVERRIDE {
+    AutoLock lock_scope(this);
+    CommandLine::StringVector argv;
+    argv.push_back(command_line_.GetProgram().value());
+    command_line_.InitFromArgv(argv);
+
+    const CommandLine::SwitchMap& map = command_line_.GetSwitches();
+    const_cast<CommandLine::SwitchMap*>(&map)->clear();
+  }
+
   virtual CefString GetCommandLineString() OVERRIDE {
     AutoLock lock_scope(this);
     return command_line_.GetCommandLineString();

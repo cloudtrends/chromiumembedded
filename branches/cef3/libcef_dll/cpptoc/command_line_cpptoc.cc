@@ -64,6 +64,17 @@ void CEF_CALLBACK command_line_init_from_string(
       CefString(command_line));
 }
 
+void CEF_CALLBACK command_line_reset(struct _cef_command_line_t* self) {
+  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
+
+  DCHECK(self);
+  if (!self)
+    return;
+
+  // Execute
+  CefCommandLineCppToC::Get(self)->Reset();
+}
+
 cef_string_userfree_t CEF_CALLBACK command_line_get_command_line_string(
     struct _cef_command_line_t* self) {
   // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
@@ -293,6 +304,7 @@ CefCommandLineCppToC::CefCommandLineCppToC(CefCommandLine* cls)
     : CefCppToC<CefCommandLineCppToC, CefCommandLine, cef_command_line_t>(cls) {
   struct_.struct_.init_from_argv = command_line_init_from_argv;
   struct_.struct_.init_from_string = command_line_init_from_string;
+  struct_.struct_.reset = command_line_reset;
   struct_.struct_.get_command_line_string =
       command_line_get_command_line_string;
   struct_.struct_.get_program = command_line_get_program;

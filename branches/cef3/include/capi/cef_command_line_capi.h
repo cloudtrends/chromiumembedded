@@ -77,6 +77,12 @@ typedef struct _cef_command_line_t {
       const cef_string_t* command_line);
 
   ///
+  // Reset the command-line switches and arguments but leave the program
+  // component unchanged.
+  ///
+  void (CEF_CALLBACK *reset)(struct _cef_command_line_t* self);
+
+  ///
   // Constructs and returns the represented command line string. Use this
   // function cautiously because quoting behavior is unclear.
   ///

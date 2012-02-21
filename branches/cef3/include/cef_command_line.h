@@ -80,6 +80,13 @@ class CefCommandLine : public virtual CefBase {
   virtual void InitFromString(const CefString& command_line) =0;
 
   ///
+  // Reset the command-line switches and arguments but leave the program
+  // component unchanged.
+  ///
+  /*--cef()--*/
+  virtual void Reset() =0;
+
+  ///
   // Constructs and returns the represented command line string. Use this method
   // cautiously because quoting behavior is unclear.
   ///

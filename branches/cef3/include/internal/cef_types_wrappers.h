@@ -232,6 +232,7 @@ struct CefSettingsTraits {
   }
 
   static inline void clear(struct_type* s) {
+    cef_string_clear(&s->browser_subprocess_path);
     cef_string_clear(&s->cache_path);
     cef_string_clear(&s->user_agent);
     cef_string_clear(&s->product_version);
@@ -246,7 +247,12 @@ struct CefSettingsTraits {
 
   static inline void set(const struct_type* src, struct_type* target,
       bool copy) {
+    target->single_process = src->single_process;
+    cef_string_set(src->browser_subprocess_path.str,
+        src->browser_subprocess_path.length,
+        &target->browser_subprocess_path, copy);
     target->multi_threaded_message_loop = src->multi_threaded_message_loop;
+    target->command_line_args_disabled = src->command_line_args_disabled;
 
     cef_string_set(src->cache_path.str, src->cache_path.length,
         &target->cache_path, copy);
