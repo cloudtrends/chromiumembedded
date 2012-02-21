@@ -76,7 +76,6 @@ class CefContentRendererClient : public content::ContentRendererClient {
                                       const std::string& value) OVERRIDE;
   virtual void RegisterPPAPIInterfaceFactories(
       webkit::ppapi::PpapiInterfaceFactoryManager* factory_manager) OVERRIDE;
-  virtual bool AllowSocketAPI(const GURL& url) OVERRIDE;
 };
 
 #endif  // CEF_LIBCEF_RENDERER_CONTENT_RENDERER_CLIENT_H_

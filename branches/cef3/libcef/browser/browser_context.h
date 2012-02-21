@@ -13,12 +13,12 @@
 #include "content/public/browser/browser_context.h"
 
 class DownloadManager;
-class SSLHostState;
 
 namespace content {
 class DownloadManagerDelegate;
 class HostZoomMap;
 class ResourceContext;
+class SpeechInputPreferences;
 }
 
 class CefBrowserMainParts;
@@ -32,7 +32,6 @@ class CefBrowserContext : public content::BrowserContext {
   // BrowserContext methods.
   virtual FilePath GetPath() OVERRIDE;
   virtual bool IsOffTheRecord() OVERRIDE;
-  virtual SSLHostState* GetSSLHostState() OVERRIDE;
   virtual content::DownloadManager* GetDownloadManager() OVERRIDE;
   virtual net::URLRequestContextGetter* GetRequestContext() OVERRIDE;
   virtual net::URLRequestContextGetter* GetRequestContextForRenderProcess(
@@ -42,34 +41,21 @@ class CefBrowserContext : public content::BrowserContext {
   virtual content::HostZoomMap* GetHostZoomMap() OVERRIDE;
   virtual content::GeolocationPermissionContext*
       GetGeolocationPermissionContext() OVERRIDE;
-  virtual SpeechInputPreferences* GetSpeechInputPreferences() OVERRIDE;
+  virtual content::SpeechInputPreferences* GetSpeechInputPreferences() OVERRIDE;
   virtual bool DidLastSessionExitCleanly() OVERRIDE;
-  virtual quota::QuotaManager* GetQuotaManager() OVERRIDE;
-  virtual WebKitContext* GetWebKitContext() OVERRIDE;
-  virtual webkit_database::DatabaseTracker* GetDatabaseTracker() OVERRIDE;
-  virtual ChromeBlobStorageContext* GetBlobStorageContext() OVERRIDE;
-  virtual ChromeAppCacheService* GetAppCacheService() OVERRIDE;
-  virtual fileapi::FileSystemContext* GetFileSystemContext() OVERRIDE;
+  virtual quota::SpecialStoragePolicy* GetSpecialStoragePolicy() OVERRIDE;
 
  private:
-  void CreateQuotaManagerAndClients();
 
   FilePath path_;
   scoped_ptr<content::ResourceContext> resource_context_;
-  scoped_ptr<SSLHostState> ssl_host_state_;
   scoped_refptr<CefDownloadManagerDelegate> download_manager_delegate_;
   scoped_refptr<content::DownloadManager> download_manager_;
   scoped_refptr<net::URLRequestContextGetter> url_request_getter_;
   scoped_refptr<content::HostZoomMap> host_zoom_map_;
   scoped_refptr<content::GeolocationPermissionContext>
       geolocation_permission_context_;
-  scoped_refptr<SpeechInputPreferences> speech_input_preferences_;
-  scoped_refptr<WebKitContext> webkit_context_;
-  scoped_refptr<ChromeAppCacheService> appcache_service_;
-  scoped_refptr<webkit_database::DatabaseTracker> db_tracker_;
-  scoped_refptr<fileapi::FileSystemContext> file_system_context_;
-  scoped_refptr<quota::QuotaManager> quota_manager_;
-  scoped_refptr<ChromeBlobStorageContext> blob_storage_context_;
+  scoped_refptr<content::SpeechInputPreferences> speech_input_preferences_;
 
   CefBrowserMainParts* main_parts_;
 

@@ -8,9 +8,10 @@
 
 #include "include/internal/cef_types_wrappers.h"
 
+#include "base/file_path.h"
 #include "base/utf_string_conversions.h"
-#include "content/browser/gpu/gpu_data_manager.h"
 #include "content/browser/gpu/gpu_process_host.h"
+#include "content/public/browser/gpu_data_manager.h"
 #include "webkit/glue/webpreferences.h"
 
 void BrowserToWebSettings(const CefBrowserSettings& cef, WebPreferences& web) {
@@ -150,21 +151,23 @@ void BrowserToWebSettings(const CefBrowserSettings& cef, WebPreferences& web) {
   // TODO(cef): The GPU black list will need to be initialized. See
   // InitializeGpuDataManager() in chrome/browser/chrome_browser_main.cc.
   {  // Certain GPU features might have been blacklisted.
-    GpuDataManager* gpu_data_manager = GpuDataManager::GetInstance();
+    content::GpuDataManager* gpu_data_manager =
+        content::GpuDataManager::GetInstance();
     DCHECK(gpu_data_manager);
-    uint32 blacklist_flags = gpu_data_manager->GetGpuFeatureFlags().flags();
-    if (blacklist_flags & GpuFeatureFlags::kGpuFeatureAcceleratedCompositing)
+    content::GpuFeatureType blacklist_flags =
+        gpu_data_manager->GetGpuFeatureType();
+    if (blacklist_flags & content::GPU_FEATURE_TYPE_ACCELERATED_COMPOSITING)
       web.accelerated_compositing_enabled = false;
-    if (blacklist_flags & GpuFeatureFlags::kGpuFeatureWebgl)
+    if (blacklist_flags & content::GPU_FEATURE_TYPE_WEBGL)
       web.experimental_webgl_enabled = false;
-    if (blacklist_flags & GpuFeatureFlags::kGpuFeatureAccelerated2dCanvas)
+    if (blacklist_flags & content::GPU_FEATURE_TYPE_ACCELERATED_2D_CANVAS)
       web.accelerated_2d_canvas_enabled = false;
-    if (blacklist_flags & GpuFeatureFlags::kGpuFeatureMultisampling)
+    if (blacklist_flags & content::GPU_FEATURE_TYPE_MULTISAMPLING)
       web.gl_multisampling_enabled = false;
 
     // Accelerated video is slower than regular when using a software 3d
     // rasterizer.
-    if (gpu_data_manager->software_rendering())
+    if (gpu_data_manager->ShouldUseSoftwareRendering())
       web.accelerated_video_enabled = false;
   }
 }

@@ -3,61 +3,47 @@
 // found in the LICENSE file.
 
 #include "libcef/browser/resource_context.h"
+#include "libcef/browser/thread_util.h"
 #include "libcef/browser/url_request_context_getter.h"
 
-#include "content/browser/chrome_blob_storage_context.h"
-
 CefResourceContext::CefResourceContext(
-    CefURLRequestContextGetter* getter,
-    ChromeBlobStorageContext* blob_storage_context)
-    : getter_(getter),
-      blob_storage_context_(blob_storage_context) {
+    CefURLRequestContextGetter* getter)
+    : getter_(getter) {
 }
 
 CefResourceContext::~CefResourceContext() {
 }
 
 net::HostResolver* CefResourceContext::GetHostResolver() {
+  CEF_REQUIRE_IOT();
   return getter_->host_resolver();
 }
 
 net::URLRequestContext* CefResourceContext::GetRequestContext() {
+  CEF_REQUIRE_IOT();
   return getter_->GetURLRequestContext();
 }
 
-ChromeAppCacheService* CefResourceContext::GetAppCacheService() {
-  return NULL;
-}
-
-webkit_database::DatabaseTracker* CefResourceContext::GetDatabaseTracker() {
-  return NULL;
-}
-
-fileapi::FileSystemContext* CefResourceContext::GetFileSystemContext() {
-  return NULL;
-}
-
-ChromeBlobStorageContext* CefResourceContext::GetBlobStorageContext() {
-  return blob_storage_context_;
-}
-
-quota::QuotaManager* CefResourceContext::GetQuotaManager() {
-  return NULL;
-}
-
 content::HostZoomMap* CefResourceContext::GetHostZoomMap() {
+  CEF_REQUIRE_IOT();
   return NULL;
 }
 
 MediaObserver* CefResourceContext::GetMediaObserver() {
+  CEF_REQUIRE_IOT();
+  NOTREACHED();
   return NULL;
 }
 
 media_stream::MediaStreamManager*
     CefResourceContext::GetMediaStreamManager() {
+  CEF_REQUIRE_IOT();
+  NOTREACHED();
   return NULL;
 }
 
 AudioManager* CefResourceContext::GetAudioManager() {
+  CEF_REQUIRE_IOT();
+  NOTREACHED();
   return NULL;
 }

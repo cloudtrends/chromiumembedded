@@ -147,7 +147,3 @@ bool CefContentRendererClient::HandleSetCookieRequest(
 void CefContentRendererClient::RegisterPPAPIInterfaceFactories(
     webkit::ppapi::PpapiInterfaceFactoryManager* factory_manager) {
 }
-
-bool CefContentRendererClient::AllowSocketAPI(const GURL& url) {
-  return false;
-}
