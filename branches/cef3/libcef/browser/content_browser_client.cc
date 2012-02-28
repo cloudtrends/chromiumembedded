@@ -8,6 +8,7 @@
 #include "libcef/browser/browser_message_filter.h"
 #include "libcef/browser/browser_settings.h"
 #include "libcef/browser/resource_dispatcher_host_delegate.h"
+#include "libcef/browser/thread_util.h"
 #include "libcef/common/cef_switches.h"
 
 #include "base/command_line.h"
@@ -239,6 +240,17 @@ bool CefContentBrowserClient::AllowSocketAPI(const GURL& url) {
 void CefContentBrowserClient::RequestMediaAccessPermission(
     const content::MediaStreamRequest* request,
     const content::MediaResponseCallback& callback) {
+  CEF_CURRENTLY_ON_UIT();
+
+  content::MediaStreamDeviceArray devices;
+  for (content::MediaStreamDeviceMap::const_iterator it =
+       request->devices.begin(); it != request->devices.end(); ++it) {
+    devices.push_back(*it->second.begin());
+  }
+
+  // TODO(cef): Give the user an opportunity to approve the device list or run
+  // the callback with an empty device list to cancel the request.
+  callback.Run(devices);
 }
 
 void CefContentBrowserClient::RequestDesktopNotificationPermission(
