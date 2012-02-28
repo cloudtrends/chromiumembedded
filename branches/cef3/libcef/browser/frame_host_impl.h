@@ -2,25 +2,25 @@
 // reserved. Use of this source code is governed by a BSD-style license that can
 // be found in the LICENSE file.
 
-#ifndef CEF_LIBCEF_BROWSER_FRAME_IMPL_H_
-#define CEF_LIBCEF_BROWSER_FRAME_IMPL_H_
+#ifndef CEF_LIBCEF_BROWSER_FRAME_HOST_IMPL_H_
+#define CEF_LIBCEF_BROWSER_FRAME_HOST_IMPL_H_
 #pragma once
 
 #include <string>
 #include "include/cef_frame.h"
 #include "base/synchronization/lock.h"
 
-class CefBrowserImpl;
+class CefBrowserHostImpl;
 
-// Implementation of CefFrame. CefFrameImpl objects are owned by the
+// Implementation of CefFrame. CefFrameHostImpl objects are owned by the
 // CefBrowerImpl and will be detached when the browser is notified that the
 // associated renderer WebFrame will close.
-class CefFrameImpl : public CefFrame {
+class CefFrameHostImpl : public CefFrame {
  public:
-  CefFrameImpl(CefBrowserImpl* browser,
+  CefFrameHostImpl(CefBrowserHostImpl* browser,
                int64 frame_id,
                bool is_main_frame);
-  virtual ~CefFrameImpl();
+  virtual ~CefFrameHostImpl();
 
   // CefFrame methods
   virtual bool IsValid() OVERRIDE;
@@ -70,14 +70,14 @@ class CefFrameImpl : public CefFrame {
 
   // Volatile state information. All access must be protected by the state lock.
   base::Lock state_lock_;
-  CefBrowserImpl* browser_;
+  CefBrowserHostImpl* browser_;
   bool is_focused_;
   CefString url_;
   CefString name_;
   int64 parent_frame_id_;
 
-  IMPLEMENT_REFCOUNTING(CefFrameImpl);
-  DISALLOW_EVIL_CONSTRUCTORS(CefFrameImpl);
+  IMPLEMENT_REFCOUNTING(CefFrameHostImpl);
+  DISALLOW_EVIL_CONSTRUCTORS(CefFrameHostImpl);
 };
 
-#endif  // CEF_LIBCEF_BROWSER_FRAME_IMPL_H_
+#endif  // CEF_LIBCEF_BROWSER_FRAME_HOST_IMPL_H_

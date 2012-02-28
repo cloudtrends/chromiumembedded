@@ -6,9 +6,9 @@
 
 #include <string>
 
-#include "libcef/browser/browser_impl.h"
-#include "libcef/browser/request_impl.h"
+#include "libcef/browser/browser_host_impl.h"
 #include "libcef/browser/thread_util.h"
+#include "libcef/common/request_impl.h"
 
 namespace {
 
@@ -86,8 +86,8 @@ int CefNetworkDelegate::OnBeforeURLRequest(
     net::URLRequest* request,
     const net::CompletionCallback& callback,
     GURL* new_url) {
-  CefRefPtr<CefBrowserImpl> browser =
-      CefBrowserImpl::GetBrowserForRequest(request);
+  CefRefPtr<CefBrowserHostImpl> browser =
+      CefBrowserHostImpl::GetBrowserForRequest(request);
   if (browser.get()) {
     CefRefPtr<CefClient> client = browser->GetClient();
     if (client.get()) {
@@ -160,8 +160,8 @@ net::NetworkDelegate::AuthRequiredResponse CefNetworkDelegate::OnAuthRequired(
     const net::AuthChallengeInfo& auth_info,
     const AuthCallback& callback,
     net::AuthCredentials* credentials) {
-  CefRefPtr<CefBrowserImpl> browser =
-      CefBrowserImpl::GetBrowserForRequest(request);
+  CefRefPtr<CefBrowserHostImpl> browser =
+      CefBrowserHostImpl::GetBrowserForRequest(request);
   if (browser.get()) {
     CefRefPtr<CefClient> client = browser->GetClient();
     if (client.get()) {

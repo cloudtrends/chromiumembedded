@@ -3,27 +3,27 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "libcef/browser/browser_impl.h"
+#include "libcef/browser/browser_host_impl.h"
 
-bool CefBrowserImpl::PlatformViewText(const std::string& text) {
+bool CefBrowserHostImpl::PlatformViewText(const std::string& text) {
   NOTIMPLEMENTED();
   return false;
 }
 
-bool CefBrowserImpl::PlatformCreateWindow() {
+bool CefBrowserHostImpl::PlatformCreateWindow() {
   NOTIMPLEMENTED();
   return false;
 }
 
-void CefBrowserImpl::PlatformCloseWindow() {
+void CefBrowserHostImpl::PlatformCloseWindow() {
   NOTIMPLEMENTED();
 }
 
-void CefBrowserImpl::PlatformSizeTo(int width, int height) {
+void CefBrowserHostImpl::PlatformSizeTo(int width, int height) {
   NOTIMPLEMENTED();
 }
 
-CefWindowHandle CefBrowserImpl::PlatformGetWindowHandle() {
+CefWindowHandle CefBrowserHostImpl::PlatformGetWindowHandle() {
   NOTIMPLEMENTED();
   return NULL;
 }

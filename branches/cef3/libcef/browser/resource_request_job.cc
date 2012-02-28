@@ -8,9 +8,9 @@
 #include <map>
 
 #include "include/cef_callback.h"
-#include "libcef/browser/request_impl.h"
-#include "libcef/browser/response_impl.h"
 #include "libcef/browser/thread_util.h"
+#include "libcef/common/request_impl.h"
+#include "libcef/common/response_impl.h"
 
 #include "base/logging.h"
 #include "net/base/io_buffer.h"

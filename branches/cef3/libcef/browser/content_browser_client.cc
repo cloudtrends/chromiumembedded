@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 #include "libcef/browser/content_browser_client.h"
-#include "libcef/browser/browser_impl.h"
+#include "libcef/browser/browser_host_impl.h"
 #include "libcef/browser/browser_main.h"
 #include "libcef/browser/browser_message_filter.h"
 #include "libcef/browser/browser_settings.h"
@@ -328,7 +328,7 @@ bool CefContentBrowserClient::IsFastShutdownPossible() {
 
 void CefContentBrowserClient::OverrideWebkitPrefs(RenderViewHost* rvh,
                                                   WebPreferences* prefs) {
-  CefRefPtr<CefBrowserImpl> browser = CefBrowserImpl::GetBrowserForHost(rvh);
+  CefRefPtr<CefBrowserHostImpl> browser = CefBrowserHostImpl::GetBrowserForHost(rvh);
   DCHECK(browser.get());
 
   // Populate WebPreferences based on CefBrowserSettings.

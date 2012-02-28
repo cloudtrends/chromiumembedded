@@ -6,7 +6,7 @@
 #include <commctrl.h>
 #include <Objbase.h>
 
-#include "libcef/browser/browser_impl.h"
+#include "libcef/browser/browser_host_impl.h"
 #include "libcef/browser/browser_main.h"
 
 #include "base/string_piece.h"
@@ -28,7 +28,7 @@ void CefBrowserMainParts::PlatformInitialize() {
   DCHECK(SUCCEEDED(res));
 
   // Register the browser window class.
-  CefBrowserImpl::RegisterWindowClass();
+  CefBrowserHostImpl::RegisterWindowClass();
 }
 
 void CefBrowserMainParts::PlatformCleanup() {

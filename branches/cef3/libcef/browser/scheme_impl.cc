@@ -10,14 +10,14 @@
 #include "include/cef_browser.h"
 #include "include/cef_scheme.h"
 #include "libcef/browser/browser_context.h"
-#include "libcef/browser/browser_impl.h"
+#include "libcef/browser/browser_host_impl.h"
 #include "libcef/browser/context.h"
-#include "libcef/browser/request_impl.h"
 #include "libcef/browser/resource_request_job.h"
-#include "libcef/browser/response_impl.h"
 #include "libcef/browser/thread_util.h"
 #include "libcef/browser/url_request_context_getter.h"
 #include "libcef/common/cef_messages.h"
+#include "libcef/common/request_impl.h"
+#include "libcef/common/response_impl.h"
 
 #include "base/bind.h"
 #include "base/lazy_instance.h"
@@ -298,8 +298,8 @@ class CefUrlRequestManager {
     CefRefPtr<CefSchemeHandlerFactory> factory =
         GetHandlerFactory(request, scheme);
     if (factory) {
-      CefRefPtr<CefBrowserImpl> browser =
-          CefBrowserImpl::GetBrowserForRequest(request);
+      CefRefPtr<CefBrowserHostImpl> browser =
+          CefBrowserHostImpl::GetBrowserForRequest(request);
       if (browser.get()) {
         // Populate the request data.
         CefRefPtr<CefRequestImpl> requestPtr(new CefRequestImpl());

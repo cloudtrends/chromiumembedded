@@ -26,13 +26,13 @@ class ContentMainRunner;
 }
 
 class CefBrowserContext;
-class CefBrowserImpl;
+class CefBrowserHostImpl;
 class CefDevToolsDelegate;
 class CefMainDelegate;
 
 class CefContext : public CefBase {
  public:
-  typedef std::list<CefRefPtr<CefBrowserImpl> > BrowserList;
+  typedef std::list<CefRefPtr<CefBrowserHostImpl> > BrowserList;
 
   CefContext();
   ~CefContext();
@@ -52,10 +52,10 @@ class CefContext : public CefBase {
   // Returns true if the context is shutting down.
   bool shutting_down() { return shutting_down_; }
 
-  bool AddBrowser(CefRefPtr<CefBrowserImpl> browser);
-  bool RemoveBrowser(CefRefPtr<CefBrowserImpl> browser);
-  CefRefPtr<CefBrowserImpl> GetBrowserByID(int id);
-  CefRefPtr<CefBrowserImpl> GetBrowserByRoutingID(int render_process_id,
+  bool AddBrowser(CefRefPtr<CefBrowserHostImpl> browser);
+  bool RemoveBrowser(CefRefPtr<CefBrowserHostImpl> browser);
+  CefRefPtr<CefBrowserHostImpl> GetBrowserByID(int id);
+  CefRefPtr<CefBrowserHostImpl> GetBrowserByRoutingID(int render_process_id,
                                                   int render_view_id);
   BrowserList* GetBrowserList() { return &browserlist_; }
 

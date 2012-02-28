@@ -3,7 +3,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "libcef/browser/browser_impl.h"
+#include "libcef/browser/browser_host_impl.h"
 
 #include <dwmapi.h>
 #include <shellapi.h>
@@ -50,12 +50,12 @@ void WriteTextToFile(const std::string& data, const std::wstring& file_path) {
 }  // namespace
 
 // static
-void CefBrowserImpl::RegisterWindowClass() {
+void CefBrowserHostImpl::RegisterWindowClass() {
   // Register the window class
   WNDCLASSEX wcex = {
     /* cbSize = */ sizeof(WNDCLASSEX),
     /* style = */ CS_HREDRAW | CS_VREDRAW,
-    /* lpfnWndProc = */ CefBrowserImpl::WndProc,
+    /* lpfnWndProc = */ CefBrowserHostImpl::WndProc,
     /* cbClsExtra = */ 0,
     /* cbWndExtra = */ 0,
     /* hInstance = */ ::GetModuleHandle(NULL),
@@ -63,22 +63,22 @@ void CefBrowserImpl::RegisterWindowClass() {
     /* hCursor = */ LoadCursor(NULL, IDC_ARROW),
     /* hbrBackground = */ 0,
     /* lpszMenuName = */ NULL,
-    /* lpszClassName = */ CefBrowserImpl::GetWndClass(),
+    /* lpszClassName = */ CefBrowserHostImpl::GetWndClass(),
     /* hIconSm = */ NULL,
   };
   RegisterClassEx(&wcex);
 }
 
 // static
-LPCTSTR CefBrowserImpl::GetWndClass() {
+LPCTSTR CefBrowserHostImpl::GetWndClass() {
   return L"CefBrowserWindow";
 }
 
 // static
-LRESULT CALLBACK CefBrowserImpl::WndProc(HWND hwnd, UINT message,
+LRESULT CALLBACK CefBrowserHostImpl::WndProc(HWND hwnd, UINT message,
                                          WPARAM wParam, LPARAM lParam) {
-  CefBrowserImpl* browser =
-      static_cast<CefBrowserImpl*>(ui::GetWindowUserData(hwnd));
+  CefBrowserHostImpl* browser =
+      static_cast<CefBrowserHostImpl*>(ui::GetWindowUserData(hwnd));
 
   switch (message) {
   case WM_CLOSE:
@@ -149,7 +149,7 @@ LRESULT CALLBACK CefBrowserImpl::WndProc(HWND hwnd, UINT message,
   return DefWindowProc(hwnd, message, wParam, lParam);
 }
 
-bool CefBrowserImpl::PlatformCreateWindow() {
+bool CefBrowserHostImpl::PlatformCreateWindow() {
   std::wstring windowName(CefString(&window_info_.window_name));
 
   // Create the new browser window.
@@ -198,12 +198,12 @@ bool CefBrowserImpl::PlatformCreateWindow() {
   return true;
 }
 
-void CefBrowserImpl::PlatformCloseWindow() {
+void CefBrowserHostImpl::PlatformCloseWindow() {
   if (window_info_.window != NULL)
     PostMessage(window_info_.window, WM_CLOSE, 0, 0);
 }
 
-void CefBrowserImpl::PlatformSizeTo(int width, int height) {
+void CefBrowserHostImpl::PlatformSizeTo(int width, int height) {
   RECT rect = {0, 0, width, height};
   DWORD style = GetWindowLong(window_info_.window, GWL_STYLE);
   DWORD ex_style = GetWindowLong(window_info_.window, GWL_EXSTYLE);
@@ -218,11 +218,11 @@ void CefBrowserImpl::PlatformSizeTo(int width, int height) {
                rect.bottom, SWP_NOZORDER | SWP_NOMOVE | SWP_NOACTIVATE);
 }
 
-CefWindowHandle CefBrowserImpl::PlatformGetWindowHandle() {
+CefWindowHandle CefBrowserHostImpl::PlatformGetWindowHandle() {
   return window_info_.window;
 }
 
-bool CefBrowserImpl::PlatformViewText(const std::string& text) {
+bool CefBrowserHostImpl::PlatformViewText(const std::string& text) {
   CEF_REQUIRE_UIT();
 
   DWORD dwRetVal;

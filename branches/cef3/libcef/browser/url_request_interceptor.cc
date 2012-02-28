@@ -6,10 +6,10 @@
 
 #include <string>
 
-#include "libcef/browser/browser_impl.h"
-#include "libcef/browser/request_impl.h"
+#include "libcef/browser/browser_host_impl.h"
 #include "libcef/browser/resource_request_job.h"
 #include "libcef/browser/thread_util.h"
+#include "libcef/common/request_impl.h"
 
 #include "net/url_request/url_request_job_manager.h"
 #include "net/url_request/url_request_redirect_job.h"
@@ -27,8 +27,8 @@ CefRequestInterceptor::~CefRequestInterceptor() {
 
 net::URLRequestJob* CefRequestInterceptor::MaybeIntercept(
     net::URLRequest* request) {
-  CefRefPtr<CefBrowserImpl> browser =
-      CefBrowserImpl::GetBrowserForRequest(request);
+  CefRefPtr<CefBrowserHostImpl> browser =
+      CefBrowserHostImpl::GetBrowserForRequest(request);
   if (browser.get()) {
     CefRefPtr<CefClient> client = browser->GetClient();
     if (client.get()) {
@@ -54,8 +54,8 @@ net::URLRequestJob* CefRequestInterceptor::MaybeIntercept(
 
 net::URLRequestJob* CefRequestInterceptor::MaybeInterceptRedirect(
     net::URLRequest* request, const GURL& location) {
-  CefRefPtr<CefBrowserImpl> browser =
-      CefBrowserImpl::GetBrowserForRequest(request);
+  CefRefPtr<CefBrowserHostImpl> browser =
+      CefBrowserHostImpl::GetBrowserForRequest(request);
   if (browser.get()) {
     CefRefPtr<CefClient> client = browser->GetClient();
     if (client.get()) {

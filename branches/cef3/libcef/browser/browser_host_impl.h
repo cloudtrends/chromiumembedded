@@ -3,18 +3,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef CEF_LIBCEF_BROWSER_BROWSER_IMPL_H_
-#define CEF_LIBCEF_BROWSER_BROWSER_IMPL_H_
+#ifndef CEF_LIBCEF_BROWSER_BROWSER_HOST_IMPL_H_
+#define CEF_LIBCEF_BROWSER_BROWSER_HOST_IMPL_H_
 #pragma once
 
 #include <map>
+#include <queue>
 #include <string>
 #include <vector>
 
 #include "include/cef_browser.h"
 #include "include/cef_client.h"
 #include "include/cef_frame.h"
-#include "libcef/browser/frame_impl.h"
+#include "libcef/browser/frame_host_impl.h"
 
 #include "base/memory/scoped_ptr.h"
 #include "base/string16.h"
@@ -25,7 +26,6 @@
 #include "content/public/browser/web_contents_delegate.h"
 #include "content/public/browser/web_contents_observer.h"
 
-class CefFrameImpl;
 struct CefHostMsg_Request_Params;
 struct CefNavigateParams;
 class SiteInstance;
@@ -33,47 +33,48 @@ class SiteInstance;
 // Implementation of CefBrowser.
 //
 // WebContentsDelegate: Interface for handling TabContents delegations. There is
-// a one-to-one relationship between CefBrowserImpl and TabContents instances.
+// a one-to-one relationship between CefBrowserHostImpl and TabContents
+// instances.
 //
 // WebContentsObserver: Interface for observing TabContents notifications and
 // IPC messages. There is a one-to-one relationship between TabContents and
 // RenderViewHost instances. IPC messages received by the RenderViewHost will be
 // forwarded to this WebContentsObserver implementation via TabContents. IPC
-// messages sent using CefBrowserImpl::Send() will be forwarded to the
+// messages sent using CefBrowserHostImpl::Send() will be forwarded to the
 // RenderViewHost (after posting to the UI thread if necessary). Use
 // WebContentsObserver::routing_id() when sending IPC messages.
 //
 // NotificationObserver: Interface for observing post-processed notifications.
-class CefBrowserImpl : public CefBrowser,
-                       public content::WebContentsDelegate,
-                       public content::WebContentsObserver,
-                       public content::NotificationObserver {
+class CefBrowserHostImpl : public CefBrowser,
+                           public content::WebContentsDelegate,
+                           public content::WebContentsObserver,
+                           public content::NotificationObserver {
  public:
   // Used for handling the response to command messages.
   class CommandResponseHandler : public virtual CefBase {
    public:
      virtual void OnResponse(const std::string& response) =0;
   };
-   
-  virtual ~CefBrowserImpl() {}
 
-  // Create a new CefBrowserImpl instance.
-  static CefRefPtr<CefBrowserImpl> Create(const CefWindowInfo& window_info,
+  virtual ~CefBrowserHostImpl() {}
+
+  // Create a new CefBrowserHostImpl instance.
+  static CefRefPtr<CefBrowserHostImpl> Create(const CefWindowInfo& window_info,
                                           const CefBrowserSettings& settings,
                                           CefRefPtr<CefClient> client,
                                           TabContents* tab_contents,
                                           CefWindowHandle opener);
 
   // Returns the browser associated with the specified RenderViewHost.
-  static CefRefPtr<CefBrowserImpl> GetBrowserForHost(RenderViewHost* host);
+  static CefRefPtr<CefBrowserHostImpl> GetBrowserForHost(RenderViewHost* host);
   // Returns the browser associated with the specified WebContents.
-  static CefRefPtr<CefBrowserImpl> GetBrowserForContents(
+  static CefRefPtr<CefBrowserHostImpl> GetBrowserForContents(
       content::WebContents* contents);
   // Returns the browser associated with the specified URLRequest.
-  static CefRefPtr<CefBrowserImpl> GetBrowserForRequest(
+  static CefRefPtr<CefBrowserHostImpl> GetBrowserForRequest(
       net::URLRequest* request);
   // Returns the browser associated with the specified routing IDs.
-  static CefRefPtr<CefBrowserImpl> GetBrowserByRoutingID(
+  static CefRefPtr<CefBrowserHostImpl> GetBrowserByRoutingID(
       int render_process_id, int render_view_id);
 
   // CefBrowser methods.
@@ -162,7 +163,7 @@ class CefBrowserImpl : public CefBrowser,
 #endif
 
  private:
-  CefBrowserImpl(const CefWindowInfo& window_info,
+  CefBrowserHostImpl(const CefWindowInfo& window_info,
                  const CefBrowserSettings& settings,
                  CefRefPtr<CefClient> client,
                  TabContents* tab_contents,
@@ -233,7 +234,7 @@ class CefBrowserImpl : public CefBrowser,
                        const content::NotificationDetails& details) OVERRIDE;
 
   // Updates and returns an existing frame or creates a new frame. Pass
-  // CefFrameImpl::kUnspecifiedFrameId for |parent_frame_id| if unknown.
+  // CefFrameHostImpl::kUnspecifiedFrameId for |parent_frame_id| if unknown.
   CefRefPtr<CefFrame> GetOrCreateFrame(int64 frame_id,
                                        int64 parent_frame_id,
                                        bool is_main_frame,
@@ -322,18 +323,18 @@ class CefBrowserImpl : public CefBrowser,
   std::queue<IPC::Message*> queued_messages_;
   bool queue_messages_;
 
-  // Map of unique frame ids to CefFrameImpl references.
-  typedef std::map<int64, CefRefPtr<CefFrameImpl> > FrameMap;
+  // Map of unique frame ids to CefFrameHostImpl references.
+  typedef std::map<int64, CefRefPtr<CefFrameHostImpl> > FrameMap;
   FrameMap frames_;
   // The unique frame id currently identified as the main frame.
   int64 main_frame_id_;
   // The unique frame id currently identified as the focused frame.
   int64 focused_frame_id_;
   // Used when no other frame exists. Provides limited functionality.
-  CefRefPtr<CefFrameImpl> placeholder_frame_;
+  CefRefPtr<CefFrameHostImpl> placeholder_frame_;
 
   // Used for generating unique request ids.
-  long next_request_id_;
+  long next_request_id_;  // NOLINT(runtime/int)
 
   // Map of unique request ids to CommandResponseHandler references. It should
   // only be accessed on the UI thread.
@@ -344,8 +345,8 @@ class CefBrowserImpl : public CefBrowser,
   // Used for managing notification subscriptions.
   content::NotificationRegistrar registrar_;
 
-  IMPLEMENT_REFCOUNTING(CefBrowserImpl);
-  DISALLOW_EVIL_CONSTRUCTORS(CefBrowserImpl);
+  IMPLEMENT_REFCOUNTING(CefBrowserHostImpl);
+  DISALLOW_EVIL_CONSTRUCTORS(CefBrowserHostImpl);
 };
 
-#endif  // CEF_LIBCEF_BROWSER_BROWSER_IMPL_H_
+#endif  // CEF_LIBCEF_BROWSER_BROWSER_HOST_IMPL_H_

@@ -1,9 +1,9 @@
-// Copyright (c) 2008-2009 The Chromium Embedded Framework Authors. All rights
+// Copyright (c) 2012 The Chromium Embedded Framework Authors. All rights
 // reserved. Use of this source code is governed by a BSD-style license that
 // can be found in the LICENSE file.
 
-#ifndef CEF_LIBCEF_BROWSER_REQUEST_IMPL_H_
-#define CEF_LIBCEF_BROWSER_REQUEST_IMPL_H_
+#ifndef CEF_LIBCEF_COMMON_REQUEST_IMPL_H_
+#define CEF_LIBCEF_COMMON_REQUEST_IMPL_H_
 #pragma once
 
 #include "include/cef_request.h"
@@ -115,4 +115,4 @@ class CefPostDataElementImpl : public CefPostDataElement {
   IMPLEMENT_LOCKING(CefPostDataElementImpl);
 };
 
-#endif  // CEF_LIBCEF_BROWSER_REQUEST_IMPL_H_
+#endif  // CEF_LIBCEF_COMMON_REQUEST_IMPL_H_

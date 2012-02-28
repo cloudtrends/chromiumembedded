@@ -4,7 +4,7 @@
 
 #include "libcef/browser/context.h"
 #include "libcef/browser/browser_context.h"
-#include "libcef/browser/browser_impl.h"
+#include "libcef/browser/browser_host_impl.h"
 #include "libcef/browser/browser_main.h"
 #include "libcef/browser/browser_message_loop.h"
 #include "libcef/browser/content_browser_client.h"
@@ -264,7 +264,7 @@ bool CefContext::OnInitThread() {
   return (base::PlatformThread::CurrentId() == init_thread_id_);
 }
 
-bool CefContext::AddBrowser(CefRefPtr<CefBrowserImpl> browser) {
+bool CefContext::AddBrowser(CefRefPtr<CefBrowserHostImpl> browser) {
   bool found = false;
 
   AutoLock lock_scope(this);
@@ -286,7 +286,7 @@ bool CefContext::AddBrowser(CefRefPtr<CefBrowserImpl> browser) {
   return !found;
 }
 
-bool CefContext::RemoveBrowser(CefRefPtr<CefBrowserImpl> browser) {
+bool CefContext::RemoveBrowser(CefRefPtr<CefBrowserHostImpl> browser) {
   bool deleted = false;
 
   {
@@ -308,7 +308,7 @@ bool CefContext::RemoveBrowser(CefRefPtr<CefBrowserImpl> browser) {
   return deleted;
 }
 
-CefRefPtr<CefBrowserImpl> CefContext::GetBrowserByID(int id) {
+CefRefPtr<CefBrowserHostImpl> CefContext::GetBrowserByID(int id) {
   AutoLock lock_scope(this);
 
   BrowserList::const_iterator it = browserlist_.begin();
@@ -320,7 +320,7 @@ CefRefPtr<CefBrowserImpl> CefContext::GetBrowserByID(int id) {
   return NULL;
 }
 
-CefRefPtr<CefBrowserImpl> CefContext::GetBrowserByRoutingID(
+CefRefPtr<CefBrowserHostImpl> CefContext::GetBrowserByRoutingID(
     int render_process_id, int render_view_id) {
   AutoLock lock_scope(this);
 

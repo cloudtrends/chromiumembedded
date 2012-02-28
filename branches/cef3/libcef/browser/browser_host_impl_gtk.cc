@@ -3,7 +3,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "libcef/browser/browser_impl.h"
+#include "libcef/browser/browser_host_impl.h"
 
 #include <gtk/gtk.h>
 
@@ -13,14 +13,14 @@
 
 namespace {
 
-void window_destroyed(GtkWidget* widget, CefBrowserImpl* browser) {
+void window_destroyed(GtkWidget* widget, CefBrowserHostImpl* browser) {
   browser->DestroyBrowser();
   browser->Release();
 }
 
 }  // namespace
 
-bool CefBrowserImpl::PlatformViewText(const std::string& text) {
+bool CefBrowserHostImpl::PlatformViewText(const std::string& text) {
   CEF_REQUIRE_UIT();
 
   char buff[] = "/tmp/CEFSourceXXXXXX";
@@ -54,7 +54,7 @@ bool CefBrowserImpl::PlatformViewText(const std::string& text) {
   return true;
 }
 
-bool CefBrowserImpl::PlatformCreateWindow() {
+bool CefBrowserHostImpl::PlatformCreateWindow() {
   GtkWidget* window;
   GtkWidget* parentView = window_info_.parent_widget;
 
@@ -88,7 +88,7 @@ bool CefBrowserImpl::PlatformCreateWindow() {
   return true;
 }
 
-void CefBrowserImpl::PlatformCloseWindow() {
+void CefBrowserHostImpl::PlatformCloseWindow() {
   if (window_info_.widget != NULL) {
     GtkWidget* window =
         gtk_widget_get_toplevel(GTK_WIDGET(window_info_.widget));
@@ -96,7 +96,7 @@ void CefBrowserImpl::PlatformCloseWindow() {
   }
 }
 
-void CefBrowserImpl::PlatformSizeTo(int width, int height) {
+void CefBrowserHostImpl::PlatformSizeTo(int width, int height) {
   if (window_info_.widget != NULL) {
     GtkWidget* window =
         gtk_widget_get_toplevel(GTK_WIDGET(window_info_.widget));
@@ -104,6 +104,6 @@ void CefBrowserImpl::PlatformSizeTo(int width, int height) {
   }
 }
 
-CefWindowHandle CefBrowserImpl::PlatformGetWindowHandle() {
+CefWindowHandle CefBrowserHostImpl::PlatformGetWindowHandle() {
   return window_info_.widget;
 }

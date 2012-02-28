@@ -16,7 +16,7 @@
 #include "net/base/upload_data.h"
 #include "webkit/glue/window_open_disposition.h"
 
-// Parameters that tell CefBrowserImpl::Navigate() what to do.
+// Parameters that tell CefBrowserHostImpl::Navigate() what to do.
 struct CefNavigateParams {
   CefNavigateParams(const GURL& a_url,
                     content::PageTransition a_transition);
