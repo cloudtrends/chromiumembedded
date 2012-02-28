@@ -16,7 +16,6 @@ class DownloadManager;
 
 namespace content {
 class DownloadManagerDelegate;
-class HostZoomMap;
 class ResourceContext;
 class SpeechInputPreferences;
 }
@@ -38,7 +37,6 @@ class CefBrowserContext : public content::BrowserContext {
       int renderer_child_id) OVERRIDE;
   virtual net::URLRequestContextGetter* GetRequestContextForMedia() OVERRIDE;
   virtual content::ResourceContext* GetResourceContext() OVERRIDE;
-  virtual content::HostZoomMap* GetHostZoomMap() OVERRIDE;
   virtual content::GeolocationPermissionContext*
       GetGeolocationPermissionContext() OVERRIDE;
   virtual content::SpeechInputPreferences* GetSpeechInputPreferences() OVERRIDE;
@@ -52,7 +50,6 @@ class CefBrowserContext : public content::BrowserContext {
   scoped_refptr<CefDownloadManagerDelegate> download_manager_delegate_;
   scoped_refptr<content::DownloadManager> download_manager_;
   scoped_refptr<net::URLRequestContextGetter> url_request_getter_;
-  scoped_refptr<content::HostZoomMap> host_zoom_map_;
   scoped_refptr<content::GeolocationPermissionContext>
       geolocation_permission_context_;
   scoped_refptr<content::SpeechInputPreferences> speech_input_preferences_;

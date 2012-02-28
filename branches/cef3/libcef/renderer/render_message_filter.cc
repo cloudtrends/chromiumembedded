@@ -11,7 +11,6 @@
 #include "googleurl/src/url_util.h"
 #include "third_party/WebKit/Source/WebKit/chromium/public/WebSecurityPolicy.h"
 #include "third_party/WebKit/Source/WebKit/chromium/public/platform/WebString.h"
-#include "third_party/WebKit/Source/WebKit/chromium/public/platform/WebURL.h"
 
 CefRenderMessageFilter::CefRenderMessageFilter()
     : channel_(NULL),
@@ -32,10 +31,6 @@ bool CefRenderMessageFilter::OnMessageReceived(const IPC::Message& message) {
   bool handled = true;
   IPC_BEGIN_MESSAGE_MAP(CefRenderMessageFilter, message)
     IPC_MESSAGE_HANDLER(CefProcessMsg_RegisterScheme, OnRegisterScheme)
-    IPC_MESSAGE_HANDLER(CefProcessMsg_ModifyCrossOriginWhitelistEntry,
-                        OnModifyCrossOriginWhitelistEntry)
-    IPC_MESSAGE_HANDLER(CefProcessMsg_ClearCrossOriginWhitelist,
-                        OnClearCrossOriginWhitelist)
     IPC_MESSAGE_UNHANDLED(handled = false)
   IPC_END_MESSAGE_MAP()
   return handled;
@@ -58,26 +53,6 @@ void CefRenderMessageFilter::OnRegisterScheme(
                  scheme_name, is_local, is_display_isolated));
 }
 
-void CefRenderMessageFilter::OnModifyCrossOriginWhitelistEntry(
-    bool add,
-    const std::string& source_origin,
-    const std::string& target_protocol,
-    const std::string& target_domain,
-    bool allow_target_subdomains) {
-  render_loop_->PostTask(FROM_HERE,
-      base::Bind(
-        &CefRenderMessageFilter::ModifyCrossOriginWhitelistEntryOnRenderThread,
-          this, add, source_origin, target_protocol, target_domain,
-          allow_target_subdomains));
-}
-
-void CefRenderMessageFilter::OnClearCrossOriginWhitelist() {
-  render_loop_->PostTask(FROM_HERE,
-      base::Bind(
-          &CefRenderMessageFilter::ClearCrossOriginWhitelistOnRenderThread,
-          this));
-}
-
 void CefRenderMessageFilter::RegisterSchemeOnRenderThread(
     const std::string& scheme_name,
     bool is_local,
@@ -91,32 +66,4 @@ void CefRenderMessageFilter::RegisterSchemeOnRenderThread(
     WebKit::WebSecurityPolicy::registerURLSchemeAsDisplayIsolated(
         WebKit::WebString::fromUTF8(scheme_name));
   }
-}
-
-void CefRenderMessageFilter::ModifyCrossOriginWhitelistEntryOnRenderThread(
-    bool add,
-    const std::string& source_origin,
-    const std::string& target_protocol,
-    const std::string& target_domain,
-    bool allow_target_subdomains) {
-  DCHECK(render_loop_->BelongsToCurrentThread());
-  GURL gurl = GURL(source_origin);
-  if (add) {
-    WebKit::WebSecurityPolicy::addOriginAccessWhitelistEntry(
-        gurl,
-        WebKit::WebString::fromUTF8(target_protocol),
-        WebKit::WebString::fromUTF8(target_domain),
-        allow_target_subdomains);
-  } else {
-    WebKit::WebSecurityPolicy::removeOriginAccessWhitelistEntry(
-        gurl,
-        WebKit::WebString::fromUTF8(target_protocol),
-        WebKit::WebString::fromUTF8(target_domain),
-        allow_target_subdomains);
-  }
-}
-
-void CefRenderMessageFilter::ClearCrossOriginWhitelistOnRenderThread() {
-  DCHECK(render_loop_->BelongsToCurrentThread());
-  WebKit::WebSecurityPolicy::resetOriginAccessWhitelists();
 }

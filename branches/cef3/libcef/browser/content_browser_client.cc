@@ -82,6 +82,11 @@ bool CefContentBrowserClient::IsSuitableHost(
   return true;
 }
 
+bool CefContentBrowserClient::ShouldTryToUseExistingProcessHost(
+      content::BrowserContext* browser_context, const GURL& url) {
+  return false;
+}
+
 void CefContentBrowserClient::SiteInstanceGotProcess(
     content::SiteInstance* site_instance) {
 }
@@ -231,6 +236,11 @@ bool CefContentBrowserClient::AllowSocketAPI(const GURL& url) {
   return false;
 }
 
+void CefContentBrowserClient::RequestMediaAccessPermission(
+    const content::MediaStreamRequest* request,
+    const content::MediaResponseCallback& callback) {
+}
+
 void CefContentBrowserClient::RequestDesktopNotificationPermission(
     const GURL& source_origin,
     int callback_context,
@@ -279,6 +289,11 @@ void CefContentBrowserClient::ResourceDispatcherHostCreated() {
   rdh->set_delegate(resource_dispatcher_host_delegate_.get());
 }
 
+content::SpeechInputManagerDelegate*
+CefContentBrowserClient::GetSpeechInputManagerDelegate() {
+  return NULL;
+}
+
 ui::Clipboard* CefContentBrowserClient::GetClipboard() {
   return browser_main_parts_->GetClipboard();
 }
@@ -288,11 +303,6 @@ MHTMLGenerationManager* CefContentBrowserClient::GetMHTMLGenerationManager() {
 }
 
 net::NetLog* CefContentBrowserClient::GetNetLog() {
-  return NULL;
-}
-
-speech_input::SpeechInputManager*
-    CefContentBrowserClient::GetSpeechInputManager() {
   return NULL;
 }
 

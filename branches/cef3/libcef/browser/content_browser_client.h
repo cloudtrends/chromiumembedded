@@ -49,6 +49,8 @@ class CefContentBrowserClient : public content::ContentBrowserClient {
   virtual bool IsHandledURL(const GURL& url) OVERRIDE;
   virtual bool IsSuitableHost(content::RenderProcessHost* process_host,
                               const GURL& site_url) OVERRIDE;
+  virtual bool ShouldTryToUseExistingProcessHost(
+      content::BrowserContext* browser_context, const GURL& url) OVERRIDE;
   virtual void SiteInstanceGotProcess(
       content::SiteInstance* site_instance) OVERRIDE;
   virtual void SiteInstanceDeleting(
@@ -118,6 +120,9 @@ class CefContentBrowserClient : public content::ContentBrowserClient {
       net::X509Certificate* cert,
       int render_process_id,
       int render_view_id) OVERRIDE;
+  virtual void RequestMediaAccessPermission(
+      const content::MediaStreamRequest* request,
+      const content::MediaResponseCallback& callback) OVERRIDE;
   virtual void RequestDesktopNotificationPermission(
       const GURL& source_origin,
       int callback_context,
@@ -144,11 +149,12 @@ class CefContentBrowserClient : public content::ContentBrowserClient {
       int render_process_id) OVERRIDE;
   virtual std::string GetWorkerProcessTitle(
       const GURL& url, content::ResourceContext* context) OVERRIDE;
+  virtual content::SpeechInputManagerDelegate* GetSpeechInputManagerDelegate()
+      OVERRIDE;
   virtual void ResourceDispatcherHostCreated() OVERRIDE;
   virtual ui::Clipboard* GetClipboard() OVERRIDE;
   virtual MHTMLGenerationManager* GetMHTMLGenerationManager() OVERRIDE;
   virtual net::NetLog* GetNetLog() OVERRIDE;
-  virtual speech_input::SpeechInputManager* GetSpeechInputManager() OVERRIDE;
   virtual content::AccessTokenStore* CreateAccessTokenStore() OVERRIDE;
   virtual bool IsFastShutdownPossible() OVERRIDE;
   virtual void OverrideWebkitPrefs(RenderViewHost* rvh,

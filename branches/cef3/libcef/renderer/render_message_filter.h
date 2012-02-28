@@ -23,28 +23,15 @@ class CefRenderMessageFilter : public IPC::ChannelProxy::MessageFilter {
   virtual bool OnMessageReceived(const IPC::Message& message) OVERRIDE;
 
  private:
-  // Message handlers.
+  // Message handlers called on the IO thread.
   void OnRegisterScheme(const std::string& scheme_name,
                         bool is_standard,
                         bool is_local,
                         bool is_display_isolated);
-  void OnModifyCrossOriginWhitelistEntry(bool add,
-                                         const std::string& source_origin,
-                                         const std::string& target_protocol,
-                                         const std::string& target_domain,
-                                         bool allow_target_subdomains);
-  void OnClearCrossOriginWhitelist();
 
   void RegisterSchemeOnRenderThread(const std::string& scheme_name,
                                     bool is_local,
                                     bool is_display_isolated);
-  void ModifyCrossOriginWhitelistEntryOnRenderThread(
-      bool add,
-      const std::string& source_origin,
-      const std::string& target_protocol,
-      const std::string& target_domain,
-      bool allow_target_subdomains);
-  void ClearCrossOriginWhitelistOnRenderThread();
 
   IPC::Channel* channel_;
   scoped_refptr<base::MessageLoopProxy> render_loop_;

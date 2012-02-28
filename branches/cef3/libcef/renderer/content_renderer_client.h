@@ -9,7 +9,10 @@
 #include <set>
 
 #include "base/compiler_specific.h"
+#include "base/memory/scoped_ptr.h"
 #include "content/public/renderer/content_renderer_client.h"
+
+class CefRenderProcessObserver;
 
 class CefContentRendererClient : public content::ContentRendererClient {
  public:
@@ -46,8 +49,7 @@ class CefContentRendererClient : public content::ContentRendererClient {
   virtual bool AllowPopup(const GURL& creator) OVERRIDE;
   virtual bool ShouldFork(WebKit::WebFrame* frame,
                           const GURL& url,
-                          bool is_content_initiated,
-                          bool is_initial_navigation,
+                         bool is_initial_navigation,
                           bool* send_referrer) OVERRIDE;
   virtual bool WillSendRequest(WebKit::WebFrame* frame,
                                const GURL& url,
@@ -55,6 +57,7 @@ class CefContentRendererClient : public content::ContentRendererClient {
   virtual bool ShouldPumpEventsDuringCookieMessage() OVERRIDE;
   virtual void DidCreateScriptContext(WebKit::WebFrame* frame,
                                       v8::Handle<v8::Context> context,
+                                      int extension_group,
                                       int world_id) OVERRIDE;
   virtual void WillReleaseScriptContext(WebKit::WebFrame* frame,
                                         v8::Handle<v8::Context> context,
@@ -76,6 +79,9 @@ class CefContentRendererClient : public content::ContentRendererClient {
                                       const std::string& value) OVERRIDE;
   virtual void RegisterPPAPIInterfaceFactories(
       webkit::ppapi::PpapiInterfaceFactoryManager* factory_manager) OVERRIDE;
+
+ private:
+  scoped_ptr<CefRenderProcessObserver> observer_;
 };
 
 #endif  // CEF_LIBCEF_RENDERER_CONTENT_RENDERER_CLIENT_H_

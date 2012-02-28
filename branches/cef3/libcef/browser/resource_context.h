@@ -8,9 +8,14 @@
 
 #include "base/compiler_specific.h"
 #include "base/memory/ref_counted.h"
+#include "base/memory/scoped_ptr.h"
 #include "content/public/browser/resource_context.h"
 
-class DownloadIdFactory;
+namespace content{
+class MediaObserver;
+}
+
+class MockMediaObserver;
 
 class CefURLRequestContextGetter;
 
@@ -23,12 +28,10 @@ class CefResourceContext : public content::ResourceContext {
   // ResourceContext methods.
   virtual net::HostResolver* GetHostResolver() OVERRIDE;
   virtual net::URLRequestContext* GetRequestContext() OVERRIDE;
-  virtual content::HostZoomMap* GetHostZoomMap() OVERRIDE;
-  virtual MediaObserver* GetMediaObserver() OVERRIDE;
-  virtual media_stream::MediaStreamManager* GetMediaStreamManager() OVERRIDE;
-  virtual AudioManager* GetAudioManager() OVERRIDE;
+  virtual content::MediaObserver* GetMediaObserver() OVERRIDE;
 
   scoped_refptr<CefURLRequestContextGetter> getter_;
+  scoped_ptr<MockMediaObserver> media_observer_;
 
   DISALLOW_COPY_AND_ASSIGN(CefResourceContext);
 };

@@ -634,6 +634,8 @@
         'libcef/renderer/content_renderer_client.h',
         'libcef/renderer/render_message_filter.cc',
         'libcef/renderer/render_message_filter.h',
+        'libcef/renderer/render_process_observer.cc',
+        'libcef/renderer/render_process_observer.h',
         'libcef/renderer/render_view_observer.cc',
         'libcef/renderer/render_view_observer.h',
         'libcef/utility/content_utility_client.cc',

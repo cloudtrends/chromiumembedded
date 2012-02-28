@@ -5,9 +5,11 @@
 #include "libcef/renderer/content_renderer_client.h"
 #include "libcef/common/cef_messages.h"
 #include "libcef/renderer/render_message_filter.h"
+#include "libcef/renderer/render_process_observer.h"
 #include "libcef/renderer/render_view_observer.h"
 
 #include "content/common/child_thread.h"
+#include "content/public/renderer/render_thread.h"
 #include "content/public/renderer/render_view.h"
 #include "ipc/ipc_sync_channel.h"
 #include "v8/include/v8.h"
@@ -19,8 +21,13 @@ CefContentRendererClient::~CefContentRendererClient() {
 }
 
 void CefContentRendererClient::RenderThreadStarted() {
-  ChildThread::current()->channel()->AddFilter(new CefRenderMessageFilter);
-  ChildThread::current()->Send(new CefProcessHostMsg_RenderThreadStarted);
+  observer_.reset(new CefRenderProcessObserver());
+
+  content::RenderThread* thread = content::RenderThread::Get();
+  thread->AddObserver(observer_.get());
+  thread->GetChannel()->AddFilter(new CefRenderMessageFilter);
+
+  thread->Send(new CefProcessHostMsg_RenderThreadStarted);
 }
 
 void CefContentRendererClient::RenderViewCreated(
@@ -85,7 +92,6 @@ bool CefContentRendererClient::AllowPopup(const GURL& creator) {
 
 bool CefContentRendererClient::ShouldFork(WebKit::WebFrame* frame,
                                           const GURL& url,
-                                          bool is_content_initiated,
                                           bool is_initial_navigation,
                                           bool* send_referrer) {
   return false;
@@ -102,7 +108,8 @@ bool CefContentRendererClient::ShouldPumpEventsDuringCookieMessage() {
 }
 
 void CefContentRendererClient::DidCreateScriptContext(
-    WebKit::WebFrame* frame, v8::Handle<v8::Context> context, int world_id) {
+    WebKit::WebFrame* frame, v8::Handle<v8::Context> context,
+    int extension_group, int world_id) {
 }
 
 void CefContentRendererClient::WillReleaseScriptContext(

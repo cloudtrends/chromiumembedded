@@ -15,8 +15,6 @@
 #include "base/path_service.h"
 #include "base/threading/thread.h"
 #include "content/browser/download/download_manager_impl.h"
-#include "content/browser/host_zoom_map_impl.h"
-#include "content/browser/in_process_webkit/webkit_context.h"
 #include "content/public/browser/browser_thread.h"
 #include "content/public/browser/geolocation_permission_context.h"
 #include "content/public/browser/speech_input_preferences.h"
@@ -160,12 +158,6 @@ content::ResourceContext* CefBrowserContext::GetResourceContext()  {
         static_cast<CefURLRequestContextGetter*>(GetRequestContext())));
   }
   return resource_context_.get();
-}
-
-content::HostZoomMap* CefBrowserContext::GetHostZoomMap()  {
-  if (!host_zoom_map_)
-    host_zoom_map_ = content::HostZoomMap::Create();
-  return host_zoom_map_.get();
 }
 
 content::GeolocationPermissionContext*
