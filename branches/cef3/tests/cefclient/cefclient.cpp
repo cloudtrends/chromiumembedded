@@ -345,11 +345,6 @@ void RunRequestTest(CefRefPtr<CefBrowser> browser) {
   browser->GetMainFrame()->LoadRequest(request);
 }
 
-void RunJavaScriptExecuteTest(CefRefPtr<CefBrowser> browser) {
-  browser->GetMainFrame()->ExecuteJavaScript(
-      "alert('JavaScript execute works!');", "about:blank", 0);
-}
-
 void RunPopupTest(CefRefPtr<CefBrowser> browser) {
   browser->GetMainFrame()->ExecuteJavaScript(
       "window.open('http://www.google.com');", "about:blank", 0);
@@ -381,8 +376,4 @@ void RunHTML5VideoTest(CefRefPtr<CefBrowser> browser) {
 
 void RunXMLHTTPRequestTest(CefRefPtr<CefBrowser> browser) {
   browser->GetMainFrame()->LoadURL("http://tests/xmlhttprequest");
-}
-
-void RunDragDropTest(CefRefPtr<CefBrowser> browser) {
-  browser->GetMainFrame()->LoadURL("http://html5demos.com/drag");
 }

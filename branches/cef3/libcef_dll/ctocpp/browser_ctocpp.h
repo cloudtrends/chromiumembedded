@@ -35,8 +35,7 @@ class CefBrowserCToCpp
   virtual ~CefBrowserCToCpp() {}
 
   // CefBrowser methods
-  virtual void ParentWindowWillClose() OVERRIDE;
-  virtual void CloseBrowser() OVERRIDE;
+  virtual CefRefPtr<CefBrowserHost> GetHost() OVERRIDE;
   virtual bool CanGoBack() OVERRIDE;
   virtual void GoBack() OVERRIDE;
   virtual bool CanGoForward() OVERRIDE;
@@ -45,12 +44,9 @@ class CefBrowserCToCpp
   virtual void Reload() OVERRIDE;
   virtual void ReloadIgnoreCache() OVERRIDE;
   virtual void StopLoad() OVERRIDE;
-  virtual void SetFocus(bool enable) OVERRIDE;
-  virtual CefWindowHandle GetWindowHandle() OVERRIDE;
-  virtual CefWindowHandle GetOpenerWindowHandle() OVERRIDE;
+  virtual int GetIdentifier() OVERRIDE;
   virtual bool IsPopup() OVERRIDE;
   virtual bool HasDocument() OVERRIDE;
-  virtual CefRefPtr<CefClient> GetClient() OVERRIDE;
   virtual CefRefPtr<CefFrame> GetMainFrame() OVERRIDE;
   virtual CefRefPtr<CefFrame> GetFocusedFrame() OVERRIDE;
   virtual CefRefPtr<CefFrame> GetFrame(int64 identifier) OVERRIDE;
@@ -58,14 +54,8 @@ class CefBrowserCToCpp
   virtual size_t GetFrameCount() OVERRIDE;
   virtual void GetFrameIdentifiers(std::vector<int64>& identifiers) OVERRIDE;
   virtual void GetFrameNames(std::vector<CefString>& names) OVERRIDE;
-  virtual void Find(int identifier, const CefString& searchText, bool forward,
-      bool matchCase, bool findNext) OVERRIDE;
-  virtual void StopFinding(bool clearSelection) OVERRIDE;
-  virtual double GetZoomLevel() OVERRIDE;
-  virtual void SetZoomLevel(double zoomLevel) OVERRIDE;
-  virtual void ClearHistory() OVERRIDE;
-  virtual void ShowDevTools() OVERRIDE;
-  virtual void CloseDevTools() OVERRIDE;
+  virtual bool SendProcessMessage(CefProcessId target_process,
+      CefRefPtr<CefProcessMessage> message) OVERRIDE;
 };
 
 #endif  // USING_CEF_SHARED

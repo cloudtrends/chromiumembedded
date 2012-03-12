@@ -14,6 +14,7 @@
 #include "libcef_dll/ctocpp/browser_ctocpp.h"
 #include "libcef_dll/ctocpp/frame_ctocpp.h"
 #include "libcef_dll/ctocpp/request_ctocpp.h"
+#include "libcef_dll/ctocpp/v8context_ctocpp.h"
 
 
 // VIRTUAL METHODS - Body may be edited by hand.
@@ -99,16 +100,6 @@ void CefFrameCToCpp::SelectAll() {
 
   // Execute
   struct_->select_all(struct_);
-}
-
-void CefFrameCToCpp::Print() {
-  if (CEF_MEMBER_MISSING(struct_, print))
-    return;
-
-  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
-
-  // Execute
-  struct_->print(struct_);
 }
 
 void CefFrameCToCpp::ViewSource() {
@@ -320,6 +311,19 @@ CefRefPtr<CefBrowser> CefFrameCToCpp::GetBrowser() {
 
   // Return type: refptr_same
   return CefBrowserCToCpp::Wrap(_retval);
+}
+
+CefRefPtr<CefV8Context> CefFrameCToCpp::GetV8Context() {
+  if (CEF_MEMBER_MISSING(struct_, get_v8context))
+    return NULL;
+
+  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
+
+  // Execute
+  cef_v8context_t* _retval = struct_->get_v8context(struct_);
+
+  // Return type: refptr_same
+  return CefV8ContextCToCpp::Wrap(_retval);
 }
 
 

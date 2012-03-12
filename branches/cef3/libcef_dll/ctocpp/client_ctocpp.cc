@@ -10,6 +10,8 @@
 // for more information.
 //
 
+#include "libcef_dll/cpptoc/browser_cpptoc.h"
+#include "libcef_dll/cpptoc/process_message_cpptoc.h"
 #include "libcef_dll/ctocpp/client_ctocpp.h"
 #include "libcef_dll/ctocpp/display_handler_ctocpp.h"
 #include "libcef_dll/ctocpp/life_span_handler_ctocpp.h"
@@ -69,6 +71,32 @@ CefRefPtr<CefDisplayHandler> CefClientCToCpp::GetDisplayHandler() {
 
   // Return type: refptr_same
   return CefDisplayHandlerCToCpp::Wrap(_retval);
+}
+
+bool CefClientCToCpp::OnProcessMessageRecieved(CefRefPtr<CefBrowser> browser,
+    CefProcessId source_process, CefRefPtr<CefProcessMessage> message) {
+  if (CEF_MEMBER_MISSING(struct_, on_process_message_recieved))
+    return false;
+
+  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
+
+  // Verify param: browser; type: refptr_diff
+  DCHECK(browser.get());
+  if (!browser.get())
+    return false;
+  // Verify param: message; type: refptr_diff
+  DCHECK(message.get());
+  if (!message.get())
+    return false;
+
+  // Execute
+  int _retval = struct_->on_process_message_recieved(struct_,
+      CefBrowserCppToC::Wrap(browser),
+      source_process,
+      CefProcessMessageCppToC::Wrap(message));
+
+  // Return type: bool
+  return _retval?true:false;
 }
 
 

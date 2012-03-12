@@ -34,6 +34,7 @@ class CefAppCToCpp
   // CefApp methods
   virtual void OnBeforeCommandLineProcessing(const CefString& process_type,
       CefRefPtr<CefCommandLine> command_line) OVERRIDE;
+  virtual CefRefPtr<CefRenderProcessHandler> GetRenderProcessHandler() OVERRIDE;
   virtual CefRefPtr<CefResourceBundleHandler> GetResourceBundleHandler(
       ) OVERRIDE;
   virtual CefRefPtr<CefProxyHandler> GetProxyHandler() OVERRIDE;

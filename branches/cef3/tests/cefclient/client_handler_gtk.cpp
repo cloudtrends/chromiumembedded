@@ -61,10 +61,10 @@ void ClientHandler::OnAddressChange(CefRefPtr<CefBrowser> browser,
                                     const CefString& url) {
   REQUIRE_UI_THREAD();
 
-  if (m_BrowserHwnd == browser->GetWindowHandle() && frame->IsMain()) {
+  if (m_BrowserId == browser->GetIdentifier() && frame->IsMain()) {
       // Set the edit window text
     std::string urlStr(url);
-      gtk_entry_set_text(GTK_ENTRY(m_EditHwnd), urlStr.c_str());
+    gtk_entry_set_text(GTK_ENTRY(m_EditHwnd), urlStr.c_str());
   }
 }
 

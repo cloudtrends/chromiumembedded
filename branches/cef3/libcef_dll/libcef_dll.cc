@@ -20,16 +20,26 @@
 #include "include/capi/cef_task_capi.h"
 #include "include/cef_url.h"
 #include "include/capi/cef_url_capi.h"
+#include "include/cef_v8.h"
+#include "include/capi/cef_v8_capi.h"
 #include "libcef_dll/cpptoc/auth_callback_cpptoc.h"
+#include "libcef_dll/cpptoc/binary_value_cpptoc.h"
 #include "libcef_dll/cpptoc/browser_cpptoc.h"
+#include "libcef_dll/cpptoc/browser_host_cpptoc.h"
 #include "libcef_dll/cpptoc/callback_cpptoc.h"
+#include "libcef_dll/cpptoc/dictionary_value_cpptoc.h"
 #include "libcef_dll/cpptoc/frame_cpptoc.h"
+#include "libcef_dll/cpptoc/list_value_cpptoc.h"
 #include "libcef_dll/cpptoc/post_data_cpptoc.h"
 #include "libcef_dll/cpptoc/post_data_element_cpptoc.h"
+#include "libcef_dll/cpptoc/process_message_cpptoc.h"
 #include "libcef_dll/cpptoc/request_cpptoc.h"
 #include "libcef_dll/cpptoc/response_cpptoc.h"
 #include "libcef_dll/cpptoc/stream_reader_cpptoc.h"
 #include "libcef_dll/cpptoc/stream_writer_cpptoc.h"
+#include "libcef_dll/cpptoc/v8context_cpptoc.h"
+#include "libcef_dll/cpptoc/v8exception_cpptoc.h"
+#include "libcef_dll/cpptoc/v8value_cpptoc.h"
 #include "libcef_dll/cpptoc/xml_reader_cpptoc.h"
 #include "libcef_dll/cpptoc/zip_reader_cpptoc.h"
 #include "libcef_dll/ctocpp/app_ctocpp.h"
@@ -38,12 +48,15 @@
 #include "libcef_dll/ctocpp/load_handler_ctocpp.h"
 #include "libcef_dll/ctocpp/proxy_handler_ctocpp.h"
 #include "libcef_dll/ctocpp/read_handler_ctocpp.h"
+#include "libcef_dll/ctocpp/render_process_handler_ctocpp.h"
 #include "libcef_dll/ctocpp/request_handler_ctocpp.h"
 #include "libcef_dll/ctocpp/resource_bundle_handler_ctocpp.h"
 #include "libcef_dll/ctocpp/resource_handler_ctocpp.h"
 #include "libcef_dll/ctocpp/scheme_handler_factory_ctocpp.h"
 #include "libcef_dll/ctocpp/string_visitor_ctocpp.h"
 #include "libcef_dll/ctocpp/task_ctocpp.h"
+#include "libcef_dll/ctocpp/v8accessor_ctocpp.h"
+#include "libcef_dll/ctocpp/v8handler_ctocpp.h"
 #include "libcef_dll/ctocpp/write_handler_ctocpp.h"
 
 
@@ -115,16 +128,22 @@ CEF_EXPORT void cef_shutdown() {
 #ifndef NDEBUG
   // Check that all wrapper objects have been destroyed
   DCHECK_EQ(CefAuthCallbackCppToC::DebugObjCt, 0);
+  DCHECK_EQ(CefBinaryValueCppToC::DebugObjCt, 0);
   DCHECK_EQ(CefBrowserCppToC::DebugObjCt, 0);
+  DCHECK_EQ(CefBrowserHostCppToC::DebugObjCt, 0);
   DCHECK_EQ(CefCallbackCppToC::DebugObjCt, 0);
+  DCHECK_EQ(CefDictionaryValueCppToC::DebugObjCt, 0);
   DCHECK_EQ(CefDisplayHandlerCToCpp::DebugObjCt, 0);
   DCHECK_EQ(CefFrameCppToC::DebugObjCt, 0);
   DCHECK_EQ(CefLifeSpanHandlerCToCpp::DebugObjCt, 0);
+  DCHECK_EQ(CefListValueCppToC::DebugObjCt, 0);
   DCHECK_EQ(CefLoadHandlerCToCpp::DebugObjCt, 0);
   DCHECK_EQ(CefPostDataCppToC::DebugObjCt, 0);
   DCHECK_EQ(CefPostDataElementCppToC::DebugObjCt, 0);
+  DCHECK_EQ(CefProcessMessageCppToC::DebugObjCt, 0);
   DCHECK_EQ(CefProxyHandlerCToCpp::DebugObjCt, 0);
   DCHECK_EQ(CefReadHandlerCToCpp::DebugObjCt, 0);
+  DCHECK_EQ(CefRenderProcessHandlerCToCpp::DebugObjCt, 0);
   DCHECK_EQ(CefRequestCppToC::DebugObjCt, 0);
   DCHECK_EQ(CefRequestHandlerCToCpp::DebugObjCt, 0);
   DCHECK_EQ(CefResourceBundleHandlerCToCpp::DebugObjCt, 0);
@@ -135,6 +154,11 @@ CEF_EXPORT void cef_shutdown() {
   DCHECK_EQ(CefStreamWriterCppToC::DebugObjCt, 0);
   DCHECK_EQ(CefStringVisitorCToCpp::DebugObjCt, 0);
   DCHECK_EQ(CefTaskCToCpp::DebugObjCt, 0);
+  DCHECK_EQ(CefV8AccessorCToCpp::DebugObjCt, 0);
+  DCHECK_EQ(CefV8ContextCppToC::DebugObjCt, 0);
+  DCHECK_EQ(CefV8ExceptionCppToC::DebugObjCt, 0);
+  DCHECK_EQ(CefV8HandlerCToCpp::DebugObjCt, 0);
+  DCHECK_EQ(CefV8ValueCppToC::DebugObjCt, 0);
   DCHECK_EQ(CefWriteHandlerCToCpp::DebugObjCt, 0);
   DCHECK_EQ(CefXmlReaderCppToC::DebugObjCt, 0);
   DCHECK_EQ(CefZipReaderCppToC::DebugObjCt, 0);
@@ -384,6 +408,30 @@ CEF_EXPORT int cef_create_url(const struct _cef_urlparts_t* parts,
   bool _retval = CefCreateURL(
       partsObj,
       urlStr);
+
+  // Return type: bool
+  return _retval;
+}
+
+CEF_EXPORT int cef_register_extension(const cef_string_t* extension_name,
+    const cef_string_t* javascript_code, struct _cef_v8handler_t* handler) {
+  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
+
+  // Verify param: extension_name; type: string_byref_const
+  DCHECK(extension_name);
+  if (!extension_name)
+    return 0;
+  // Verify param: javascript_code; type: string_byref_const
+  DCHECK(javascript_code);
+  if (!javascript_code)
+    return 0;
+  // Unverified params: handler
+
+  // Execute
+  bool _retval = CefRegisterExtension(
+      CefString(extension_name),
+      CefString(javascript_code),
+      CefV8HandlerCToCpp::Wrap(handler));
 
   // Return type: bool
   return _retval;

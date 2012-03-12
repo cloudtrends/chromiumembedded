@@ -13,6 +13,7 @@
 #include "libcef_dll/cpptoc/command_line_cpptoc.h"
 #include "libcef_dll/ctocpp/app_ctocpp.h"
 #include "libcef_dll/ctocpp/proxy_handler_ctocpp.h"
+#include "libcef_dll/ctocpp/render_process_handler_ctocpp.h"
 #include "libcef_dll/ctocpp/resource_bundle_handler_ctocpp.h"
 
 
@@ -35,6 +36,20 @@ void CefAppCToCpp::OnBeforeCommandLineProcessing(const CefString& process_type,
   struct_->on_before_command_line_processing(struct_,
       process_type.GetStruct(),
       CefCommandLineCppToC::Wrap(command_line));
+}
+
+CefRefPtr<CefRenderProcessHandler> CefAppCToCpp::GetRenderProcessHandler() {
+  if (CEF_MEMBER_MISSING(struct_, get_render_process_handler))
+    return NULL;
+
+  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
+
+  // Execute
+  cef_render_process_handler_t* _retval = struct_->get_render_process_handler(
+      struct_);
+
+  // Return type: refptr_same
+  return CefRenderProcessHandlerCToCpp::Wrap(_retval);
 }
 
 CefRefPtr<CefResourceBundleHandler> CefAppCToCpp::GetResourceBundleHandler() {

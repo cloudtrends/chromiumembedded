@@ -78,7 +78,8 @@ class HistoryNavTestHandler : public TestHandler {
       browser->GoForward();
       break;
     case NA_CLEAR:
-      browser->ClearHistory();
+      // TODO(cef): Enable once ClearHistory is implemented
+      // browser->GetHost()->ClearHistory();
       // Not really a navigation action so go to the next one.
       nav_++;
       RunNav(browser);

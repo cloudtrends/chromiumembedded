@@ -26,8 +26,61 @@ CEF_EXPORT cef_command_line_t* cef_command_line_create() {
   return CefCommandLineCppToC::Wrap(_retval);
 }
 
+CEF_EXPORT cef_command_line_t* cef_command_line_get_global() {
+  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
+
+  // Execute
+  CefRefPtr<CefCommandLine> _retval = CefCommandLine::GetGlobalCommandLine();
+
+  // Return type: refptr_same
+  return CefCommandLineCppToC::Wrap(_retval);
+}
+
 
 // MEMBER FUNCTIONS - Body may be edited by hand.
+
+int CEF_CALLBACK command_line_is_valid(struct _cef_command_line_t* self) {
+  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
+
+  DCHECK(self);
+  if (!self)
+    return 0;
+
+  // Execute
+  bool _retval = CefCommandLineCppToC::Get(self)->IsValid();
+
+  // Return type: bool
+  return _retval;
+}
+
+int CEF_CALLBACK command_line_is_read_only(struct _cef_command_line_t* self) {
+  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
+
+  DCHECK(self);
+  if (!self)
+    return 0;
+
+  // Execute
+  bool _retval = CefCommandLineCppToC::Get(self)->IsReadOnly();
+
+  // Return type: bool
+  return _retval;
+}
+
+struct _cef_command_line_t* CEF_CALLBACK command_line_copy(
+    struct _cef_command_line_t* self) {
+  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
+
+  DCHECK(self);
+  if (!self)
+    return NULL;
+
+  // Execute
+  CefRefPtr<CefCommandLine> _retval = CefCommandLineCppToC::Get(self)->Copy();
+
+  // Return type: refptr_same
+  return CefCommandLineCppToC::Wrap(_retval);
+}
 
 void CEF_CALLBACK command_line_init_from_argv(struct _cef_command_line_t* self,
     int argc, const char* const* argv) {
@@ -302,6 +355,9 @@ void CEF_CALLBACK command_line_append_argument(struct _cef_command_line_t* self,
 
 CefCommandLineCppToC::CefCommandLineCppToC(CefCommandLine* cls)
     : CefCppToC<CefCommandLineCppToC, CefCommandLine, cef_command_line_t>(cls) {
+  struct_.struct_.is_valid = command_line_is_valid;
+  struct_.struct_.is_read_only = command_line_is_read_only;
+  struct_.struct_.copy = command_line_copy;
   struct_.struct_.init_from_argv = command_line_init_from_argv;
   struct_.struct_.init_from_string = command_line_init_from_string;
   struct_.struct_.reset = command_line_reset;

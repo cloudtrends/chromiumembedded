@@ -12,6 +12,7 @@
 
 #include "libcef_dll/cpptoc/app_cpptoc.h"
 #include "libcef_dll/cpptoc/proxy_handler_cpptoc.h"
+#include "libcef_dll/cpptoc/render_process_handler_cpptoc.h"
 #include "libcef_dll/cpptoc/resource_bundle_handler_cpptoc.h"
 #include "libcef_dll/ctocpp/command_line_ctocpp.h"
 
@@ -36,6 +37,22 @@ void CEF_CALLBACK app_on_before_command_line_processing(struct _cef_app_t* self,
   CefAppCppToC::Get(self)->OnBeforeCommandLineProcessing(
       CefString(process_type),
       CefCommandLineCToCpp::Wrap(command_line));
+}
+
+struct _cef_render_process_handler_t* CEF_CALLBACK app_get_render_process_handler(
+    struct _cef_app_t* self) {
+  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
+
+  DCHECK(self);
+  if (!self)
+    return NULL;
+
+  // Execute
+  CefRefPtr<CefRenderProcessHandler> _retval = CefAppCppToC::Get(
+      self)->GetRenderProcessHandler();
+
+  // Return type: refptr_same
+  return CefRenderProcessHandlerCppToC::Wrap(_retval);
 }
 
 struct _cef_resource_bundle_handler_t* CEF_CALLBACK app_get_resource_bundle_handler(
@@ -77,6 +94,7 @@ CefAppCppToC::CefAppCppToC(CefApp* cls)
     : CefCppToC<CefAppCppToC, CefApp, cef_app_t>(cls) {
   struct_.struct_.on_before_command_line_processing =
       app_on_before_command_line_processing;
+  struct_.struct_.get_render_process_handler = app_get_render_process_handler;
   struct_.struct_.get_resource_bundle_handler = app_get_resource_bundle_handler;
   struct_.struct_.get_proxy_handler = app_get_proxy_handler;
 }

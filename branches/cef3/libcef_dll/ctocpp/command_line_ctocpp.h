@@ -34,6 +34,9 @@ class CefCommandLineCToCpp
   virtual ~CefCommandLineCToCpp() {}
 
   // CefCommandLine methods
+  virtual bool IsValid() OVERRIDE;
+  virtual bool IsReadOnly() OVERRIDE;
+  virtual CefRefPtr<CefCommandLine> Copy() OVERRIDE;
   virtual void InitFromArgv(int argc, const char* const* argv) OVERRIDE;
   virtual void InitFromString(const CefString& command_line) OVERRIDE;
   virtual void Reset() OVERRIDE;

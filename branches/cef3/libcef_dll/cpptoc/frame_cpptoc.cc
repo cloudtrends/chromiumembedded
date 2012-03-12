@@ -13,6 +13,7 @@
 #include "libcef_dll/cpptoc/browser_cpptoc.h"
 #include "libcef_dll/cpptoc/frame_cpptoc.h"
 #include "libcef_dll/cpptoc/request_cpptoc.h"
+#include "libcef_dll/cpptoc/v8context_cpptoc.h"
 #include "libcef_dll/ctocpp/string_visitor_ctocpp.h"
 
 
@@ -107,17 +108,6 @@ void CEF_CALLBACK frame_select_all(struct _cef_frame_t* self) {
 
   // Execute
   CefFrameCppToC::Get(self)->SelectAll();
-}
-
-void CEF_CALLBACK frame_print(struct _cef_frame_t* self) {
-  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
-
-  DCHECK(self);
-  if (!self)
-    return;
-
-  // Execute
-  CefFrameCppToC::Get(self)->Print();
 }
 
 void CEF_CALLBACK frame_view_source(struct _cef_frame_t* self) {
@@ -340,6 +330,21 @@ cef_browser_t* CEF_CALLBACK frame_get_browser(struct _cef_frame_t* self) {
   return CefBrowserCppToC::Wrap(_retval);
 }
 
+struct _cef_v8context_t* CEF_CALLBACK frame_get_v8context(
+    struct _cef_frame_t* self) {
+  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
+
+  DCHECK(self);
+  if (!self)
+    return NULL;
+
+  // Execute
+  CefRefPtr<CefV8Context> _retval = CefFrameCppToC::Get(self)->GetV8Context();
+
+  // Return type: refptr_same
+  return CefV8ContextCppToC::Wrap(_retval);
+}
+
 
 // CONSTRUCTOR - Do not edit by hand.
 
@@ -353,7 +358,6 @@ CefFrameCppToC::CefFrameCppToC(CefFrame* cls)
   struct_.struct_.paste = frame_paste;
   struct_.struct_.del = frame_del;
   struct_.struct_.select_all = frame_select_all;
-  struct_.struct_.print = frame_print;
   struct_.struct_.view_source = frame_view_source;
   struct_.struct_.get_source = frame_get_source;
   struct_.struct_.get_text = frame_get_text;
@@ -368,6 +372,7 @@ CefFrameCppToC::CefFrameCppToC(CefFrame* cls)
   struct_.struct_.get_parent = frame_get_parent;
   struct_.struct_.get_url = frame_get_url;
   struct_.struct_.get_browser = frame_get_browser;
+  struct_.struct_.get_v8context = frame_get_v8context;
 }
 
 #ifndef NDEBUG

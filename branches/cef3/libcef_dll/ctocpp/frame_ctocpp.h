@@ -22,6 +22,8 @@
 #include "include/capi/cef_frame_capi.h"
 #include "include/cef_browser.h"
 #include "include/capi/cef_browser_capi.h"
+#include "include/cef_v8.h"
+#include "include/capi/cef_v8_capi.h"
 #include "libcef_dll/ctocpp/ctocpp.h"
 
 // Wrap a C structure with a C++ class.
@@ -42,7 +44,6 @@ class CefFrameCToCpp
   virtual void Paste() OVERRIDE;
   virtual void Delete() OVERRIDE;
   virtual void SelectAll() OVERRIDE;
-  virtual void Print() OVERRIDE;
   virtual void ViewSource() OVERRIDE;
   virtual void GetSource(CefRefPtr<CefStringVisitor> visitor) OVERRIDE;
   virtual void GetText(CefRefPtr<CefStringVisitor> visitor) OVERRIDE;
@@ -59,6 +60,7 @@ class CefFrameCToCpp
   virtual CefRefPtr<CefFrame> GetParent() OVERRIDE;
   virtual CefString GetURL() OVERRIDE;
   virtual CefRefPtr<CefBrowser> GetBrowser() OVERRIDE;
+  virtual CefRefPtr<CefV8Context> GetV8Context() OVERRIDE;
 };
 
 #endif  // USING_CEF_SHARED

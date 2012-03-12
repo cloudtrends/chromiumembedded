@@ -77,6 +77,15 @@ typedef struct _cef_client_t {
   ///
   struct _cef_display_handler_t* (CEF_CALLBACK *get_display_handler)(
       struct _cef_client_t* self);
+
+  ///
+  // Called when a new message is received from a different process. Return true
+  // (1) if the message was handled or false (0) otherwise. Do not keep a
+  // reference to or attempt to access the message outside of this callback.
+  ///
+  int (CEF_CALLBACK *on_process_message_recieved)(struct _cef_client_t* self,
+      struct _cef_browser_t* browser, enum cef_process_id_t source_process,
+      struct _cef_process_message_t* message);
 } cef_client_t;
 
 

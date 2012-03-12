@@ -20,25 +20,52 @@
 #define IPC_MESSAGE_START ExtensionMsgStart
 
 
+// Common types.
+
+// Parameters structure for a request.
+IPC_STRUCT_BEGIN(Cef_Request_Params)
+  // Unique request id to match requests and responses.
+  IPC_STRUCT_MEMBER(int, request_id)
+
+  // Unique id of the target frame. -1 if unknown / invalid.
+  IPC_STRUCT_MEMBER(int64, frame_id)
+
+  // True if the request is user-initiated instead of internal.
+  IPC_STRUCT_MEMBER(bool, user_initiated)
+
+  // True if a response is expected.
+  IPC_STRUCT_MEMBER(bool, expect_response)
+
+  // Message name.
+  IPC_STRUCT_MEMBER(std::string, name)
+
+  // List of message arguments.
+  IPC_STRUCT_MEMBER(ListValue, arguments)
+IPC_STRUCT_END()
+
+// Parameters structure for a response.
+IPC_STRUCT_BEGIN(Cef_Response_Params)
+  // Unique request id to match requests and responses.
+  IPC_STRUCT_MEMBER(int, request_id)
+
+  // True if a response ack is expected.
+  IPC_STRUCT_MEMBER(bool, expect_response_ack)
+
+  // True on success.
+  IPC_STRUCT_MEMBER(bool, success)
+
+  // Response or error string depending on the value of |success|.
+  IPC_STRUCT_MEMBER(std::string, response)
+IPC_STRUCT_END()
+
+
+
 // Messages sent from the browser to the renderer.
 
 // Tell the renderer which browser window it's being attached to.
-IPC_MESSAGE_ROUTED1(CefMsg_UpdateBrowserWindowId,
-                    int /* id of browser window */)
-
-// Send the renderer a response to a CefHostMsg_Request or a
-// CefHostMsg_RequestForIOThread.
-IPC_MESSAGE_ROUTED4(CefMsg_Response,
-                    int /* request_id */,
-                    bool /* success */,
-                    std::string /* response */,
-                    std::string /* error */)
-
-// Tell the renderer to load a string.
-IPC_MESSAGE_ROUTED3(CefMsg_LoadString,
-                    int64 /* frame_id */,
-                    std::string /* string */,
-                    GURL /* url */)
+IPC_MESSAGE_ROUTED2(CefMsg_UpdateBrowserWindowId,
+                    int /* browser_id */,
+                    bool /* is_popup */)
 
 // Parameters for a resource request.
 IPC_STRUCT_BEGIN(CefMsg_LoadRequest_Params)
@@ -79,36 +106,19 @@ IPC_STRUCT_END()
 IPC_MESSAGE_ROUTED1(CefMsg_LoadRequest,
                     CefMsg_LoadRequest_Params)
 
-// Tell the renderer to execute a command.
-IPC_MESSAGE_ROUTED3(CefMsg_ExecuteCommand,
-                    int /* request_id */,
-                    int64 /* frame_id */,
-                    std::string /* command */)
+// Sent when the browser has a request for the renderer. The renderer may
+// respond with a CefHostMsg_Response.
+IPC_MESSAGE_ROUTED1(CefMsg_Request,
+                    Cef_Request_Params)
 
-// Parameters structure for CefMsg_ExecuteCode.
-IPC_STRUCT_BEGIN(CefMsg_ExecuteCode_Params)
-  // Unique request id to match requests and responses.
-  IPC_STRUCT_MEMBER(int, request_id)
+// Optional message sent in response to a CefHostMsg_Request.
+IPC_MESSAGE_ROUTED1(CefMsg_Response,
+                    Cef_Response_Params)
 
-  // Unique id of the target frame.
-  IPC_STRUCT_MEMBER(int64, frame_id)
-
-  // Whether the code is JavaScript or CSS.
-  IPC_STRUCT_MEMBER(bool, is_javascript)
-
-  // Code to execute.
-  IPC_STRUCT_MEMBER(std::string, code)
-
-  // Code script URL.
-  IPC_STRUCT_MEMBER(GURL, script_url)
-
-  // Code script start line.
-  IPC_STRUCT_MEMBER(int, script_start_line)
-IPC_STRUCT_END()
-
-// Tell the renderer to execute some JavaScript or CSS code.
-IPC_MESSAGE_ROUTED1(CefMsg_ExecuteCode,
-                    CefMsg_ExecuteCode_Params)
+// Optional Ack message sent to the browser to notify that a CefHostMsg_Response
+// has been processed.
+IPC_MESSAGE_ROUTED1(CefMsg_ResponseAck,
+                    int /* request_id */)
 
 // Sent to child processes to register a scheme.
 IPC_MESSAGE_CONTROL4(CefProcessMsg_RegisterScheme,
@@ -148,43 +158,14 @@ IPC_MESSAGE_ROUTED1(CefHostMsg_FrameDetached,
 IPC_MESSAGE_ROUTED1(CefHostMsg_FrameFocusChange,
                     int64 /* frame_id */)
 
-// Optional response message sent to the browser to return the results requested
-// by CefMsg_ExecuteCommand or CefMsg_ExecuteCode.
-IPC_MESSAGE_ROUTED2(CefHostMsg_ExecuteResponse,
-                    int /* request_id */,
-                    std::string /* response */)
-
-// Parameters structure for CefHostMsg_Request.
-IPC_STRUCT_BEGIN(CefHostMsg_Request_Params)
-  // Unique request id to match requests and responses.
-  IPC_STRUCT_MEMBER(int, request_id)
-
-  // Unique id of the source frame.
-  IPC_STRUCT_MEMBER(int64, frame_id)
-
-  // Message name.
-  IPC_STRUCT_MEMBER(std::string, name)
-
-  // List of message arguments.
-  IPC_STRUCT_MEMBER(ListValue, arguments)
-
-  // Web security origin of the frame the request was sent from.
-  IPC_STRUCT_MEMBER(string16, source_origin)
-
-  // True if request has a callback specified.
-  IPC_STRUCT_MEMBER(bool, has_callback)
-IPC_STRUCT_END()
-
-// Sent when the renderer has a request for the browser. The browser will always
-// respond with a CefMsg_Response.
+// Sent when the renderer has a request for the browser. The browser may respond
+// with a CefMsg_Response.
 IPC_MESSAGE_ROUTED1(CefHostMsg_Request,
-                    CefHostMsg_Request_Params)
+                    Cef_Request_Params)
 
-// Sent when the renderer has a request for the browser that must be executed on
-// the IO thread. The browser will always respond with a CefMsg_Response.
-IPC_MESSAGE_CONTROL2(CefHostMsg_RequestForIOThread,
-                     int /* routing_id */,
-                     CefHostMsg_Request_Params)
+// Optional message sent in response to a CefMsg_Request.
+IPC_MESSAGE_ROUTED1(CefHostMsg_Response,
+                    Cef_Response_Params)
 
 // Optional Ack message sent to the browser to notify that a CefMsg_Response
 // has been processed.

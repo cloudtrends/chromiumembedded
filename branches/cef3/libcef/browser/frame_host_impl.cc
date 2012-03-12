@@ -3,20 +3,22 @@
 // be found in the LICENSE file.
 
 #include "libcef/browser/frame_host_impl.h"
-#include "include/cef_stream.h"
 #include "include/cef_request.h"
+#include "include/cef_stream.h"
+#include "include/cef_v8.h"
+#include "libcef/common/cef_messages.h"
 #include "libcef/browser/browser_host_impl.h"
 
 namespace {
 
 // Implementation of CommandResponseHandler for calling a CefStringVisitor.
-class StringVisitHandler : public CefBrowserHostImpl::CommandResponseHandler {
+class StringVisitHandler : public CefResponseManager::Handler {
  public:
   explicit StringVisitHandler(CefRefPtr<CefStringVisitor> visitor)
       : visitor_(visitor) {
   }
-  virtual void OnResponse(const std::string& response) OVERRIDE {
-    visitor_->Visit(response);
+  virtual void OnResponse(const Cef_Response_Params& params) OVERRIDE {
+    visitor_->Visit(params.response);
   }
  private:
   CefRefPtr<CefStringVisitor> visitor_;
@@ -25,15 +27,17 @@ class StringVisitHandler : public CefBrowserHostImpl::CommandResponseHandler {
 };
 
 // Implementation of CommandResponseHandler for calling ViewText().
-class ViewTextHandler : public CefBrowserHostImpl::CommandResponseHandler {
+class ViewTextHandler : public CefResponseManager::Handler {
  public:
   explicit ViewTextHandler(CefRefPtr<CefFrameHostImpl> frame)
       : frame_(frame) {
   }
-  virtual void OnResponse(const std::string& response) OVERRIDE {
+  virtual void OnResponse(const Cef_Response_Params& params) OVERRIDE {
     CefRefPtr<CefBrowser> browser = frame_->GetBrowser();
-    if (browser.get())
-      static_cast<CefBrowserHostImpl*>(browser.get())->ViewText(response);
+    if (browser.get()) {
+      static_cast<CefBrowserHostImpl*>(browser.get())->ViewText(
+          params.response);
+    }
   }
  private:
   CefRefPtr<CefFrameHostImpl> frame_;
@@ -101,10 +105,6 @@ void CefFrameHostImpl::SelectAll() {
   base::AutoLock lock_scope(state_lock_);
   if (browser_ && frame_id_ != kInvalidFrameId)
     browser_->SendCommand(frame_id_, "SelectAll", NULL);
-}
-
-void CefFrameHostImpl::Print() {
-  NOTIMPLEMENTED();
 }
 
 void CefFrameHostImpl::ViewSource() {
@@ -218,6 +218,11 @@ void CefFrameHostImpl::SetName(const CefString& name) {
 void CefFrameHostImpl::SetParentId(int64 frame_id) {
   base::AutoLock lock_scope(state_lock_);
   parent_frame_id_ = frame_id;
+}
+
+CefRefPtr<CefV8Context> CefFrameHostImpl::GetV8Context() {
+  NOTREACHED() << "GetV8Context cannot be called from the browser process";
+  return NULL;
 }
 
 void CefFrameHostImpl::Detach() {

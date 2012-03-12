@@ -19,6 +19,9 @@ class CefContentClient : public content::ContentClient {
   explicit CefContentClient(CefRefPtr<CefApp> application);
   virtual ~CefContentClient();
 
+  // Returns the singleton CefContentClient instance.
+  static CefContentClient* Get();
+
   virtual void SetActiveURL(const GURL& url) OVERRIDE;
   virtual void SetGpuInfo(const content::GPUInfo& gpu_info) OVERRIDE;
   virtual void AddPepperPlugins(

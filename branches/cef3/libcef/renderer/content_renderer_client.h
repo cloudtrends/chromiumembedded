@@ -6,18 +6,42 @@
 #define CEF_LIBCEF_RENDERER_CONTENT_RENDERER_CLIENT_H_
 #pragma once
 
+#include <map>
 #include <set>
+#include <string>
+
+#include "libcef/renderer/browser_impl.h"
 
 #include "base/compiler_specific.h"
 #include "base/memory/scoped_ptr.h"
+#include "base/message_loop_proxy.h"
 #include "content/public/renderer/content_renderer_client.h"
 
 class CefRenderProcessObserver;
+
 
 class CefContentRendererClient : public content::ContentRendererClient {
  public:
   CefContentRendererClient();
   virtual ~CefContentRendererClient();
+
+  // Returns the singleton CefContentRendererClient instance.
+  static CefContentRendererClient* Get();
+
+  // Returns the browser associated with the specified RenderView.
+  CefRefPtr<CefBrowserImpl> GetBrowserForView(content::RenderView* view);
+
+  // Returns the browser associated with the specified main WebFrame.
+  CefRefPtr<CefBrowserImpl> GetBrowserForMainFrame(WebKit::WebFrame* frame);
+
+  // Called from CefBrowserImpl::OnDestruct().
+  void OnBrowserDestroyed(CefBrowserImpl* browser);
+
+  // Render thread message loop proxy.
+  base::MessageLoopProxy* render_loop() const { return render_loop_.get(); }
+
+ private:
+  // ContentRendererClient implementation.
   virtual void RenderThreadStarted() OVERRIDE;
   virtual void RenderViewCreated(content::RenderView* render_view) OVERRIDE;
   virtual void SetNumberOfViews(int number_of_views) OVERRIDE;
@@ -80,8 +104,12 @@ class CefContentRendererClient : public content::ContentRendererClient {
   virtual void RegisterPPAPIInterfaceFactories(
       webkit::ppapi::PpapiInterfaceFactoryManager* factory_manager) OVERRIDE;
 
- private:
+  scoped_refptr<base::MessageLoopProxy> render_loop_;
   scoped_ptr<CefRenderProcessObserver> observer_;
+
+  // Map of RenderView pointers to CefBrowserImpl references.
+  typedef std::map<content::RenderView*, CefRefPtr<CefBrowserImpl> > BrowserMap;
+  BrowserMap browsers_;
 };
 
 #endif  // CEF_LIBCEF_RENDERER_CONTENT_RENDERER_CLIENT_H_

@@ -7,8 +7,6 @@
 #define CEF_LIBCEF_RENDERER_RENDER_MESSAGE_FILTER_H_
 
 #include <string>
-#include "base/memory/ref_counted.h"
-#include "base/message_loop_proxy.h"
 #include "ipc/ipc_channel_proxy.h"
 
 // This class sends and receives control messages on the renderer process.
@@ -34,7 +32,6 @@ class CefRenderMessageFilter : public IPC::ChannelProxy::MessageFilter {
                                     bool is_display_isolated);
 
   IPC::Channel* channel_;
-  scoped_refptr<base::MessageLoopProxy> render_loop_;
 
   DISALLOW_COPY_AND_ASSIGN(CefRenderMessageFilter);
 };

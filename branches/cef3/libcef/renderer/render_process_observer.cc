@@ -5,6 +5,7 @@
 
 #include "libcef/renderer/render_process_observer.h"
 #include "libcef/common/cef_messages.h"
+#include "libcef/common/content_client.h"
 
 #include "base/bind.h"
 #include "base/path_service.h"
@@ -44,6 +45,15 @@ bool CefRenderProcessObserver::OnControlMessageReceived(
 void CefRenderProcessObserver::WebKitInitialized() {
   WebKit::WebRuntimeFeatures::enableMediaPlayer(
       media::IsMediaLibraryInitialized());
+
+  // Notify the render process handler.
+  CefRefPtr<CefApp> application = CefContentClient::Get()->application();
+  if (application.get()) {
+    CefRefPtr<CefRenderProcessHandler> handler =
+        application->GetRenderProcessHandler();
+    if (handler.get())
+      handler->OnWebKitInitialized();
+  }
 }
 
 void CefRenderProcessObserver::OnModifyCrossOriginWhitelistEntry(

@@ -4,6 +4,7 @@
 // found in the LICENSE file.
 
 #include "libcef/renderer/render_message_filter.h"
+#include "libcef/renderer/thread_util.h"
 #include "libcef/common/cef_messages.h"
 
 #include "base/bind.h"
@@ -13,8 +14,7 @@
 #include "third_party/WebKit/Source/WebKit/chromium/public/platform/WebString.h"
 
 CefRenderMessageFilter::CefRenderMessageFilter()
-    : channel_(NULL),
-      render_loop_(base::MessageLoopProxy::current()) {
+    : channel_(NULL) {
 }
 
 CefRenderMessageFilter::~CefRenderMessageFilter() {
@@ -47,8 +47,8 @@ void CefRenderMessageFilter::OnRegisterScheme(
     if (!url_util::IsStandard(scheme_name.c_str(), scheme_comp))
       url_util::AddStandardScheme(scheme_name.c_str());
   }
-  
-  render_loop_->PostTask(FROM_HERE,
+
+  CEF_POST_TASK_RT(
       base::Bind(&CefRenderMessageFilter::RegisterSchemeOnRenderThread, this,
                  scheme_name, is_local, is_display_isolated));
 }
@@ -57,7 +57,7 @@ void CefRenderMessageFilter::RegisterSchemeOnRenderThread(
     const std::string& scheme_name,
     bool is_local,
     bool is_display_isolated) {
-  DCHECK(render_loop_->BelongsToCurrentThread());
+  CEF_REQUIRE_RT();
   if (is_local) {
     WebKit::WebSecurityPolicy::registerURLSchemeAsLocal(
         WebKit::WebString::fromUTF8(scheme_name));

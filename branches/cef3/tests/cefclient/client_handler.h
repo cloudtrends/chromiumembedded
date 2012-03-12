@@ -94,7 +94,7 @@ class ClientHandler : public CefClient,
                       CefWindowHandle stopHwnd);
 
   CefRefPtr<CefBrowser> GetBrowser() { return m_Browser; }
-  CefWindowHandle GetBrowserHwnd() { return m_BrowserHwnd; }
+  int GetBrowserId() { return m_BrowserId; }
 
   std::string GetLogFile();
 
@@ -111,6 +111,9 @@ class ClientHandler : public CefClient,
   void SendNotification(NotificationType type);
   void CloseMainWindow();
 
+  void ShowDevTools();
+  void CloseDevTools();
+
  protected:
   void SetLoading(bool isLoading);
   void SetNavState(bool canGoBack, bool canGoForward);
@@ -121,8 +124,8 @@ class ClientHandler : public CefClient,
   // The main frame window handle
   CefWindowHandle m_MainHwnd;
 
-  // The child browser window handle
-  CefWindowHandle m_BrowserHwnd;
+  // The child browser id
+  int m_BrowserId;
 
   // The edit window handle
   CefWindowHandle m_EditHwnd;

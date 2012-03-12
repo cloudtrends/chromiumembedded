@@ -34,8 +34,64 @@ CefRefPtr<CefCommandLine> CefCommandLine::CreateCommandLine() {
   return CefCommandLineCToCpp::Wrap(_retval);
 }
 
+CefRefPtr<CefCommandLine> CefCommandLine::GetGlobalCommandLine() {
+  int build_revision = cef_build_revision();
+  if (build_revision != CEF_REVISION) {
+    // The libcef build revision does not match the CEF API revision.
+    DCHECK(false);
+    return NULL;
+  }
+
+  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
+
+  // Execute
+  cef_command_line_t* _retval = cef_command_line_get_global();
+
+  // Return type: refptr_same
+  return CefCommandLineCToCpp::Wrap(_retval);
+}
+
 
 // VIRTUAL METHODS - Body may be edited by hand.
+
+bool CefCommandLineCToCpp::IsValid() {
+  if (CEF_MEMBER_MISSING(struct_, is_valid))
+    return false;
+
+  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
+
+  // Execute
+  int _retval = struct_->is_valid(struct_);
+
+  // Return type: bool
+  return _retval?true:false;
+}
+
+bool CefCommandLineCToCpp::IsReadOnly() {
+  if (CEF_MEMBER_MISSING(struct_, is_read_only))
+    return false;
+
+  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
+
+  // Execute
+  int _retval = struct_->is_read_only(struct_);
+
+  // Return type: bool
+  return _retval?true:false;
+}
+
+CefRefPtr<CefCommandLine> CefCommandLineCToCpp::Copy() {
+  if (CEF_MEMBER_MISSING(struct_, copy))
+    return NULL;
+
+  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
+
+  // Execute
+  cef_command_line_t* _retval = struct_->copy(struct_);
+
+  // Return type: refptr_same
+  return CefCommandLineCToCpp::Wrap(_retval);
+}
 
 void CefCommandLineCToCpp::InitFromArgv(int argc, const char* const* argv) {
   if (CEF_MEMBER_MISSING(struct_, init_from_argv))

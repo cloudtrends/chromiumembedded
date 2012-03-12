@@ -28,8 +28,6 @@ HINSTANCE hInst;   // current instance
 TCHAR szTitle[MAX_LOADSTRING];  // The title bar text
 TCHAR szWindowClass[MAX_LOADSTRING];  // the main window class name
 char szWorkingDir[MAX_PATH];  // The current working directory
-UINT uFindMsg;  // Message identifier for find events.
-HWND hFindDlg = NULL;  // Handle for the find dialog.
 
 // Forward declarations of functions included in this code module:
 ATOM MyRegisterClass(HINSTANCE hInstance);
@@ -93,9 +91,6 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
 
   hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_CEFCLIENT));
 
-  // Register the find event message.
-  uFindMsg = RegisterWindowMessage(FINDMSGSTRING);
-
   int result = 0;
 
   if (!settings.multi_threaded_message_loop) {
@@ -107,10 +102,6 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
 
     // Run the application message loop.
     while (GetMessage(&msg, NULL, 0, 0)) {
-      // Allow processing of find dialog messages.
-      if (hFindDlg && IsDialogMessage(hFindDlg, &msg))
-        continue;
-
       if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg)) {
         TranslateMessage(&msg);
         DispatchMessage(&msg);
@@ -230,47 +221,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
 
     return (LRESULT)CallWindowProc(editWndOldProc, hWnd, message, wParam,
                                    lParam);
-  } else if (message == uFindMsg) {
-    // Find event.
-    LPFINDREPLACE lpfr = (LPFINDREPLACE)lParam;
-
-    if (lpfr->Flags & FR_DIALOGTERM) {
-      // The find dialog box has been dismissed so invalidate the handle and
-      // reset the search results.
-      hFindDlg = NULL;
-      if (g_handler.get()) {
-        g_handler->GetBrowser()->StopFinding(true);
-        szLastFindWhat[0] = 0;
-        findNext = false;
-      }
-      return 0;
-    }
-
-    if ((lpfr->Flags & FR_FINDNEXT) && g_handler.get())  {
-      // Search for the requested string.
-      bool matchCase = (lpfr->Flags & FR_MATCHCASE?true:false);
-      if (matchCase != lastMatchCase ||
-          (matchCase && wcsncmp(szFindWhat, szLastFindWhat,
-              sizeof(szLastFindWhat)/sizeof(WCHAR)) != 0) ||
-          (!matchCase && _wcsnicmp(szFindWhat, szLastFindWhat,
-              sizeof(szLastFindWhat)/sizeof(WCHAR)) != 0)) {
-        // The search string has changed, so reset the search results.
-        if (szLastFindWhat[0] != 0) {
-          g_handler->GetBrowser()->StopFinding(true);
-          findNext = false;
-        }
-        lastMatchCase = matchCase;
-        wcscpy_s(szLastFindWhat, sizeof(szLastFindWhat)/sizeof(WCHAR),
-            szFindWhat);
-      }
-
-      g_handler->GetBrowser()->Find(0, lpfr->lpstrFindWhat,
-          (lpfr->Flags & FR_DOWN)?true:false, matchCase, findNext);
-      if (!findNext)
-        findNext = true;
-    }
-
-    return 0;
   } else {
     // Callback for the main window
     switch (message) {
@@ -338,7 +288,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
       info.SetAsChild(hWnd, rect);
 
       // Creat the new child browser window
-      CefBrowser::CreateBrowser(info,
+      CefBrowserHost::CreateBrowser(info,
           static_cast<CefRefPtr<CefClient> >(g_handler),
           "http://www.google.com", settings);
 
@@ -386,26 +336,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
               MB_OK | MB_ICONINFORMATION);
         }
         return 0;
-      case ID_FIND:
-        if (!hFindDlg) {
-          // Create the find dialog.
-          ZeroMemory(&fr, sizeof(fr));
-          fr.lStructSize = sizeof(fr);
-          fr.hwndOwner = hWnd;
-          fr.lpstrFindWhat = szFindWhat;
-          fr.wFindWhatLen = sizeof(szFindWhat);
-          fr.Flags = FR_HIDEWHOLEWORD | FR_DOWN;
-
-          hFindDlg = FindText(&fr);
-        } else {
-          // Give focus to the existing find dialog.
-          ::SetFocus(hFindDlg);
-        }
-        return 0;
-      case ID_PRINT:
-        if (browser.get())
-          browser->GetMainFrame()->Print();
-        return 0;
       case IDC_NAV_BACK:   // Back button
         if (browser.get())
           browser->GoBack();
@@ -430,17 +360,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         if (browser.get())
           RunGetTextTest(browser);
         return 0;
-      case ID_TESTS_JAVASCRIPT_EXECUTE:  // Test execution of javascript
-        if (browser.get())
-          RunJavaScriptExecuteTest(browser);
-        return 0;
       case ID_TESTS_POPUP:  // Test a popup window
         if (browser.get())
           RunPopupTest(browser);
-        return 0;
-      case ID_TESTS_TRANSPARENT_POPUP:  // Test a transparent popup window
-        if (browser.get())
-          RunTransparentPopupTest(browser);
         return 0;
       case ID_TESTS_REQUEST:  // Test a request
         if (browser.get())
@@ -470,33 +392,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         if (browser.get())
           RunHTML5VideoTest(browser);
         return 0;
-      case ID_TESTS_DRAGDROP:  // Test drag & drop
-        if (browser.get())
-          RunDragDropTest(browser);
-        return 0;
       case ID_TESTS_XMLHTTPREQUEST:  // Test XMLHttpRequest
         if (browser.get())
           RunXMLHTTPRequestTest(browser);
-        return 0;
-      case ID_TESTS_ZOOM_IN:
-        if (browser.get())
-          browser->SetZoomLevel(browser->GetZoomLevel() + 0.5);
-        return 0;
-      case ID_TESTS_ZOOM_OUT:
-        if (browser.get())
-          browser->SetZoomLevel(browser->GetZoomLevel() - 0.5);
-        return 0;
-      case ID_TESTS_ZOOM_RESET:
-        if (browser.get())
-          browser->SetZoomLevel(0.0);
-        return 0;
-      case ID_TESTS_DEVTOOLS_SHOW:
-        if (browser.get())
-          browser->ShowDevTools();
-        return 0;
-      case ID_TESTS_DEVTOOLS_CLOSE:
-        if (browser.get())
-          browser->CloseDevTools();
         return 0;
       }
       break;
@@ -508,37 +406,48 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
       return 0;
 
     case WM_SETFOCUS:
-      if (g_handler.get() && g_handler->GetBrowserHwnd()) {
+      if (g_handler.get() && g_handler->GetBrowser()) {
         // Pass focus to the browser window
-        PostMessage(g_handler->GetBrowserHwnd(), WM_SETFOCUS, wParam, NULL);
+        CefWindowHandle hwnd =
+            g_handler->GetBrowser()->GetHost()->GetWindowHandle();
+        if (hwnd)
+          PostMessage(hwnd, WM_SETFOCUS, wParam, NULL);
       }
       return 0;
 
     case WM_SIZE:
-      if (g_handler.get() && g_handler->GetBrowserHwnd()) {
-        // Resize the browser window and address bar to match the new frame
-        // window size
-        RECT rect;
-        GetClientRect(hWnd, &rect);
-        rect.top += URLBAR_HEIGHT;
+      if (g_handler.get() && g_handler->GetBrowser()) {
+        CefWindowHandle hwnd =
+            g_handler->GetBrowser()->GetHost()->GetWindowHandle();
+        if (hwnd) {
+          // Resize the browser window and address bar to match the new frame
+          // window size
+          RECT rect;
+          GetClientRect(hWnd, &rect);
+          rect.top += URLBAR_HEIGHT;
 
-        int urloffset = rect.left + BUTTON_WIDTH * 4;
+          int urloffset = rect.left + BUTTON_WIDTH * 4;
 
-        HDWP hdwp = BeginDeferWindowPos(1);
-        hdwp = DeferWindowPos(hdwp, editWnd, NULL, urloffset,
-          0, rect.right - urloffset, URLBAR_HEIGHT, SWP_NOZORDER);
-        hdwp = DeferWindowPos(hdwp, g_handler->GetBrowserHwnd(), NULL,
-          rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top,
-          SWP_NOZORDER);
-        EndDeferWindowPos(hdwp);
+          HDWP hdwp = BeginDeferWindowPos(1);
+          hdwp = DeferWindowPos(hdwp, editWnd, NULL, urloffset,
+            0, rect.right - urloffset, URLBAR_HEIGHT, SWP_NOZORDER);
+          hdwp = DeferWindowPos(hdwp, hwnd, NULL,
+            rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top,
+            SWP_NOZORDER);
+          EndDeferWindowPos(hdwp);
+        }
       }
       break;
 
     case WM_ERASEBKGND:
-      if (g_handler.get() && g_handler->GetBrowserHwnd()) {
-        // Dont erase the background if the browser window has been loaded
-        // (this avoids flashing)
-        return 0;
+      if (g_handler.get() && g_handler->GetBrowser()) {
+        CefWindowHandle hwnd =
+            g_handler->GetBrowser()->GetHost()->GetWindowHandle();
+        if (hwnd) {
+          // Dont erase the background if the browser window has been loaded
+          // (this avoids flashing)
+          return 0;
+        }
       }
       break;
 
@@ -547,7 +456,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         CefRefPtr<CefBrowser> browser = g_handler->GetBrowser();
         if (browser.get()) {
           // Let the browser window know we are about to destroy it.
-          browser->ParentWindowWillClose();
+          browser->GetHost()->ParentWindowWillClose();
         }
       }
       break;
@@ -584,20 +493,4 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) {
 
 std::string AppGetWorkingDirectory() {
   return szWorkingDir;
-}
-
-void RunTransparentPopupTest(CefRefPtr<CefBrowser> browser) {
-  CefWindowInfo info;
-  CefBrowserSettings settings;
-
-  // Initialize window info to the defaults for a popup window
-  info.SetAsPopup(NULL, "TransparentPopup");
-  info.SetTransparentPainting(TRUE);
-  info.width = 500;
-  info.height = 500;
-
-  // Creat the popup browser window
-  CefBrowser::CreateBrowser(info,
-      static_cast<CefRefPtr<CefClient> >(g_handler),
-      "http://tests/transparency", settings);
 }

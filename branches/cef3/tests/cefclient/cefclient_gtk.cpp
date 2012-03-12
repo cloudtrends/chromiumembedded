@@ -30,7 +30,7 @@ void TerminationSignalHandler(int signatl) {
 
 // Callback for Debug > Get Source... menu item.
 gboolean GetSourceActivated(GtkWidget* widget) {
-  if (g_handler.get() && g_handler->GetBrowserHwnd())
+  if (g_handler.get() && g_handler->GetBrowserId())
     RunGetSourceTest(g_handler->GetBrowser());
 
   return FALSE;  // Don't stop this message.
@@ -38,23 +38,15 @@ gboolean GetSourceActivated(GtkWidget* widget) {
 
 // Callback for Debug > Get Source... menu item.
 gboolean GetTextActivated(GtkWidget* widget) {
-  if (g_handler.get() && g_handler->GetBrowserHwnd())
+  if (g_handler.get() && g_handler->GetBrowserId())
     RunGetTextTest(g_handler->GetBrowser());
-
-  return FALSE;  // Don't stop this message.
-}
-
-// Callback for Debug > JS Execute... menu item.
-gboolean JSExecuteActivated(GtkWidget* widget) {
-  if (g_handler.get() && g_handler->GetBrowserHwnd())
-    RunJavaScriptExecuteTest(g_handler->GetBrowser());
 
   return FALSE;  // Don't stop this message.
 }
 
 // Callback for Debug > Request... menu item.
 gboolean RequestActivated(GtkWidget* widget) {
-  if (g_handler.get() && g_handler->GetBrowserHwnd())
+  if (g_handler.get() && g_handler->GetBrowserId())
     RunRequestTest(g_handler->GetBrowser());
 
   return FALSE;  // Don't stop this message.
@@ -62,7 +54,7 @@ gboolean RequestActivated(GtkWidget* widget) {
 
 // Callback for Debug > Local Storage... menu item.
 gboolean LocalStorageActivated(GtkWidget* widget) {
-  if (g_handler.get() && g_handler->GetBrowserHwnd())
+  if (g_handler.get() && g_handler->GetBrowserId())
     RunLocalStorageTest(g_handler->GetBrowser());
 
   return FALSE;  // Don't stop this message.
@@ -70,7 +62,7 @@ gboolean LocalStorageActivated(GtkWidget* widget) {
 
 // Callback for Debug > XMLHttpRequest... menu item.
 gboolean XMLHttpRequestActivated(GtkWidget* widget) {
-  if (g_handler.get() && g_handler->GetBrowserHwnd())
+  if (g_handler.get() && g_handler->GetBrowserId())
     RunXMLHTTPRequestTest(g_handler->GetBrowser());
 
   return FALSE;  // Don't stop this message.
@@ -78,7 +70,7 @@ gboolean XMLHttpRequestActivated(GtkWidget* widget) {
 
 // Callback for Debug > Scheme Handler... menu item.
 gboolean SchemeHandlerActivated(GtkWidget* widget) {
-  if (g_handler.get() && g_handler->GetBrowserHwnd())
+  if (g_handler.get() && g_handler->GetBrowserId())
     RunSchemeTest(g_handler->GetBrowser());
 
   return FALSE;  // Don't stop this message.
@@ -86,7 +78,7 @@ gboolean SchemeHandlerActivated(GtkWidget* widget) {
 
 // Callback for Debug > Popup Window... menu item.
 gboolean PopupWindowActivated(GtkWidget* widget) {
-  if (g_handler.get() && g_handler->GetBrowserHwnd())
+  if (g_handler.get() && g_handler->GetBrowserId())
     RunPopupTest(g_handler->GetBrowser());
 
   return FALSE;  // Don't stop this message.
@@ -94,7 +86,7 @@ gboolean PopupWindowActivated(GtkWidget* widget) {
 
 // Callback for Debug > Accelerated 2D Canvas:... menu item.
 gboolean Accelerated2DCanvasActivated(GtkWidget* widget) {
-  if (g_handler.get() && g_handler->GetBrowserHwnd())
+  if (g_handler.get() && g_handler->GetBrowserId())
     RunAccelerated2DCanvasTest(g_handler->GetBrowser());
 
   return FALSE;  // Don't stop this message.
@@ -102,7 +94,7 @@ gboolean Accelerated2DCanvasActivated(GtkWidget* widget) {
 
 // Callback for Debug > Accelerated Layers:... menu item.
 gboolean AcceleratedLayersActivated(GtkWidget* widget) {
-  if (g_handler.get() && g_handler->GetBrowserHwnd())
+  if (g_handler.get() && g_handler->GetBrowserId())
     RunAcceleratedLayersTest(g_handler->GetBrowser());
 
   return FALSE;  // Don't stop this message.
@@ -110,7 +102,7 @@ gboolean AcceleratedLayersActivated(GtkWidget* widget) {
 
 // Callback for Debug > WebGL:... menu item.
 gboolean WebGLActivated(GtkWidget* widget) {
-  if (g_handler.get() && g_handler->GetBrowserHwnd())
+  if (g_handler.get() && g_handler->GetBrowserId())
     RunWebGLTest(g_handler->GetBrowser());
 
   return FALSE;  // Don't stop this message.
@@ -118,87 +110,39 @@ gboolean WebGLActivated(GtkWidget* widget) {
 
 // Callback for Debug > HTML5 Video... menu item.
 gboolean HTML5VideoActivated(GtkWidget* widget) {
-  if (g_handler.get() && g_handler->GetBrowserHwnd())
+  if (g_handler.get() && g_handler->GetBrowserId())
     RunHTML5VideoTest(g_handler->GetBrowser());
-
-  return FALSE;  // Don't stop this message.
-}
-
-// Callback for Debug > Zoom In... menu item.
-gboolean ZoomInActivated(GtkWidget* widget) {
-  if (g_handler.get() && g_handler->GetBrowserHwnd()) {
-    CefRefPtr<CefBrowser> browser = g_handler->GetBrowser();
-    browser->SetZoomLevel(browser->GetZoomLevel() + 0.5);
-  }
-
-  return FALSE;  // Don't stop this message.
-}
-
-// Callback for Debug > Zoom Out... menu item.
-gboolean ZoomOutActivated(GtkWidget* widget) {
-  if (g_handler.get() && g_handler->GetBrowserHwnd()) {
-    CefRefPtr<CefBrowser> browser = g_handler->GetBrowser();
-    browser->SetZoomLevel(browser->GetZoomLevel() - 0.5);
-  }
-
-  return FALSE;  // Don't stop this message.
-}
-
-// Callback for Debug > Zoom Reset... menu item.
-gboolean ZoomResetActivated(GtkWidget* widget) {
-  if (g_handler.get() && g_handler->GetBrowserHwnd()) {
-    CefRefPtr<CefBrowser> browser = g_handler->GetBrowser();
-    browser->SetZoomLevel(0.0);
-  }
-
-  return FALSE;  // Don't stop this message.
-}
-
-gboolean DragDropActivated(GtkWidget* widget) {
-  if (g_handler.get() && g_handler->GetBrowserHwnd()) {
-    CefRefPtr<CefBrowser> browser = g_handler->GetBrowser();
-    RunDragDropTest(browser);
-  }
-
-  return FALSE;  // Don't stop this message.
-}
-
-gboolean ShowDevtoolsActivated(GtkWidget* widget) {
-  if (g_handler.get() && g_handler->GetBrowserHwnd()) {
-    CefRefPtr<CefBrowser> browser = g_handler->GetBrowser();
-    browser->ShowDevTools();
-  }
 
   return FALSE;  // Don't stop this message.
 }
 
 // Callback for when you click the back button.
 void BackButtonClicked(GtkButton* button) {
-  if (g_handler.get() && g_handler->GetBrowserHwnd())
+  if (g_handler.get() && g_handler->GetBrowserId())
     g_handler->GetBrowser()->GoBack();
 }
 
 // Callback for when you click the forward button.
 void ForwardButtonClicked(GtkButton* button) {
-  if (g_handler.get() && g_handler->GetBrowserHwnd())
+  if (g_handler.get() && g_handler->GetBrowserId())
     g_handler->GetBrowser()->GoForward();
 }
 
 // Callback for when you click the stop button.
 void StopButtonClicked(GtkButton* button) {
-  if (g_handler.get() && g_handler->GetBrowserHwnd())
+  if (g_handler.get() && g_handler->GetBrowserId())
     g_handler->GetBrowser()->StopLoad();
 }
 
 // Callback for when you click the reload button.
 void ReloadButtonClicked(GtkButton* button) {
-  if (g_handler.get() && g_handler->GetBrowserHwnd())
+  if (g_handler.get() && g_handler->GetBrowserId())
     g_handler->GetBrowser()->Reload();
 }
 
 // Callback for when you press enter in the URL box.
 void URLEntryActivate(GtkEntry* entry) {
-  if (!g_handler.get() || !g_handler->GetBrowserHwnd())
+  if (!g_handler.get() || !g_handler->GetBrowserId())
     return;
 
   const gchar* url = gtk_entry_get_text(entry);
@@ -231,8 +175,6 @@ GtkWidget* CreateMenuBar() {
                G_CALLBACK(GetSourceActivated));
   AddMenuEntry(debug_menu, "Get Text",
                G_CALLBACK(GetTextActivated));
-  AddMenuEntry(debug_menu, "JS Execute",
-               G_CALLBACK(JSExecuteActivated));
   AddMenuEntry(debug_menu, "Request",
                G_CALLBACK(RequestActivated));
   AddMenuEntry(debug_menu, "Local Storage",
@@ -251,26 +193,15 @@ GtkWidget* CreateMenuBar() {
                G_CALLBACK(WebGLActivated));
   AddMenuEntry(debug_menu, "HTML5 Video",
                G_CALLBACK(HTML5VideoActivated));
-  AddMenuEntry(debug_menu, "Zoom In",
-               G_CALLBACK(ZoomInActivated));
-  AddMenuEntry(debug_menu, "Zoom Out",
-               G_CALLBACK(ZoomOutActivated));
-  AddMenuEntry(debug_menu, "Zoom Reset",
-               G_CALLBACK(ZoomResetActivated));
-  AddMenuEntry(debug_menu, "Test DragDrop",
-               G_CALLBACK(DragDropActivated));
-  AddMenuEntry(debug_menu, "Show DevTools",
-               G_CALLBACK(ShowDevtoolsActivated));
-
   return menu_bar;
 }
 
 // WebViewDelegate::TakeFocus in the test webview delegate.
 static gboolean HandleFocus(GtkWidget* widget,
                             GdkEventFocus* focus) {
-  if (g_handler.get() && g_handler->GetBrowserHwnd()) {
+  if (g_handler.get() && g_handler->GetBrowserId()) {
     // Give focus to the browser window.
-    g_handler->GetBrowser()->SetFocus(true);
+    g_handler->GetBrowser()->GetHost()->SetFocus(true);
   }
 
   return TRUE;
@@ -373,9 +304,10 @@ int main(int argc, char* argv[]) {
 
   window_info.SetAsChild(vbox);
 
-  CefBrowser::CreateBrowserSync(window_info,
-                                static_cast<CefRefPtr<CefClient> >(g_handler),
-                                "http://www.google.com", browserSettings);
+  CefBrowserHost::CreateBrowserSync(
+      window_info,
+      static_cast<CefRefPtr<CefClient> >(g_handler),
+      "http://www.google.com", browserSettings);
 
   gtk_container_add(GTK_CONTAINER(window), vbox);
   gtk_widget_show_all(GTK_WIDGET(window));

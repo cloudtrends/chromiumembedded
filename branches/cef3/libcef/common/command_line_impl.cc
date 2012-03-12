@@ -2,124 +2,144 @@
 // reserved. Use of this source code is governed by a BSD-style license that
 // can be found in the LICENSE file.
 
-#include "include/cef_command_line.h"
-#include "base/command_line.h"
+#include "libcef/common/command_line_impl.h"
+
 #include "base/file_path.h"
 #include "base/logging.h"
 
-namespace {
+CefCommandLineImpl::CefCommandLineImpl(CommandLine* value,
+                                       bool will_delete,
+                                       bool read_only)
+  : parent(value, NULL, will_delete ? kOwnerWillDelete : kOwnerNoDelete,
+           read_only, NULL) {
+}
 
-class CefCommandLineImpl : public CefCommandLine {
- public:
-  CefCommandLineImpl()
-    : command_line_(CommandLine::NO_PROGRAM) {
-  }
+bool CefCommandLineImpl::IsValid() {
+  return !detached();
+}
 
-  virtual void InitFromArgv(int argc, const char* const* argv) OVERRIDE {
+bool CefCommandLineImpl::IsReadOnly() {
+  return read_only();
+}
+
+CefRefPtr<CefCommandLine> CefCommandLineImpl::Copy() {
+  CEF_VALUE_VERIFY_RETURN(false, NULL);
+  return new CefCommandLineImpl(
+      new CommandLine(const_value().argv()), true, false);
+}
+
+void CefCommandLineImpl::InitFromArgv(int argc, const char* const* argv) {
 #if !defined(OS_WIN)
-    AutoLock lock_scope(this);
-    command_line_.InitFromArgv(argc, argv);
+  CEF_VALUE_VERIFY_RETURN_VOID(true);
+  mutable_value()->InitFromArgv(argc, argv);
 #else
-    NOTREACHED() << "method not supported on this platform";
+  NOTREACHED() << "method not supported on this platform";
 #endif
-  }
+}
 
-  virtual void InitFromString(const CefString& command_line) OVERRIDE {
+void CefCommandLineImpl::InitFromString(const CefString& command_line) {
 #if defined(OS_WIN)
-    AutoLock lock_scope(this);
-    command_line_.ParseFromString(command_line);
+  CEF_VALUE_VERIFY_RETURN_VOID(true);
+  mutable_value()->ParseFromString(command_line);
 #else
-    NOTREACHED() << "method not supported on this platform";
+  NOTREACHED() << "method not supported on this platform";
 #endif
-  }
+}
 
-  virtual void Reset() OVERRIDE {
-    AutoLock lock_scope(this);
-    CommandLine::StringVector argv;
-    argv.push_back(command_line_.GetProgram().value());
-    command_line_.InitFromArgv(argv);
+void CefCommandLineImpl::Reset() {
+  CEF_VALUE_VERIFY_RETURN_VOID(true);
+  CommandLine::StringVector argv;
+  argv.push_back(mutable_value()->GetProgram().value());
+  mutable_value()->InitFromArgv(argv);
 
-    const CommandLine::SwitchMap& map = command_line_.GetSwitches();
-    const_cast<CommandLine::SwitchMap*>(&map)->clear();
-  }
+  const CommandLine::SwitchMap& map = mutable_value()->GetSwitches();
+  const_cast<CommandLine::SwitchMap*>(&map)->clear();
+}
 
-  virtual CefString GetCommandLineString() OVERRIDE {
-    AutoLock lock_scope(this);
-    return command_line_.GetCommandLineString();
-  }
+CefString CefCommandLineImpl::GetCommandLineString() {
+  CEF_VALUE_VERIFY_RETURN(false, CefString());
+  return const_value().GetCommandLineString();
+}
 
-  virtual CefString GetProgram() OVERRIDE {
-    AutoLock lock_scope(this);
-    return command_line_.GetProgram().value();
-  }
+CefString CefCommandLineImpl::GetProgram() {
+  CEF_VALUE_VERIFY_RETURN(false, CefString());
+  return const_value().GetProgram().value();
+}
 
-  virtual void SetProgram(const CefString& program) OVERRIDE {
-    AutoLock lock_scope(this);
-    command_line_.SetProgram(FilePath(program));
-  }
+void CefCommandLineImpl::SetProgram(const CefString& program) {
+  CEF_VALUE_VERIFY_RETURN_VOID(true);
+  mutable_value()->SetProgram(FilePath(program));
+}
 
-  virtual bool HasSwitches() OVERRIDE {
-    AutoLock lock_scope(this);
-    return (command_line_.GetSwitches().size() > 0);
-  }
+bool CefCommandLineImpl::HasSwitches() {
+  CEF_VALUE_VERIFY_RETURN(false, false);
+  return (const_value().GetSwitches().size() > 0);
+}
 
-  virtual bool HasSwitch(const CefString& name) OVERRIDE {
-    AutoLock lock_scope(this);
-    return command_line_.HasSwitch(name);
-  }
+bool CefCommandLineImpl::HasSwitch(const CefString& name) {
+  CEF_VALUE_VERIFY_RETURN(false, false);
+  return const_value().HasSwitch(name);
+}
 
-  virtual CefString GetSwitchValue(const CefString& name) OVERRIDE {
-    AutoLock lock_scope(this);
-    return command_line_.GetSwitchValueNative(name);
-  }
+CefString CefCommandLineImpl::GetSwitchValue(const CefString& name) {
+  CEF_VALUE_VERIFY_RETURN(false, CefString());
+  return const_value().GetSwitchValueNative(name);
+}
 
-  virtual void GetSwitches(SwitchMap& switches) OVERRIDE {
-    AutoLock lock_scope(this);
-    const CommandLine::SwitchMap& map = command_line_.GetSwitches();
-    CommandLine::SwitchMap::const_iterator it = map.begin();
-    for (; it != map.end(); ++it)
-      switches.insert(std::make_pair(it->first, it->second));
-  }
+void CefCommandLineImpl::GetSwitches(SwitchMap& switches) {
+  CEF_VALUE_VERIFY_RETURN_VOID(false);
+  const CommandLine::SwitchMap& map = const_value().GetSwitches();
+  CommandLine::SwitchMap::const_iterator it = map.begin();
+  for (; it != map.end(); ++it)
+    switches.insert(std::make_pair(it->first, it->second));
+}
 
-  virtual void AppendSwitch(const CefString& name) OVERRIDE {
-    AutoLock lock_scope(this);
-    command_line_.AppendSwitch(name);
-  }
+void CefCommandLineImpl::AppendSwitch(const CefString& name) {
+  CEF_VALUE_VERIFY_RETURN_VOID(true);
+  mutable_value()->AppendSwitch(name);
+}
 
-  virtual void AppendSwitchWithValue(const CefString& name,
-                                     const CefString& value) OVERRIDE {
-    AutoLock lock_scope(this);
-    command_line_.AppendSwitchNative(name, value);
-  }
+void CefCommandLineImpl::AppendSwitchWithValue(const CefString& name,
+                                               const CefString& value) {
+  CEF_VALUE_VERIFY_RETURN_VOID(true);
+  mutable_value()->AppendSwitchNative(name, value);
+}
 
-  virtual bool HasArguments() OVERRIDE {
-    AutoLock lock_scope(this);
-    return (command_line_.GetArgs().size() > 0);
-  }
+bool CefCommandLineImpl::HasArguments() {
+  CEF_VALUE_VERIFY_RETURN(false, false);
+  return (const_value().GetArgs().size() > 0);
+}
 
-  virtual void GetArguments(ArgumentList& arguments) OVERRIDE {
-    AutoLock lock_scope(this);
-    const CommandLine::StringVector& vec = command_line_.GetArgs();
-    CommandLine::StringVector::const_iterator it = vec.begin();
-    for (; it != vec.end(); ++it)
-      arguments.push_back(*it);
-  }
+void CefCommandLineImpl::GetArguments(ArgumentList& arguments) {
+  CEF_VALUE_VERIFY_RETURN_VOID(false);
+  const CommandLine::StringVector& vec = const_value().GetArgs();
+  CommandLine::StringVector::const_iterator it = vec.begin();
+  for (; it != vec.end(); ++it)
+    arguments.push_back(*it);
+}
 
-  virtual void AppendArgument(const CefString& argument) OVERRIDE {
-    AutoLock lock_scope(this);
-    command_line_.AppendArgNative(argument);
-  }
+void CefCommandLineImpl::AppendArgument(const CefString& argument) {
+  CEF_VALUE_VERIFY_RETURN_VOID(true);
+  mutable_value()->AppendArgNative(argument);
+}
 
- private:
-  CommandLine command_line_;
 
-  IMPLEMENT_REFCOUNTING(CefCommandLineImpl);
-  IMPLEMENT_LOCKING(CefCommandLineImpl);
-};
-
-}  // namespace
+// CefCommandLine implementation.
 
 // static
 CefRefPtr<CefCommandLine> CefCommandLine::CreateCommandLine() {
-  return new CefCommandLineImpl();
+  return new CefCommandLineImpl(
+      new CommandLine(CommandLine::NO_PROGRAM), true, false);
+}
+
+// static
+CefRefPtr<CefCommandLine> CefCommandLine::GetGlobalCommandLine() {
+  // Uses a singleton reference object.
+  static CefRefPtr<CefCommandLineImpl> commandLinePtr;
+  if (!commandLinePtr.get()) {
+    CommandLine* command_line = CommandLine::ForCurrentProcess();
+    if (command_line)
+      commandLinePtr = new CefCommandLineImpl(command_line, false, true);
+  }
+  return commandLinePtr.get();
 }

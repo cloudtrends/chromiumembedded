@@ -15,6 +15,8 @@
 #include "libcef_dll/cpptoc/life_span_handler_cpptoc.h"
 #include "libcef_dll/cpptoc/load_handler_cpptoc.h"
 #include "libcef_dll/cpptoc/request_handler_cpptoc.h"
+#include "libcef_dll/ctocpp/browser_ctocpp.h"
+#include "libcef_dll/ctocpp/process_message_ctocpp.h"
 
 
 // MEMBER FUNCTIONS - Body may be edited by hand.
@@ -83,6 +85,33 @@ struct _cef_display_handler_t* CEF_CALLBACK client_get_display_handler(
   return CefDisplayHandlerCppToC::Wrap(_retval);
 }
 
+int CEF_CALLBACK client_on_process_message_recieved(struct _cef_client_t* self,
+    cef_browser_t* browser, enum cef_process_id_t source_process,
+    struct _cef_process_message_t* message) {
+  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
+
+  DCHECK(self);
+  if (!self)
+    return 0;
+  // Verify param: browser; type: refptr_diff
+  DCHECK(browser);
+  if (!browser)
+    return 0;
+  // Verify param: message; type: refptr_diff
+  DCHECK(message);
+  if (!message)
+    return 0;
+
+  // Execute
+  bool _retval = CefClientCppToC::Get(self)->OnProcessMessageRecieved(
+      CefBrowserCToCpp::Wrap(browser),
+      source_process,
+      CefProcessMessageCToCpp::Wrap(message));
+
+  // Return type: bool
+  return _retval;
+}
+
 
 // CONSTRUCTOR - Do not edit by hand.
 
@@ -92,6 +121,8 @@ CefClientCppToC::CefClientCppToC(CefClient* cls)
   struct_.struct_.get_load_handler = client_get_load_handler;
   struct_.struct_.get_request_handler = client_get_request_handler;
   struct_.struct_.get_display_handler = client_get_display_handler;
+  struct_.struct_.on_process_message_recieved =
+      client_on_process_message_recieved;
 }
 
 #ifndef NDEBUG

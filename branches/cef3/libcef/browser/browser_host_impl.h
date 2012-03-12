@@ -16,6 +16,7 @@
 #include "include/cef_client.h"
 #include "include/cef_frame.h"
 #include "libcef/browser/frame_host_impl.h"
+#include "libcef/common/response_manager.h"
 
 #include "base/memory/scoped_ptr.h"
 #include "base/string16.h"
@@ -26,7 +27,8 @@
 #include "content/public/browser/web_contents_delegate.h"
 #include "content/public/browser/web_contents_observer.h"
 
-struct CefHostMsg_Request_Params;
+struct Cef_Request_Params;
+struct Cef_Response_Params;
 struct CefNavigateParams;
 class SiteInstance;
 
@@ -45,7 +47,8 @@ class SiteInstance;
 // WebContentsObserver::routing_id() when sending IPC messages.
 //
 // NotificationObserver: Interface for observing post-processed notifications.
-class CefBrowserHostImpl : public CefBrowser,
+class CefBrowserHostImpl : public CefBrowserHost,
+                           public CefBrowser,
                            public content::WebContentsDelegate,
                            public content::WebContentsObserver,
                            public content::NotificationObserver {
@@ -59,11 +62,12 @@ class CefBrowserHostImpl : public CefBrowser,
   virtual ~CefBrowserHostImpl() {}
 
   // Create a new CefBrowserHostImpl instance.
-  static CefRefPtr<CefBrowserHostImpl> Create(const CefWindowInfo& window_info,
-                                          const CefBrowserSettings& settings,
-                                          CefRefPtr<CefClient> client,
-                                          TabContents* tab_contents,
-                                          CefWindowHandle opener);
+  static CefRefPtr<CefBrowserHostImpl> Create(
+      const CefWindowInfo& window_info,
+      const CefBrowserSettings& settings,
+      CefRefPtr<CefClient> client,
+      TabContents* tab_contents,
+      CefWindowHandle opener);
 
   // Returns the browser associated with the specified RenderViewHost.
   static CefRefPtr<CefBrowserHostImpl> GetBrowserForHost(RenderViewHost* host);
@@ -77,8 +81,17 @@ class CefBrowserHostImpl : public CefBrowser,
   static CefRefPtr<CefBrowserHostImpl> GetBrowserByRoutingID(
       int render_process_id, int render_view_id);
 
-  // CefBrowser methods.
+  // CefBrowserHost methods.
+  virtual CefRefPtr<CefBrowser> GetBrowser() OVERRIDE;
   virtual void CloseBrowser() OVERRIDE;
+  virtual void ParentWindowWillClose() OVERRIDE;
+  virtual void SetFocus(bool enable) OVERRIDE;
+  virtual CefWindowHandle GetWindowHandle() OVERRIDE;
+  virtual CefWindowHandle GetOpenerWindowHandle() OVERRIDE;
+  virtual CefRefPtr<CefClient> GetClient() OVERRIDE;
+
+  // CefBrowser methods.
+  virtual CefRefPtr<CefBrowserHost> GetHost() OVERRIDE;
   virtual bool CanGoBack() OVERRIDE;
   virtual void GoBack() OVERRIDE;
   virtual bool CanGoForward() OVERRIDE;
@@ -87,13 +100,9 @@ class CefBrowserHostImpl : public CefBrowser,
   virtual void Reload() OVERRIDE;
   virtual void ReloadIgnoreCache() OVERRIDE;
   virtual void StopLoad() OVERRIDE;
-  virtual void SetFocus(bool enable) OVERRIDE;
-  virtual void ParentWindowWillClose() OVERRIDE;
-  virtual CefWindowHandle GetWindowHandle() OVERRIDE;
-  virtual CefWindowHandle GetOpenerWindowHandle() OVERRIDE;
+  virtual int GetIdentifier() OVERRIDE;
   virtual bool IsPopup() OVERRIDE;
   virtual bool HasDocument() OVERRIDE;
-  virtual CefRefPtr<CefClient> GetClient() OVERRIDE;
   virtual CefRefPtr<CefFrame> GetMainFrame() OVERRIDE;
   virtual CefRefPtr<CefFrame> GetFocusedFrame() OVERRIDE;
   virtual CefRefPtr<CefFrame> GetFrame(int64 identifier) OVERRIDE;
@@ -101,14 +110,9 @@ class CefBrowserHostImpl : public CefBrowser,
   virtual size_t GetFrameCount() OVERRIDE;
   virtual void GetFrameIdentifiers(std::vector<int64>& identifiers) OVERRIDE;
   virtual void GetFrameNames(std::vector<CefString>& names) OVERRIDE;
-  virtual void Find(int identifier, const CefString& searchText,
-                    bool forward, bool matchCase, bool findNext) OVERRIDE;
-  virtual void StopFinding(bool clearSelection) OVERRIDE;
-  virtual double GetZoomLevel() OVERRIDE;
-  virtual void SetZoomLevel(double zoomLevel) OVERRIDE;
-  virtual void ClearHistory() OVERRIDE;
-  virtual void ShowDevTools() OVERRIDE;
-  virtual void CloseDevTools() OVERRIDE;
+  virtual bool SendProcessMessage(
+      CefProcessId target_process,
+      CefRefPtr<CefProcessMessage> message) OVERRIDE;
 
   // Set the unique identifier for this browser.
   void SetUniqueId(int unique_id);
@@ -136,17 +140,17 @@ class CefBrowserHostImpl : public CefBrowser,
   void LoadURL(int64 frame_id, const std::string& url);
 
   // Load the specified string.
-  void LoadString(int64 frame_id, const std::string& string,
-                  const std::string& url);
+  void LoadString(int64 frame_id, const CefString& string,
+                  const CefString& url);
 
   // Send a command to the renderer for execution.
-  void SendCommand(int64 frame_id, const std::string& command,
-                   CefRefPtr<CommandResponseHandler> responseHandler);
+  void SendCommand(int64 frame_id, const CefString& command,
+                   CefRefPtr<CefResponseManager::Handler> responseHandler);
 
   // Send code to the renderer for execution.
-  void SendCode(int64 frame_id, bool is_javascript, const std::string& code,
-                const std::string& script_url, int script_start_line,
-                CefRefPtr<CommandResponseHandler> responseHandler);
+  void SendCode(int64 frame_id, bool is_javascript, const CefString& code,
+                const CefString& script_url, int script_start_line,
+                CefRefPtr<CefResponseManager::Handler> responseHandler);
 
   // Open the specified text in the default text editor.
   bool ViewText(const std::string& text);
@@ -163,12 +167,6 @@ class CefBrowserHostImpl : public CefBrowser,
 #endif
 
  private:
-  CefBrowserHostImpl(const CefWindowInfo& window_info,
-                 const CefBrowserSettings& settings,
-                 CefRefPtr<CefClient> client,
-                 TabContents* tab_contents,
-                 CefWindowHandle opener);
-
   // content::WebContentsDelegate methods.
   virtual content::WebContents* OpenURLFromTab(
       content::WebContents* source,
@@ -222,16 +220,20 @@ class CefBrowserHostImpl : public CefBrowser,
 
   // content::WebContentsObserver::OnMessageReceived() message handlers.
   void OnFrameIdentified(int64 frame_id, int64 parent_frame_id, string16 name);
-  void OnExecuteResponse(int request_id, const std::string& response);
-  void OnRequest(const CefHostMsg_Request_Params& params);
-  void OnRequestForIOThread(int routing_id,
-                            const CefHostMsg_Request_Params& params);
-  void OnResponseAck(int routing_id);
+  void OnRequest(const Cef_Request_Params& params);
+  void OnResponse(const Cef_Response_Params& params);
+  void OnResponseAck(int request_id);
 
   // content::NotificationObserver methods.
   virtual void Observe(int type,
                        const content::NotificationSource& source,
                        const content::NotificationDetails& details) OVERRIDE;
+
+  CefBrowserHostImpl(const CefWindowInfo& window_info,
+                     const CefBrowserSettings& settings,
+                     CefRefPtr<CefClient> client,
+                     TabContents* tab_contents,
+                     CefWindowHandle opener);
 
   // Updates and returns an existing frame or creates a new frame. Pass
   // CefFrameHostImpl::kUnspecifiedFrameId for |parent_frame_id| if unknown.
@@ -246,15 +248,6 @@ class CefBrowserHostImpl : public CefBrowser,
   void DetachAllFrames();
   // Set the frame that currently has focus.
   void SetFocusedFrame(int64 frame_id);
-
-  // Returns the next unique request id. This method is thread safe.
-  int GetNextRequestId();
-
-  // Register a response handler for command messages and return the unique
-  // request id.
-  int RegisterCommandResponseHandler(CefRefPtr<CommandResponseHandler> handler);
-  // Retrieve the response handler for the specified request id.
-  CefRefPtr<CommandResponseHandler> PopCommandResponseHandler(int request_id);
 
 #if defined(OS_WIN)
   static LPCTSTR GetWndClass();
@@ -333,14 +326,8 @@ class CefBrowserHostImpl : public CefBrowser,
   // Used when no other frame exists. Provides limited functionality.
   CefRefPtr<CefFrameHostImpl> placeholder_frame_;
 
-  // Used for generating unique request ids.
-  long next_request_id_;  // NOLINT(runtime/int)
-
-  // Map of unique request ids to CommandResponseHandler references. It should
-  // only be accessed on the UI thread.
-  typedef std::map<int, CefRefPtr<CommandResponseHandler> >
-      CommandResponseHandlerMap;
-  CommandResponseHandlerMap command_response_handlers_;
+  // Manages response registrations.
+  CefResponseManager response_manager_;
 
   // Used for managing notification subscriptions.
   content::NotificationRegistrar registrar_;

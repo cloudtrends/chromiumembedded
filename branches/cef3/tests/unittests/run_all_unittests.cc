@@ -1,9 +1,10 @@
-// Copyright (c) 2011 The Chromium Embedded Framework Authors. All rights
+// Copyright (c) 2012 The Chromium Embedded Framework Authors. All rights
 // reserved. Use of this source code is governed by a BSD-style license that
 // can be found in the LICENSE file.
 
 #include "include/cef_app.h"
 #include "include/cef_task.h"
+#include "tests/unittests/test_app.h"
 #include "tests/unittests/test_suite.h"
 #include "base/bind.h"
 #include "base/command_line.h"
@@ -50,8 +51,10 @@ int main(int argc, char* argv[]) {
   CefMainArgs main_args(argc, argv);
 #endif
 
+  CefRefPtr<CefApp> app(new TestApp);
+
   // Execute the secondary process, if any.
-  int exit_code = CefExecuteProcess(main_args, NULL);
+  int exit_code = CefExecuteProcess(main_args, app);
   if (exit_code >= 0)
     return exit_code;
 
@@ -68,7 +71,7 @@ int main(int argc, char* argv[]) {
 #endif
 
   // Initialize CEF.
-  CefInitialize(main_args, settings, NULL);
+  CefInitialize(main_args, settings, app);
 
   // Create the test suite object.
   CefTestSuite test_suite(argc, argv);

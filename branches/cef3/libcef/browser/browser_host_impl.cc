@@ -15,6 +15,7 @@
 #include "libcef/common/cef_messages.h"
 #include "libcef/common/http_header_utils.h"
 #include "libcef/common/main_delegate.h"
+#include "libcef/common/process_message_impl.h"
 #include "libcef/common/request_impl.h"
 
 #include "base/bind.h"
@@ -49,18 +50,22 @@ class CreateBrowserHelper {
 };
 
 void CreateBrowserWithHelper(CreateBrowserHelper* helper) {
-  CefBrowser::CreateBrowserSync(helper->window_info_, helper->client_,
+  CefBrowserHost::CreateBrowserSync(helper->window_info_, helper->client_,
       helper->url_, helper->settings_);
   delete helper;
 }
 
 }  // namespace
 
+
+// CefBrowserHost static methods.
+// -----------------------------------------------------------------------------
+
 // static
-bool CefBrowser::CreateBrowser(const CefWindowInfo& windowInfo,
-                               CefRefPtr<CefClient> client,
-                               const CefString& url,
-                               const CefBrowserSettings& settings) {
+bool CefBrowserHost::CreateBrowser(const CefWindowInfo& windowInfo,
+                                   CefRefPtr<CefClient> client,
+                                   const CefString& url,
+                                   const CefBrowserSettings& settings) {
   // Verify that the context is in a valid state.
   if (!CONTEXT_STATE_VALID()) {
     NOTREACHED() << "context not valid";
@@ -82,7 +87,7 @@ bool CefBrowser::CreateBrowser(const CefWindowInfo& windowInfo,
 }
 
 // static
-CefRefPtr<CefBrowser> CefBrowser::CreateBrowserSync(
+CefRefPtr<CefBrowser> CefBrowserHost::CreateBrowserSync(
     const CefWindowInfo& windowInfo,
     CefRefPtr<CefClient> client,
     const CefString& url,
@@ -111,6 +116,10 @@ CefRefPtr<CefBrowser> CefBrowser::CreateBrowserSync(
     browser->LoadURL(CefFrameHostImpl::kMainFrameId, url);
   return browser.get();
 }
+
+
+// CefBrowserHostImpl static methods.
+// -----------------------------------------------------------------------------
 
 // static
 CefRefPtr<CefBrowserHostImpl> CefBrowserHostImpl::Create(
@@ -196,6 +205,14 @@ CefRefPtr<CefBrowserHostImpl> CefBrowserHostImpl::GetBrowserByRoutingID(
   }
 }
 
+
+// CefBrowserHost methods.
+// -----------------------------------------------------------------------------
+
+CefRefPtr<CefBrowser> CefBrowserHostImpl::GetBrowser() {
+  return this;
+}
+
 void CefBrowserHostImpl::CloseBrowser() {
   if (CEF_CURRENTLY_ON_UIT()) {
     PlatformCloseWindow();
@@ -203,6 +220,42 @@ void CefBrowserHostImpl::CloseBrowser() {
     CEF_POST_TASK(CEF_UIT,
         base::Bind(&CefBrowserHostImpl::PlatformCloseWindow, this));
   }
+}
+
+void CefBrowserHostImpl::ParentWindowWillClose() {
+}
+
+void CefBrowserHostImpl::SetFocus(bool enable) {
+  if (!enable)
+    return;
+
+  if (CEF_CURRENTLY_ON_UIT()) {
+    if (tab_contents_.get())
+      tab_contents_->Focus();
+  } else {
+    CEF_POST_TASK(CEF_UIT,
+        base::Bind(&CefBrowserHostImpl::SetFocus, this, enable));
+  }
+}
+
+CefWindowHandle CefBrowserHostImpl::GetWindowHandle() {
+  return PlatformGetWindowHandle();
+}
+
+CefWindowHandle CefBrowserHostImpl::GetOpenerWindowHandle() {
+  return opener_;
+}
+
+CefRefPtr<CefClient> CefBrowserHostImpl::GetClient() {
+  return client_;
+}
+
+
+// CefBrowser methods.
+// -----------------------------------------------------------------------------
+
+CefRefPtr<CefBrowserHost> CefBrowserHostImpl::GetHost() {
+  return this;
 }
 
 bool CefBrowserHostImpl::CanGoBack() {
@@ -270,28 +323,8 @@ void CefBrowserHostImpl::StopLoad() {
   }
 }
 
-void CefBrowserHostImpl::SetFocus(bool enable) {
-  if (!enable)
-    return;
-
-  if (CEF_CURRENTLY_ON_UIT()) {
-    if (tab_contents_.get())
-      tab_contents_->Focus();
-  } else {
-    CEF_POST_TASK(CEF_UIT,
-        base::Bind(&CefBrowserHostImpl::SetFocus, this, enable));
-  }
-}
-
-void CefBrowserHostImpl::ParentWindowWillClose() {
-}
-
-CefWindowHandle CefBrowserHostImpl::GetWindowHandle() {
-  return PlatformGetWindowHandle();
-}
-
-CefWindowHandle CefBrowserHostImpl::GetOpenerWindowHandle() {
-  return opener_;
+int CefBrowserHostImpl::GetIdentifier() {
+  return unique_id();
 }
 
 bool CefBrowserHostImpl::IsPopup() {
@@ -301,10 +334,6 @@ bool CefBrowserHostImpl::IsPopup() {
 bool CefBrowserHostImpl::HasDocument() {
   base::AutoLock lock_scope(state_lock_);
   return has_document_;
-}
-
-CefRefPtr<CefClient> CefBrowserHostImpl::GetClient() {
-  return client_;
 }
 
 CefRefPtr<CefFrame> CefBrowserHostImpl::GetMainFrame() {
@@ -377,40 +406,37 @@ void CefBrowserHostImpl::GetFrameNames(std::vector<CefString>& names) {
     names.push_back(it->second->GetName());
 }
 
-void CefBrowserHostImpl::Find(int identifier, const CefString& searchText,
-                              bool forward, bool matchCase, bool findNext) {
-  NOTIMPLEMENTED();
+bool CefBrowserHostImpl::SendProcessMessage(
+    CefProcessId target_process,
+    CefRefPtr<CefProcessMessage> message) {
+  DCHECK_EQ(PID_RENDERER, target_process);
+  DCHECK(message.get());
+
+  Cef_Request_Params params;
+  CefProcessMessageImpl* impl =
+      static_cast<CefProcessMessageImpl*>(message.get());
+  if (impl->CopyTo(params)) {
+    DCHECK(!params.name.empty());
+
+    params.frame_id = -1;
+    params.user_initiated = true;
+    params.request_id = -1;
+    params.expect_response = false;
+
+    return Send(new CefMsg_Request(routing_id(), params));
+  }
+
+  return false;
 }
 
-void CefBrowserHostImpl::StopFinding(bool clearSelection) {
-  NOTIMPLEMENTED();
-}
 
-double CefBrowserHostImpl::GetZoomLevel() {
-  NOTIMPLEMENTED();
-  return 0;
-}
-
-void CefBrowserHostImpl::SetZoomLevel(double zoomLevel) {
-  NOTIMPLEMENTED();
-}
-
-void CefBrowserHostImpl::ClearHistory() {
-  NOTIMPLEMENTED();
-}
-
-void CefBrowserHostImpl::ShowDevTools() {
-  NOTIMPLEMENTED();
-}
-
-void CefBrowserHostImpl::CloseDevTools() {
-  NOTIMPLEMENTED();
-}
+// CefBrowserHostImpl public methods.
+// -----------------------------------------------------------------------------
 
 void CefBrowserHostImpl::SetUniqueId(int unique_id) {
   CEF_REQUIRE_UIT();
   unique_id_ = unique_id;
-  Send(new CefMsg_UpdateBrowserWindowId(routing_id(), unique_id));
+  Send(new CefMsg_UpdateBrowserWindowId(routing_id(), unique_id, IsPopup()));
 }
 
 void CefBrowserHostImpl::DestroyBrowser() {
@@ -552,30 +578,50 @@ void CefBrowserHostImpl::LoadURL(int64 frame_id, const std::string& url) {
   }
 }
 
-void CefBrowserHostImpl::LoadString(int64 frame_id, const std::string& string,
-                                    const std::string& url) {
+void CefBrowserHostImpl::LoadString(int64 frame_id, const CefString& string,
+                                    const CefString& url) {
   // Only known frame ids or kMainFrameId are supported.
   DCHECK(frame_id >= CefFrameHostImpl::kMainFrameId);
 
-  Send(new CefMsg_LoadString(routing_id(), frame_id, string, GURL(url)));
+  Cef_Request_Params params;
+  params.name = "load-string";
+  params.frame_id = frame_id;
+  params.user_initiated = false;
+  params.request_id = -1;
+  params.expect_response = false;
+
+  params.arguments.Append(base::Value::CreateStringValue(string.ToString16()));
+  params.arguments.Append(base::Value::CreateStringValue(url.ToString16()));
+
+  Send(new CefMsg_Request(routing_id(), params));
 }
 
 void CefBrowserHostImpl::SendCommand(
     int64 frame_id,
-    const std::string& command,
-    CefRefPtr<CommandResponseHandler> responseHandler) {
+    const CefString& command,
+    CefRefPtr<CefResponseManager::Handler> responseHandler) {
   // Only known frame ids are supported.
   DCHECK(frame_id > CefFrameHostImpl::kMainFrameId);
 
-  // Execute on the UI thread because the CommandResponseHandler map is not
-  // thread safe.
+  // Execute on the UI thread because CefResponseManager is not thread safe.
   if (CEF_CURRENTLY_ON_UIT()) {
-    int request_id = -1;
-    if (responseHandler.get())
-      request_id = RegisterCommandResponseHandler(responseHandler);
+    Cef_Request_Params params;
+    params.name = "execute-command";
+    params.frame_id = frame_id;
+    params.user_initiated = false;
 
-    Send(new CefMsg_ExecuteCommand(routing_id(), request_id, frame_id,
-                                   command));
+    if (responseHandler.get()) {
+      params.request_id = response_manager_.RegisterHandler(responseHandler);
+      params.expect_response = true;
+    } else {
+      params.request_id = -1;
+      params.expect_response = false;
+    }
+
+    params.arguments.Append(
+        base::Value::CreateStringValue(command.ToString16()));
+
+    Send(new CefMsg_Request(routing_id(), params));
   } else {
     CEF_POST_TASK(CEF_UIT,
         base::Bind(&CefBrowserHostImpl::SendCommand, this, frame_id, command,
@@ -586,30 +632,35 @@ void CefBrowserHostImpl::SendCommand(
 void CefBrowserHostImpl::SendCode(
     int64 frame_id,
     bool is_javascript,
-    const std::string& code,
-    const std::string& script_url,
+    const CefString& code,
+    const CefString& script_url,
     int script_start_line,
-    CefRefPtr<CommandResponseHandler> responseHandler) {
+    CefRefPtr<CefResponseManager::Handler> responseHandler) {
   // Only known frame ids are supported.
   DCHECK(frame_id >= CefFrameHostImpl::kMainFrameId);
 
-  // Execute on the UI thread because the CommandResponseHandler map is not
-  // thread safe.
+  // Execute on the UI thread because CefResponseManager is not thread safe.
   if (CEF_CURRENTLY_ON_UIT()) {
-    CefMsg_ExecuteCode_Params params;
-
-    if (responseHandler.get())
-      params.request_id = RegisterCommandResponseHandler(responseHandler);
-    else
-      params.request_id = -1;
-
+    Cef_Request_Params params;
+    params.name = "execute-code";
     params.frame_id = frame_id;
-    params.is_javascript = is_javascript;
-    params.code = code;
-    params.script_url = GURL(script_url);
-    params.script_start_line = script_start_line;
+    params.user_initiated = false;
 
-    Send(new CefMsg_ExecuteCode(routing_id(), params));
+    if (responseHandler.get()) {
+      params.request_id = response_manager_.RegisterHandler(responseHandler);
+      params.expect_response = true;
+    } else {
+      params.request_id = -1;
+      params.expect_response = false;
+    }
+
+    params.arguments.Append(base::Value::CreateBooleanValue(is_javascript));
+    params.arguments.Append(base::Value::CreateStringValue(code.ToString16()));
+    params.arguments.Append(
+        base::Value::CreateStringValue(script_url.ToString16()));
+    params.arguments.Append(base::Value::CreateIntegerValue(script_start_line));
+
+    Send(new CefMsg_Request(routing_id(), params));
   } else {
     CEF_POST_TASK(CEF_UIT,
         base::Bind(&CefBrowserHostImpl::SendCode, this, frame_id, is_javascript,
@@ -621,41 +672,9 @@ bool CefBrowserHostImpl::ViewText(const std::string& text) {
   return PlatformViewText(text);
 }
 
-CefBrowserHostImpl::CefBrowserHostImpl(const CefWindowInfo& window_info,
-                                       const CefBrowserSettings& settings,
-                                       CefRefPtr<CefClient> client,
-                                       TabContents* tab_contents,
-                                       CefWindowHandle opener)
-    : content::WebContentsObserver(tab_contents),
-      window_info_(window_info),
-      settings_(settings),
-      client_(client),
-      opener_(opener),
-      render_process_id_(tab_contents->GetRenderProcessHost()->GetID()),
-      render_view_id_(routing_id()),
-      unique_id_(0),
-      received_page_title_(false),
-      is_loading_(false),
-      can_go_back_(false),
-      can_go_forward_(false),
-      has_document_(false),
-      queue_messages_(true),
-      main_frame_id_(CefFrameHostImpl::kInvalidFrameId),
-      focused_frame_id_(CefFrameHostImpl::kInvalidFrameId),
-      next_request_id_(0) {
-  tab_contents_.reset(tab_contents);
-  tab_contents->SetDelegate(this);
 
-  registrar_.Add(this, content::NOTIFICATION_WEB_CONTENTS_TITLE_UPDATED,
-                 content::Source<content::WebContents>(tab_contents));
-
-  placeholder_frame_ =
-      new CefFrameHostImpl(this, CefFrameHostImpl::kInvalidFrameId, true);
-
-  CefDevToolsDelegate* devtools_delegate = _Context->devtools_delegate();
-  if (devtools_delegate)
-    devtools_delegate->AddWebContents(tab_contents);
-}
+// content::WebContentsDelegate methods.
+// -----------------------------------------------------------------------------
 
 content::WebContents* CefBrowserHostImpl::OpenURLFromTab(
     content::WebContents* source,
@@ -791,6 +810,10 @@ void CefBrowserHostImpl::UpdatePreferredSize(content::WebContents* source,
   PlatformSizeTo(pref_size.width(), pref_size.height());
 }
 
+
+// content::WebContentsObserver methods.
+// -----------------------------------------------------------------------------
+
 void CefBrowserHostImpl::RenderViewReady() {
   // Send the queued messages.
   queue_messages_ = false;
@@ -860,9 +883,8 @@ bool CefBrowserHostImpl::OnMessageReceived(const IPC::Message& message) {
     IPC_MESSAGE_HANDLER(CefHostMsg_FrameIdentified, OnFrameIdentified)
     IPC_MESSAGE_HANDLER(CefHostMsg_FrameDetached, DetachFrame)
     IPC_MESSAGE_HANDLER(CefHostMsg_FrameFocusChange, SetFocusedFrame)
-    IPC_MESSAGE_HANDLER(CefHostMsg_ExecuteResponse, OnExecuteResponse)
     IPC_MESSAGE_HANDLER(CefHostMsg_Request, OnRequest)
-    IPC_MESSAGE_HANDLER(CefHostMsg_RequestForIOThread, OnRequestForIOThread)
+    IPC_MESSAGE_HANDLER(CefHostMsg_Response, OnResponse)
     IPC_MESSAGE_HANDLER(CefHostMsg_ResponseAck, OnResponseAck)
     IPC_MESSAGE_UNHANDLED(handled = false)
   IPC_END_MESSAGE_MAP()
@@ -885,6 +907,10 @@ bool CefBrowserHostImpl::Send(IPC::Message* message) {
   }
 }
 
+
+// content::WebContentsObserver::OnMessageReceived() message handlers.
+// -----------------------------------------------------------------------------
+
 void CefBrowserHostImpl::OnFrameIdentified(int64 frame_id,
                                            int64 parent_frame_id,
                                            string16 name) {
@@ -892,28 +918,52 @@ void CefBrowserHostImpl::OnFrameIdentified(int64 frame_id,
   GetOrCreateFrame(frame_id, parent_frame_id, is_main_frame, name, GURL());
 }
 
-void CefBrowserHostImpl::OnExecuteResponse(int request_id,
-                                           const std::string& response) {
-  CefRefPtr<CommandResponseHandler> handler =
-      PopCommandResponseHandler(request_id);
-  DCHECK(handler.get());
-  if (handler.get())
-    handler->OnResponse(response);
+void CefBrowserHostImpl::OnRequest(const Cef_Request_Params& params) {
+  bool success = false;
+  std::string response;
+  bool expect_response_ack = false;
+
+  if (params.user_initiated) {
+    // Give the user a chance to handle the request.
+    if (client_.get()) {
+      CefRefPtr<CefProcessMessageImpl> message(
+          new CefProcessMessageImpl(const_cast<Cef_Request_Params*>(&params),
+                                    false, true));
+      success = client_->OnProcessMessageRecieved(this, PID_RENDERER,
+                                                  message.get());
+      message->Detach(NULL);
+    }
+  } else {
+    // Invalid request.
+    NOTREACHED();
+  }
+
+  if (params.expect_response) {
+    DCHECK_GE(params.request_id, 0);
+
+    // Send a response to the renderer.
+    Cef_Response_Params response_params;
+    response_params.request_id = params.request_id;
+    response_params.success = success;
+    response_params.response = response;
+    response_params.expect_response_ack = expect_response_ack;
+    Send(new CefMsg_Response(routing_id(), response_params));
+  }
 }
 
-void CefBrowserHostImpl::OnRequest(const CefHostMsg_Request_Params& params) {
-  NOTIMPLEMENTED();
+void CefBrowserHostImpl::OnResponse(const Cef_Response_Params& params) {
+  response_manager_.RunHandler(params);
+  if (params.expect_response_ack)
+    Send(new CefMsg_ResponseAck(routing_id(), params.request_id));
 }
 
-void CefBrowserHostImpl::OnRequestForIOThread(
-    int routing_id,
-    const CefHostMsg_Request_Params& params) {
-  NOTIMPLEMENTED();
+void CefBrowserHostImpl::OnResponseAck(int request_id) {
+  response_manager_.RunAckHandler(request_id);
 }
 
-void CefBrowserHostImpl::OnResponseAck(int routing_id) {
-  NOTIMPLEMENTED();
-}
+
+// content::NotificationObserver methods.
+// -----------------------------------------------------------------------------
 
 void CefBrowserHostImpl::Observe(int type,
                                  const content::NotificationSource& source,
@@ -939,6 +989,45 @@ void CefBrowserHostImpl::Observe(int type,
       received_page_title_ = title->explicit_set();
     }
   }
+}
+
+
+// CefBrowserHostImpl private methods.
+// -----------------------------------------------------------------------------
+
+CefBrowserHostImpl::CefBrowserHostImpl(const CefWindowInfo& window_info,
+                                       const CefBrowserSettings& settings,
+                                       CefRefPtr<CefClient> client,
+                                       TabContents* tab_contents,
+                                       CefWindowHandle opener)
+    : content::WebContentsObserver(tab_contents),
+      window_info_(window_info),
+      settings_(settings),
+      client_(client),
+      opener_(opener),
+      render_process_id_(tab_contents->GetRenderProcessHost()->GetID()),
+      render_view_id_(routing_id()),
+      unique_id_(0),
+      received_page_title_(false),
+      is_loading_(false),
+      can_go_back_(false),
+      can_go_forward_(false),
+      has_document_(false),
+      queue_messages_(true),
+      main_frame_id_(CefFrameHostImpl::kInvalidFrameId),
+      focused_frame_id_(CefFrameHostImpl::kInvalidFrameId) {
+  tab_contents_.reset(tab_contents);
+  tab_contents->SetDelegate(this);
+
+  registrar_.Add(this, content::NOTIFICATION_WEB_CONTENTS_TITLE_UPDATED,
+                 content::Source<content::WebContents>(tab_contents));
+
+  placeholder_frame_ =
+      new CefFrameHostImpl(this, CefFrameHostImpl::kInvalidFrameId, true);
+
+  CefDevToolsDelegate* devtools_delegate = _Context->devtools_delegate();
+  if (devtools_delegate)
+    devtools_delegate->AddWebContents(tab_contents);
 }
 
 CefRefPtr<CefFrame> CefBrowserHostImpl::GetOrCreateFrame(
@@ -1036,32 +1125,6 @@ void CefBrowserHostImpl::SetFocusedFrame(int64 frame_id) {
 
   // No valid frame found.
   focused_frame_id_ = CefFrameHostImpl::kInvalidFrameId;
-}
-
-int CefBrowserHostImpl::GetNextRequestId() {
-  return CefAtomicIncrement(&next_request_id_);
-}
-
-int CefBrowserHostImpl::RegisterCommandResponseHandler(
-    CefRefPtr<CommandResponseHandler> handler) {
-  CEF_REQUIRE_UIT();
-  int request_id = GetNextRequestId();
-  command_response_handlers_.insert(std::make_pair(request_id, handler));
-  return request_id;
-}
-
-CefRefPtr<CefBrowserHostImpl::CommandResponseHandler>
-CefBrowserHostImpl::PopCommandResponseHandler(
-    int request_id) {
-  CEF_REQUIRE_UIT();
-  CefRefPtr<CefBrowserHostImpl::CommandResponseHandler> handler;
-  CommandResponseHandlerMap::iterator it =
-      command_response_handlers_.find(request_id);
-  if (it != command_response_handlers_.end()) {
-    handler = it->second;
-    command_response_handlers_.erase(it);
-  }
-  return handler;
 }
 
 void CefBrowserHostImpl::OnAddressChange(CefRefPtr<CefFrame> frame,

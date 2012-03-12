@@ -23,6 +23,11 @@ CefContentClient::CefContentClient(CefRefPtr<CefApp> application)
 CefContentClient::~CefContentClient() {
 }
 
+// static
+CefContentClient* CefContentClient::Get() {
+  return static_cast<CefContentClient*>(content::GetContentClient());
+}
+
 void CefContentClient::SetActiveURL(const GURL& url) {
 }
 

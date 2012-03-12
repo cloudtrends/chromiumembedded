@@ -74,27 +74,27 @@ static NSAutoreleasePool* g_autopool = nil;
 @implementation ClientWindowDelegate
 
 - (IBAction)goBack:(id)sender {
-  if (g_handler.get() && g_handler->GetBrowserHwnd())
+  if (g_handler.get() && g_handler->GetBrowserId())
     g_handler->GetBrowser()->GoBack();
 }
 
 - (IBAction)goForward:(id)sender {
-  if (g_handler.get() && g_handler->GetBrowserHwnd())
+  if (g_handler.get() && g_handler->GetBrowserId())
     g_handler->GetBrowser()->GoForward();
 }
 
 - (IBAction)reload:(id)sender {
-  if (g_handler.get() && g_handler->GetBrowserHwnd())
+  if (g_handler.get() && g_handler->GetBrowserId())
     g_handler->GetBrowser()->Reload();
 }
 
 - (IBAction)stopLoading:(id)sender {
-  if (g_handler.get() && g_handler->GetBrowserHwnd())
+  if (g_handler.get() && g_handler->GetBrowserId())
     g_handler->GetBrowser()->StopLoad();
 }
 
 - (IBAction)takeURLStringValueFrom:(NSTextField *)sender {
-  if (!g_handler.get() || !g_handler->GetBrowserHwnd())
+  if (!g_handler.get() || !g_handler->GetBrowserId())
     return;
   
   NSString *url = [sender stringValue];
@@ -142,9 +142,9 @@ static NSAutoreleasePool* g_autopool = nil;
 }
 
 - (void)windowDidBecomeKey:(NSNotification*)notification {
-  if (g_handler.get() && g_handler->GetBrowserHwnd()) {
+  if (g_handler.get() && g_handler->GetBrowserId()) {
     // Give focus to the browser window.
-    g_handler->GetBrowser()->SetFocus(true);
+    g_handler->GetBrowser()->GetHost()->SetFocus(true);
   }
 }
 
@@ -187,7 +187,6 @@ NSButton* MakeButton(NSRect* rect, NSString* title, NSView* parent) {
 - (void)createApp:(id)object;
 - (IBAction)testGetSource:(id)sender;
 - (IBAction)testGetText:(id)sender;
-- (IBAction)testJSExecute:(id)sender;
 - (IBAction)testRequest:(id)sender;
 - (IBAction)testLocalStorage:(id)sender;
 - (IBAction)testXMLHttpRequest:(id)sender;
@@ -197,12 +196,6 @@ NSButton* MakeButton(NSRect* rect, NSString* title, NSView* parent) {
 - (IBAction)testAcceleratedLayers:(id)sender;
 - (IBAction)testWebGL:(id)sender;
 - (IBAction)testHTML5Video:(id)sender;
-- (IBAction)testDragDrop:(id)sender;
-- (IBAction)testZoomIn:(id)sender;
-- (IBAction)testZoomOut:(id)sender;
-- (IBAction)testZoomReset:(id)sender;
-- (IBAction)testDevToolsShow:(id)sender;
-- (IBAction)testDevToolsClose:(id)sender;
 @end
 
 @implementation ClientAppDelegate
@@ -226,9 +219,6 @@ NSButton* MakeButton(NSRect* rect, NSString* title, NSView* parent) {
                keyEquivalent:@""];
   [testMenu addItemWithTitle:@"Get Text"
                       action:@selector(testGetText:)
-               keyEquivalent:@""];
-  [testMenu addItemWithTitle:@"JavaScript Execute"
-                      action:@selector(testJSExecute:)
                keyEquivalent:@""];
   [testMenu addItemWithTitle:@"Popup Window"
                       action:@selector(testPopupWindow:)
@@ -256,24 +246,6 @@ NSButton* MakeButton(NSRect* rect, NSString* title, NSView* parent) {
                keyEquivalent:@""];
   [testMenu addItemWithTitle:@"HTML5 Video"
                       action:@selector(testHTML5Video:)
-               keyEquivalent:@""];
-  [testMenu addItemWithTitle:@"Drag & Drop"
-                      action:@selector(testDragDrop:)
-               keyEquivalent:@""];
-  [testMenu addItemWithTitle:@"Zoom In"
-                      action:@selector(testZoomIn:)
-               keyEquivalent:@""];
-  [testMenu addItemWithTitle:@"Zoom Out"
-                      action:@selector(testZoomOut:)
-               keyEquivalent:@""];
-  [testMenu addItemWithTitle:@"Zoom Reset"
-                      action:@selector(testZoomReset:)
-               keyEquivalent:@""];
-  [testMenu addItemWithTitle:@"Show DevTools"
-                      action:@selector(testDevToolsShow:)
-               keyEquivalent:@""];
-  [testMenu addItemWithTitle:@"Close DevTools"
-                      action:@selector(testDevToolsClose:)
                keyEquivalent:@""];
   [testItem setSubmenu:testMenu];
   [menubar addItem:testItem];
@@ -353,8 +325,8 @@ NSButton* MakeButton(NSRect* rect, NSString* title, NSView* parent) {
   AppGetBrowserSettings(settings);
 
   window_info.SetAsChild(contentView, 0, 0, kWindowWidth, kWindowHeight);
-  CefBrowser::CreateBrowser(window_info, g_handler.get(),
-                            "http://www.google.com", settings);
+  CefBrowserHost::CreateBrowser(window_info, g_handler.get(),
+                                "http://www.google.com", settings);
 
   // Show the window.
   [mainWnd makeKeyAndOrderFront: nil];
@@ -367,103 +339,58 @@ NSButton* MakeButton(NSRect* rect, NSString* title, NSView* parent) {
 }
 
 - (IBAction)testGetSource:(id)sender {
-  if (g_handler.get() && g_handler->GetBrowserHwnd())
+  if (g_handler.get() && g_handler->GetBrowserId())
     RunGetSourceTest(g_handler->GetBrowser());
 }
 
 - (IBAction)testGetText:(id)sender {
-  if (g_handler.get() && g_handler->GetBrowserHwnd())
+  if (g_handler.get() && g_handler->GetBrowserId())
     RunGetTextTest(g_handler->GetBrowser());
 }
 
-- (IBAction)testJSExecute:(id)sender {
-  if (g_handler.get() && g_handler->GetBrowserHwnd())
-    RunJavaScriptExecuteTest(g_handler->GetBrowser());
-}
-
 - (IBAction)testRequest:(id)sender {
-  if (g_handler.get() && g_handler->GetBrowserHwnd())
+  if (g_handler.get() && g_handler->GetBrowserId())
     RunRequestTest(g_handler->GetBrowser());
 }
 
 - (IBAction)testLocalStorage:(id)sender {
-  if (g_handler.get() && g_handler->GetBrowserHwnd())
+  if (g_handler.get() && g_handler->GetBrowserId())
     RunLocalStorageTest(g_handler->GetBrowser());
 }
 
 - (IBAction)testXMLHttpRequest:(id)sender {
-  if (g_handler.get() && g_handler->GetBrowserHwnd())
+  if (g_handler.get() && g_handler->GetBrowserId())
     RunXMLHTTPRequestTest(g_handler->GetBrowser());
 }
 
 - (IBAction)testSchemeHandler:(id)sender {
-  if (g_handler.get() && g_handler->GetBrowserHwnd())
+  if (g_handler.get() && g_handler->GetBrowserId())
     RunSchemeTest(g_handler->GetBrowser());
 }
 
 - (IBAction)testPopupWindow:(id)sender {
-  if (g_handler.get() && g_handler->GetBrowserHwnd())
+  if (g_handler.get() && g_handler->GetBrowserId())
     RunPopupTest(g_handler->GetBrowser());
 }
 
 - (IBAction)testAccelerated2DCanvas:(id)sender {
-  if (g_handler.get() && g_handler->GetBrowserHwnd())
+  if (g_handler.get() && g_handler->GetBrowserId())
     RunAccelerated2DCanvasTest(g_handler->GetBrowser());
 }
 
 - (IBAction)testAcceleratedLayers:(id)sender {
-  if (g_handler.get() && g_handler->GetBrowserHwnd())
+  if (g_handler.get() && g_handler->GetBrowserId())
     RunAcceleratedLayersTest(g_handler->GetBrowser());
 }
 
 - (IBAction)testWebGL:(id)sender {
-  if (g_handler.get() && g_handler->GetBrowserHwnd())
+  if (g_handler.get() && g_handler->GetBrowserId())
     RunWebGLTest(g_handler->GetBrowser());
 }
 
 - (IBAction)testHTML5Video:(id)sender {
-  if (g_handler.get() && g_handler->GetBrowserHwnd())
+  if (g_handler.get() && g_handler->GetBrowserId())
     RunHTML5VideoTest(g_handler->GetBrowser());
-}
-
-- (IBAction)testDragDrop:(id)sender {
-  if (g_handler.get() && g_handler->GetBrowserHwnd())
-    RunDragDropTest(g_handler->GetBrowser());
-}
-
-- (IBAction)testZoomIn:(id)sender {
-  if (g_handler.get() && g_handler->GetBrowserHwnd()) {
-    CefRefPtr<CefBrowser> browser = g_handler->GetBrowser();
-    browser->SetZoomLevel(browser->GetZoomLevel() + 0.5);
-  }
-}
-
-- (IBAction)testZoomOut:(id)sender {
-  if (g_handler.get() && g_handler->GetBrowserHwnd()) {
-    CefRefPtr<CefBrowser> browser = g_handler->GetBrowser();
-    browser->SetZoomLevel(browser->GetZoomLevel() - 0.5);
-  }
-}
-
-- (IBAction)testZoomReset:(id)sender {
-  if (g_handler.get() && g_handler->GetBrowserHwnd()) {
-    CefRefPtr<CefBrowser> browser = g_handler->GetBrowser();
-    browser->SetZoomLevel(0.0);
-  }
-}
-
-- (IBAction)testDevToolsShow:(id)sender {
-  if (g_handler.get() && g_handler->GetBrowserHwnd()) {
-    CefRefPtr<CefBrowser> browser = g_handler->GetBrowser();
-    browser->ShowDevTools();
-  }
-}
-
-- (IBAction)testDevToolsClose:(id)sender {
-  if (g_handler.get() && g_handler->GetBrowserHwnd()) {
-    CefRefPtr<CefBrowser> browser = g_handler->GetBrowser();
-    browser->CloseDevTools();
-  }
 }
 
 // Sent by the default notification center immediately before the application

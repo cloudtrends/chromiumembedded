@@ -13,7 +13,7 @@
 class CefBrowserHostImpl;
 
 // Implementation of CefFrame. CefFrameHostImpl objects are owned by the
-// CefBrowerImpl and will be detached when the browser is notified that the
+// CefBrowerHostImpl and will be detached when the browser is notified that the
 // associated renderer WebFrame will close.
 class CefFrameHostImpl : public CefFrame {
  public:
@@ -31,7 +31,6 @@ class CefFrameHostImpl : public CefFrame {
   virtual void Paste() OVERRIDE;
   virtual void Delete() OVERRIDE;
   virtual void SelectAll() OVERRIDE;
-  virtual void Print() OVERRIDE;
   virtual void ViewSource() OVERRIDE;
   virtual void GetSource(CefRefPtr<CefStringVisitor> visitor) OVERRIDE;
   virtual void GetText(CefRefPtr<CefStringVisitor> visitor) OVERRIDE;
@@ -49,6 +48,7 @@ class CefFrameHostImpl : public CefFrame {
   virtual CefRefPtr<CefFrame> GetParent() OVERRIDE;
   virtual CefString GetURL() OVERRIDE;
   virtual CefRefPtr<CefBrowser> GetBrowser() OVERRIDE;
+  virtual CefRefPtr<CefV8Context> GetV8Context() OVERRIDE;
 
   void SetFocused(bool focused);
   void SetURL(const CefString& url);

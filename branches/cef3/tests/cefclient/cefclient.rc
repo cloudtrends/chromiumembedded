@@ -53,10 +53,6 @@ IDC_CEFCLIENT MENU
 BEGIN
     POPUP "&File"
     BEGIN
-        MENUITEM "&Find...",                    ID_FIND
-        MENUITEM SEPARATOR
-        MENUITEM "&Print...",                   ID_PRINT
-        MENUITEM SEPARATOR
         MENUITEM "E&xit",                       IDM_EXIT
     END
     POPUP "&Help"
@@ -67,9 +63,7 @@ BEGIN
     BEGIN
         MENUITEM "Get Source",                  ID_TESTS_GETSOURCE
         MENUITEM "Get Text",                    ID_TESTS_GETTEXT
-        MENUITEM "JavaScript Execute",          ID_TESTS_JAVASCRIPT_EXECUTE
         MENUITEM "Popup Window",                ID_TESTS_POPUP
-        MENUITEM "Transparent Popup Window",    ID_TESTS_TRANSPARENT_POPUP
         MENUITEM "Request",                     ID_TESTS_REQUEST
         MENUITEM "Scheme Handler",              ID_TESTS_SCHEME_HANDLER
         MENUITEM "Local Storage",               ID_TESTS_LOCALSTORAGE
@@ -78,12 +72,6 @@ BEGIN
         MENUITEM "Accelerated Layers",          ID_TESTS_ACCELERATEDLAYERS
         MENUITEM "WebGL",                       ID_TESTS_WEBGL
         MENUITEM "HTML5 Video",                 ID_TESTS_HTML5VIDEO
-        MENUITEM "Drag && Drop",                ID_TESTS_DRAGDROP
-        MENUITEM "Zoom In",                     ID_TESTS_ZOOM_IN
-        MENUITEM "Zoom Out",                    ID_TESTS_ZOOM_OUT
-        MENUITEM "Reset Zoom",                  ID_TESTS_ZOOM_RESET
-        MENUITEM "Show Developer Tools",        ID_TESTS_DEVTOOLS_SHOW
-        MENUITEM "Close Developer Tools",       ID_TESTS_DEVTOOLS_CLOSE
    END
 END
 

@@ -55,6 +55,7 @@ class TestHandler : public CefClient,
   virtual CefRefPtr<CefRequestHandler> GetRequestHandler() OVERRIDE {
     return this;
   }
+
   // CefLifeSpanHandler methods
   virtual void OnAfterCreated(CefRefPtr<CefBrowser> browser) OVERRIDE;
   virtual void OnBeforeClose(CefRefPtr<CefBrowser> browser) OVERRIDE;
@@ -66,7 +67,7 @@ class TestHandler : public CefClient,
       CefRefPtr<CefRequest> request) OVERRIDE;
 
   CefRefPtr<CefBrowser> GetBrowser() { return browser_; }
-  CefWindowHandle GetBrowserHwnd() { return browser_hwnd_; }
+  int GetBrowserId() { return browser_id_; }
 
   // Called by the test function to execute the test.  This method blocks until
   // the test is complete. Do not reference the object after this method
@@ -89,8 +90,8 @@ class TestHandler : public CefClient,
   // The child browser window
   CefRefPtr<CefBrowser> browser_;
 
-  // The browser window handle
-  CefWindowHandle browser_hwnd_;
+  // The browser window identifier
+  int browser_id_;
 
   // Handle used to notify when the test is complete
   base::WaitableEvent completion_event_;

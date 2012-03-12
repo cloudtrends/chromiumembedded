@@ -14,7 +14,7 @@
 
 ClientHandler::ClientHandler()
   : m_MainHwnd(NULL),
-    m_BrowserHwnd(NULL),
+    m_BrowserId(0),
     m_EditHwnd(NULL),
     m_BackHwnd(NULL),
     m_ForwardHwnd(NULL),
@@ -34,14 +34,14 @@ void ClientHandler::OnAfterCreated(CefRefPtr<CefBrowser> browser) {
   if (!m_Browser.get())   {
     // We need to keep the main child window, but not popup windows
     m_Browser = browser;
-    m_BrowserHwnd = browser->GetWindowHandle();
+    m_BrowserId = browser->GetIdentifier();
   }
 }
 
 bool ClientHandler::DoClose(CefRefPtr<CefBrowser> browser) {
   REQUIRE_UI_THREAD();
 
-  if (m_BrowserHwnd == browser->GetWindowHandle()) {
+  if (m_BrowserId == browser->GetIdentifier()) {
     // Since the main window contains the browser window, we need to close
     // the parent window instead of the browser window.
     CloseMainWindow();
@@ -60,7 +60,7 @@ bool ClientHandler::DoClose(CefRefPtr<CefBrowser> browser) {
 void ClientHandler::OnBeforeClose(CefRefPtr<CefBrowser> browser) {
   REQUIRE_UI_THREAD();
 
-  if (m_BrowserHwnd == browser->GetWindowHandle()) {
+  if (m_BrowserId == browser->GetIdentifier()) {
     // Free the browser pointer so that the browser can be destroyed
     m_Browser = NULL;
   }
@@ -70,7 +70,7 @@ void ClientHandler::OnLoadStart(CefRefPtr<CefBrowser> browser,
                                 CefRefPtr<CefFrame> frame) {
   REQUIRE_UI_THREAD();
 
-  if (m_BrowserHwnd == browser->GetWindowHandle() && frame->IsMain()) {
+  if (m_BrowserId == browser->GetIdentifier() && frame->IsMain()) {
     // We've just started loading a page
     SetLoading(true);
   }
@@ -81,7 +81,7 @@ void ClientHandler::OnLoadEnd(CefRefPtr<CefBrowser> browser,
                               int httpStatusCode) {
   REQUIRE_UI_THREAD();
 
-  if (m_BrowserHwnd == browser->GetWindowHandle() && frame->IsMain()) {
+  if (m_BrowserId == browser->GetIdentifier() && frame->IsMain()) {
     // We've just finished loading a page
     SetLoading(false);
   }
@@ -181,4 +181,10 @@ void ClientHandler::SetLastDownloadFile(const std::string& fileName) {
 std::string ClientHandler::GetLastDownloadFile() {
   AutoLock lock_scope(this);
   return m_LastDownloadFile;
+}
+
+void ClientHandler::ShowDevTools() {
+}
+
+void ClientHandler::CloseDevTools() {
 }

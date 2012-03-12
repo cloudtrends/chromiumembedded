@@ -38,7 +38,6 @@ void AppGetBrowserSettings(CefBrowserSettings& settings);
 void RunGetSourceTest(CefRefPtr<CefBrowser> browser);
 void RunGetTextTest(CefRefPtr<CefBrowser> browser);
 void RunRequestTest(CefRefPtr<CefBrowser> browser);
-void RunJavaScriptExecuteTest(CefRefPtr<CefBrowser> browser);
 void RunPopupTest(CefRefPtr<CefBrowser> browser);
 void RunLocalStorageTest(CefRefPtr<CefBrowser> browser);
 void RunAccelerated2DCanvasTest(CefRefPtr<CefBrowser> browser);
@@ -46,7 +45,6 @@ void RunAcceleratedLayersTest(CefRefPtr<CefBrowser> browser);
 void RunWebGLTest(CefRefPtr<CefBrowser> browser);
 void RunHTML5VideoTest(CefRefPtr<CefBrowser> browser);
 void RunXMLHTTPRequestTest(CefRefPtr<CefBrowser> browser);
-void RunDragDropTest(CefRefPtr<CefBrowser> browser);
 
 #if defined(OS_WIN)
 void RunTransparentPopupTest(CefRefPtr<CefBrowser> browser);
