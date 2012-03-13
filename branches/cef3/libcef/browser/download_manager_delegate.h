@@ -29,7 +29,7 @@ class CefDownloadManagerDelegate
   virtual bool ShouldStartDownload(int32 download_id) OVERRIDE;
   virtual void ChooseDownloadPath(content::WebContents* web_contents,
                                   const FilePath& suggested_path,
-                                  void* data) OVERRIDE;
+                                  int32 download_id) OVERRIDE;
 
  private:
   friend class base::RefCountedThreadSafe<CefDownloadManagerDelegate>;

@@ -20,10 +20,8 @@
 
 #include "base/bind.h"
 #include "base/bind_helpers.h"
-#include "content/browser/renderer_host/render_view_host.h"
-#include "content/browser/renderer_host/resource_dispatcher_host.h"
-#include "content/browser/renderer_host/resource_dispatcher_host_request_info.h"
-#include "content/browser/tab_contents/title_updated_details.h"
+#include "content/browser/renderer_host/render_view_host_impl.h"
+#include "content/browser/renderer_host/resource_request_info_impl.h"
 #include "content/public/browser/navigation_controller.h"
 #include "content/public/browser/navigation_entry.h"
 #include "content/public/browser/notification_details.h"
@@ -158,10 +156,10 @@ CefRefPtr<CefBrowserHostImpl> CefBrowserHostImpl::Create(
 
 // static
 CefRefPtr<CefBrowserHostImpl> CefBrowserHostImpl::GetBrowserForHost(
-    RenderViewHost* host) {
+    content::RenderViewHost* host) {
   DCHECK(host);
   CEF_REQUIRE_UIT();
-  TabContents* tab_contents = static_cast<TabContents*>(host->delegate());
+  TabContents* tab_contents = static_cast<TabContents*>(host->GetDelegate());
   if (tab_contents)
     return static_cast<CefBrowserHostImpl*>(tab_contents->GetDelegate());
   return NULL;
@@ -180,12 +178,17 @@ CefRefPtr<CefBrowserHostImpl> CefBrowserHostImpl::GetBrowserForRequest(
     net::URLRequest* request) {
   DCHECK(request);
   CEF_REQUIRE_IOT();
-  int render_process_id;
-  int render_view_id;
-  if (!ResourceDispatcherHost::RenderViewForRequest(request,
-      &render_process_id, &render_view_id)) {
+  int render_process_id = -1;
+  int render_view_id = -1;
+
+  const content::ResourceRequestInfoImpl* info =
+      content::ResourceRequestInfoImpl::ForRequest(request);
+  if (info)
+    info->GetAssociatedRenderView(&render_process_id, &render_view_id);
+
+  if (render_process_id == -1 || render_view_id == -1)
     return NULL;
-  }
+
   return GetBrowserByRoutingID(render_process_id, render_view_id);
 }
 
@@ -194,8 +197,8 @@ CefRefPtr<CefBrowserHostImpl> CefBrowserHostImpl::GetBrowserByRoutingID(
     int render_process_id, int render_view_id) {
   if (CEF_CURRENTLY_ON_UIT()) {
     // Use the non-thread-safe but potentially faster approach.
-    RenderViewHost* render_view_host =
-        RenderViewHost::FromID(render_process_id, render_view_id);
+    content::RenderViewHost* render_view_host =
+        content::RenderViewHost::FromID(render_process_id, render_view_id);
     if (!render_view_host)
       return NULL;
     return GetBrowserForHost(render_view_host);
@@ -480,12 +483,12 @@ TabContents* CefBrowserHostImpl::GetTabContents() const {
 CefRefPtr<CefFrame> CefBrowserHostImpl::GetFrameForRequest(
     net::URLRequest* request) {
   CEF_REQUIRE_IOT();
-  ResourceDispatcherHostRequestInfo* info =
-      ResourceDispatcherHost::InfoForRequest(request);
+  const content::ResourceRequestInfoImpl* info =
+      content::ResourceRequestInfoImpl::ForRequest(request);
   if (!info)
     return NULL;
-  return GetOrCreateFrame(info->frame_id(), info->parent_frame_id(),
-                          info->is_main_frame(), string16(), GURL());
+  return GetOrCreateFrame(info->GetFrameID(), info->GetParentFrameID(),
+                          info->IsMainFrame(), string16(), GURL());
 }
 
 void CefBrowserHostImpl::Navigate(const CefNavigateParams& params) {
@@ -971,22 +974,23 @@ void CefBrowserHostImpl::Observe(int type,
   DCHECK(type == content::NOTIFICATION_WEB_CONTENTS_TITLE_UPDATED);
 
   if (type == content::NOTIFICATION_WEB_CONTENTS_TITLE_UPDATED) {
-    TitleUpdatedDetails* title =
-        content::Details<TitleUpdatedDetails>(details).ptr();
+    std::pair<content::NavigationEntry*, bool>* title =
+        content::Details<std::pair<content::NavigationEntry*, bool> >(
+            details).ptr();
 
     if (received_page_title_)
       return;
 
-    if (title->entry()) {
+    if (title->first) {
       if (client_.get()) {
         CefRefPtr<CefDisplayHandler> handler = client_->GetDisplayHandler();
         if (handler.get()) {
-          CefString title_str = title->entry()->GetTitleForDisplay("");
+          CefString title_str = title->first->GetTitleForDisplay("");
           handler->OnTitleChange(this, title_str);
         }
       }
 
-      received_page_title_ = title->explicit_set();
+      received_page_title_ = title->second;
     }
   }
 }

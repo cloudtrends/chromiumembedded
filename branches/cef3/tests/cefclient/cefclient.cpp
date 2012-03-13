@@ -377,3 +377,7 @@ void RunHTML5VideoTest(CefRefPtr<CefBrowser> browser) {
 void RunXMLHTTPRequestTest(CefRefPtr<CefBrowser> browser) {
   browser->GetMainFrame()->LoadURL("http://tests/xmlhttprequest");
 }
+
+void RunDragDropTest(CefRefPtr<CefBrowser> browser) {
+  browser->GetMainFrame()->LoadURL("http://html5demos.com/drag");
+}

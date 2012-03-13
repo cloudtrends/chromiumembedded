@@ -17,7 +17,7 @@ class DownloadManager;
 namespace content {
 class DownloadManagerDelegate;
 class ResourceContext;
-class SpeechInputPreferences;
+class SpeechRecognitionPreferences;
 }
 
 class CefBrowserMainParts;
@@ -30,7 +30,7 @@ class CefBrowserContext : public content::BrowserContext {
 
   // BrowserContext methods.
   virtual FilePath GetPath() OVERRIDE;
-  virtual bool IsOffTheRecord() OVERRIDE;
+  virtual bool IsOffTheRecord() const OVERRIDE;
   virtual content::DownloadManager* GetDownloadManager() OVERRIDE;
   virtual net::URLRequestContextGetter* GetRequestContext() OVERRIDE;
   virtual net::URLRequestContextGetter* GetRequestContextForRenderProcess(
@@ -39,7 +39,8 @@ class CefBrowserContext : public content::BrowserContext {
   virtual content::ResourceContext* GetResourceContext() OVERRIDE;
   virtual content::GeolocationPermissionContext*
       GetGeolocationPermissionContext() OVERRIDE;
-  virtual content::SpeechInputPreferences* GetSpeechInputPreferences() OVERRIDE;
+  virtual content::SpeechRecognitionPreferences*
+      GetSpeechRecognitionPreferences() OVERRIDE;
   virtual bool DidLastSessionExitCleanly() OVERRIDE;
   virtual quota::SpecialStoragePolicy* GetSpecialStoragePolicy() OVERRIDE;
 
@@ -52,7 +53,8 @@ class CefBrowserContext : public content::BrowserContext {
   scoped_refptr<net::URLRequestContextGetter> url_request_getter_;
   scoped_refptr<content::GeolocationPermissionContext>
       geolocation_permission_context_;
-  scoped_refptr<content::SpeechInputPreferences> speech_input_preferences_;
+  scoped_refptr<content::SpeechRecognitionPreferences>
+      speech_recognition_preferences_;
 
   CefBrowserMainParts* main_parts_;
 

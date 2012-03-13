@@ -7,13 +7,11 @@
 #include "libcef/browser/browser_main.h"
 #include "libcef/browser/browser_message_filter.h"
 #include "libcef/browser/browser_settings.h"
-#include "libcef/browser/resource_dispatcher_host_delegate.h"
 #include "libcef/browser/thread_util.h"
 #include "libcef/common/cef_switches.h"
 
 #include "base/command_line.h"
 #include "base/file_path.h"
-#include "content/browser/renderer_host/resource_dispatcher_host.h"
 #include "content/public/common/content_switches.h"
 #include "googleurl/src/gurl.h"
 #include "third_party/skia/include/core/SkBitmap.h"
@@ -24,6 +22,8 @@
 #include "content/common/view_messages.h"
 #elif defined(OS_LINUX)
 #include "content/browser/tab_contents/tab_contents_view_gtk.h"
+#elif defined(OS_MACOSX)
+#include "content/browser/tab_contents/web_contents_view_mac.h"
 #endif
 
 CefContentBrowserClient::CefContentBrowserClient()
@@ -41,16 +41,18 @@ content::BrowserMainParts* CefContentBrowserClient::CreateBrowserMainParts(
 content::WebContentsView* CefContentBrowserClient::CreateWebContentsView(
     content::WebContents* web_contents) {
 #if defined(OS_WIN)
-  return new TabContentsViewWin(web_contents);
+  return new TabContentsViewWin(web_contents, NULL);
 #elif defined(OS_LINUX)
   return new content::TabContentsViewGtk(web_contents, NULL);
+#elif defined(OS_MACOSX)
+  return web_contents_view_mac::CreateWebContentsView(web_contents, NULL);
 #else
   return NULL;
 #endif
 }
 
 void CefContentBrowserClient::RenderViewHostCreated(
-    RenderViewHost* render_view_host) {
+    content::RenderViewHost* render_view_host) {
 }
 
 void CefContentBrowserClient::RenderProcessHostCreated(
@@ -191,7 +193,15 @@ bool CefContentBrowserClient::AllowWorkerFileSystem(
   return true;
 }
 
-QuotaPermissionContext*
+bool CefContentBrowserClient::AllowWorkerIndexedDB(
+    const GURL& url,
+    const string16& name,
+    content::ResourceContext* context,
+    const std::vector<std::pair<int, int> >& render_views) {
+  return true;
+}
+
+content::QuotaPermissionContext*
     CefContentBrowserClient::CreateQuotaPermissionContext() {
   return NULL;
 }
@@ -233,7 +243,9 @@ void CefContentBrowserClient::AddNewCertificate(
     int render_view_id) {
 }
 
-bool CefContentBrowserClient::AllowSocketAPI(const GURL& url) {
+bool CefContentBrowserClient::AllowSocketAPI(
+    content::BrowserContext* browser_context,
+    const GURL& url) {
   return false;
 }
 
@@ -242,7 +254,7 @@ void CefContentBrowserClient::RequestMediaAccessPermission(
     const content::MediaResponseCallback& callback) {
   CEF_CURRENTLY_ON_UIT();
 
-  content::MediaStreamDeviceArray devices;
+  content::MediaStreamDevices devices;
   for (content::MediaStreamDeviceMap::const_iterator it =
        request->devices.begin(); it != request->devices.end(); ++it) {
     devices.push_back(*it->second.begin());
@@ -282,6 +294,7 @@ void CefContentBrowserClient::CancelDesktopNotification(
 }
 
 bool CefContentBrowserClient::CanCreateWindow(
+    const GURL& opener_url,
     const GURL& origin,
     WindowContainerType container_type,
     content::ResourceContext* context,
@@ -295,23 +308,15 @@ std::string CefContentBrowserClient::GetWorkerProcessTitle(
 }
 
 void CefContentBrowserClient::ResourceDispatcherHostCreated() {
-  ResourceDispatcherHost* rdh = ResourceDispatcherHost::Get();
-  resource_dispatcher_host_delegate_.reset(
-      new CefResourceDispatcherHostDelegate(rdh));
-  rdh->set_delegate(resource_dispatcher_host_delegate_.get());
 }
 
-content::SpeechInputManagerDelegate*
-CefContentBrowserClient::GetSpeechInputManagerDelegate() {
+content::SpeechRecognitionManagerDelegate*
+    CefContentBrowserClient::GetSpeechRecognitionManagerDelegate() {
   return NULL;
 }
 
 ui::Clipboard* CefContentBrowserClient::GetClipboard() {
   return browser_main_parts_->GetClipboard();
-}
-
-MHTMLGenerationManager* CefContentBrowserClient::GetMHTMLGenerationManager() {
-  return NULL;
 }
 
 net::NetLog* CefContentBrowserClient::GetNetLog() {
@@ -326,8 +331,10 @@ bool CefContentBrowserClient::IsFastShutdownPossible() {
   return true;
 }
 
-void CefContentBrowserClient::OverrideWebkitPrefs(RenderViewHost* rvh,
-                                                  WebPreferences* prefs) {
+void CefContentBrowserClient::OverrideWebkitPrefs(
+    content::RenderViewHost* rvh,
+    const GURL& url,
+    WebPreferences* prefs) {
   CefRefPtr<CefBrowserHostImpl> browser = CefBrowserHostImpl::GetBrowserForHost(rvh);
   DCHECK(browser.get());
 
@@ -336,20 +343,23 @@ void CefContentBrowserClient::OverrideWebkitPrefs(RenderViewHost* rvh,
 }
 
 void CefContentBrowserClient::UpdateInspectorSetting(
-    RenderViewHost* rvh, const std::string& key, const std::string& value) {
+    content::RenderViewHost* rvh,
+    const std::string& key,
+    const std::string& value) {
 }
 
-void CefContentBrowserClient::ClearInspectorSettings(RenderViewHost* rvh) {
+void CefContentBrowserClient::ClearInspectorSettings(
+    content::RenderViewHost* rvh) {
 }
 
 void CefContentBrowserClient::BrowserURLHandlerCreated(
-    BrowserURLHandler* handler) {
+    content::BrowserURLHandler* handler) {
 }
 
-void CefContentBrowserClient::ClearCache(RenderViewHost* rvh) {
+void CefContentBrowserClient::ClearCache(content::RenderViewHost* rvh) {
 }
 
-void CefContentBrowserClient::ClearCookies(RenderViewHost* rvh) {
+void CefContentBrowserClient::ClearCookies(content::RenderViewHost* rvh) {
 }
 
 FilePath CefContentBrowserClient::GetDefaultDownloadDirectory() {

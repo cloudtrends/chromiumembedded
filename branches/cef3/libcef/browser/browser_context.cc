@@ -17,7 +17,7 @@
 #include "content/browser/download/download_manager_impl.h"
 #include "content/public/browser/browser_thread.h"
 #include "content/public/browser/geolocation_permission_context.h"
-#include "content/public/browser/speech_input_preferences.h"
+#include "content/public/browser/speech_recognition_preferences.h"
 
 #if defined(OS_WIN)
 #include "base/base_paths_win.h"
@@ -63,12 +63,13 @@ class CefGeolocationPermissionContext :
   DISALLOW_COPY_AND_ASSIGN(CefGeolocationPermissionContext);
 };
 
-class CefSpeechInputPreferences : public content::SpeechInputPreferences {
+class CefSpeechRecognitionPreferences
+    : public content::SpeechRecognitionPreferences {
  public:
-  CefSpeechInputPreferences() {
+  CefSpeechRecognitionPreferences() {
   }
 
-  // Overridden from SpeechInputPreferences:
+  // Overridden from SpeechRecognitionPreferences:
   virtual bool FilterProfanities() const OVERRIDE {
     return false;
   }
@@ -77,7 +78,7 @@ class CefSpeechInputPreferences : public content::SpeechInputPreferences {
   }
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(CefSpeechInputPreferences);
+  DISALLOW_COPY_AND_ASSIGN(CefSpeechRecognitionPreferences);
 };
 
 }  // namespace
@@ -122,11 +123,11 @@ FilePath CefBrowserContext::GetPath() {
   return path_;
 }
 
-bool CefBrowserContext::IsOffTheRecord()  {
+bool CefBrowserContext::IsOffTheRecord() const {
   return false;
 }
 
-content::DownloadManager* CefBrowserContext::GetDownloadManager()  {
+content::DownloadManager* CefBrowserContext::GetDownloadManager() {
   if (!download_manager_.get()) {
     download_manager_delegate_ = new CefDownloadManagerDelegate();
     download_manager_ = new DownloadManagerImpl(download_manager_delegate_,
@@ -137,22 +138,22 @@ content::DownloadManager* CefBrowserContext::GetDownloadManager()  {
   return download_manager_.get();
 }
 
-net::URLRequestContextGetter* CefBrowserContext::GetRequestContext()  {
+net::URLRequestContextGetter* CefBrowserContext::GetRequestContext() {
   return url_request_getter_;
 }
 
 net::URLRequestContextGetter*
     CefBrowserContext::GetRequestContextForRenderProcess(
-        int renderer_child_id)  {
+        int renderer_child_id) {
   return GetRequestContext();
 }
 
 net::URLRequestContextGetter*
-    CefBrowserContext::GetRequestContextForMedia()  {
+    CefBrowserContext::GetRequestContextForMedia() {
   return GetRequestContext();
 }
 
-content::ResourceContext* CefBrowserContext::GetResourceContext()  {
+content::ResourceContext* CefBrowserContext::GetResourceContext() {
   if (!resource_context_.get()) {
     resource_context_.reset(new CefResourceContext(
         static_cast<CefURLRequestContextGetter*>(GetRequestContext())));
@@ -161,7 +162,7 @@ content::ResourceContext* CefBrowserContext::GetResourceContext()  {
 }
 
 content::GeolocationPermissionContext*
-CefBrowserContext::GetGeolocationPermissionContext()  {
+CefBrowserContext::GetGeolocationPermissionContext() {
   if (!geolocation_permission_context_) {
     geolocation_permission_context_ =
         new CefGeolocationPermissionContext();
@@ -169,14 +170,14 @@ CefBrowserContext::GetGeolocationPermissionContext()  {
   return geolocation_permission_context_;
 }
 
-content::SpeechInputPreferences*
-CefBrowserContext::GetSpeechInputPreferences() {
-  if (!speech_input_preferences_.get())
-    speech_input_preferences_ = new CefSpeechInputPreferences();
-  return speech_input_preferences_.get();
+content::SpeechRecognitionPreferences*
+    CefBrowserContext::GetSpeechRecognitionPreferences() {
+  if (!speech_recognition_preferences_.get())
+    speech_recognition_preferences_ = new CefSpeechRecognitionPreferences();
+  return speech_recognition_preferences_.get();
 }
 
-bool CefBrowserContext::DidLastSessionExitCleanly()  {
+bool CefBrowserContext::DidLastSessionExitCleanly() {
   return true;
 }
 

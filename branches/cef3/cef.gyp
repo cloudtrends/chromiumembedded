@@ -257,6 +257,7 @@
         '<(DEPTH)/base/third_party/dynamic_annotations/dynamic_annotations.gyp:dynamic_annotations',
         '<(DEPTH)/build/temp_gyp/googleurl.gyp:googleurl',
         '<(DEPTH)/ipc/ipc.gyp:ipc',
+        '<(DEPTH)/media/media.gyp:media',
         '<(DEPTH)/net/net.gyp:net',
         '<(DEPTH)/skia/skia.gyp:skia',
         '<(DEPTH)/third_party/WebKit/Source/WebKit/chromium/WebKit.gyp:webkit',
@@ -550,6 +551,7 @@
         '<(DEPTH)/base/third_party/dynamic_annotations/dynamic_annotations.gyp:dynamic_annotations',
         '<(DEPTH)/build/temp_gyp/googleurl.gyp:googleurl',
         '<(DEPTH)/ipc/ipc.gyp:ipc',
+        '<(DEPTH)/media/media.gyp:media',
         '<(DEPTH)/net/net.gyp:net',
         '<(DEPTH)/skia/skia.gyp:skia',
         '<(DEPTH)/third_party/libxml/libxml.gyp:libxml',
@@ -595,8 +597,6 @@
         'libcef/browser/origin_whitelist_impl.h',
         'libcef/browser/resource_context.cc',
         'libcef/browser/resource_context.h',
-        'libcef/browser/resource_dispatcher_host_delegate.cc',
-        'libcef/browser/resource_dispatcher_host_delegate.h',
         'libcef/browser/resource_request_job.cc',
         'libcef/browser/resource_request_job.h',
         'libcef/browser/scheme_impl.cc',
@@ -668,9 +668,6 @@
         'libcef/renderer/webkit_glue.h',
         'libcef/utility/content_utility_client.cc',
         'libcef/utility/content_utility_client.h',
-        # TabContentsView implementations
-        '<(DEPTH)/content/browser/tab_contents/tab_contents_view_win.cc',
-        '<(DEPTH)/content/browser/tab_contents/tab_contents_view_win.h',
       ],
       'conditions': [
         ['OS=="win"', {

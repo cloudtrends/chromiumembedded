@@ -70,7 +70,8 @@ class CefBrowserHostImpl : public CefBrowserHost,
       CefWindowHandle opener);
 
   // Returns the browser associated with the specified RenderViewHost.
-  static CefRefPtr<CefBrowserHostImpl> GetBrowserForHost(RenderViewHost* host);
+  static CefRefPtr<CefBrowserHostImpl> GetBrowserForHost(
+      content::RenderViewHost* host);
   // Returns the browser associated with the specified WebContents.
   static CefRefPtr<CefBrowserHostImpl> GetBrowserForContents(
       content::WebContents* contents);

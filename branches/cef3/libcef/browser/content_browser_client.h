@@ -15,7 +15,6 @@
 #include "content/public/browser/content_browser_client.h"
 
 class CefBrowserMainParts;
-class CefResourceDispatcherHostDelegate;
 
 namespace content {
 class SiteInstance;
@@ -38,7 +37,7 @@ class CefContentBrowserClient : public content::ContentBrowserClient {
   virtual content::WebContentsView* CreateWebContentsView(
       content::WebContents* web_contents) OVERRIDE;
   virtual void RenderViewHostCreated(
-      RenderViewHost* render_view_host) OVERRIDE;
+      content::RenderViewHost* render_view_host) OVERRIDE;
   virtual void RenderProcessHostCreated(
       content::RenderProcessHost* host) OVERRIDE;
   virtual content::WebUIControllerFactory* GetWebUIControllerFactory() OVERRIDE;
@@ -95,9 +94,15 @@ class CefContentBrowserClient : public content::ContentBrowserClient {
       const GURL& url,
       content::ResourceContext* context,
       const std::vector<std::pair<int, int> >& render_views) OVERRIDE;
+  virtual bool AllowWorkerIndexedDB(
+      const GURL& url,
+      const string16& name,
+      content::ResourceContext* context,
+      const std::vector<std::pair<int, int> >& render_views) OVERRIDE;
   virtual net::URLRequestContext* OverrideRequestContextForURL(
       const GURL& url, content::ResourceContext* context) OVERRIDE;
-  virtual QuotaPermissionContext* CreateQuotaPermissionContext() OVERRIDE;
+  virtual content::QuotaPermissionContext* CreateQuotaPermissionContext()
+      OVERRIDE;
   virtual void OpenItem(const FilePath& path) OVERRIDE;
   virtual void ShowItemInFolder(const FilePath& path) OVERRIDE;
   virtual void AllowCertificateError(
@@ -143,32 +148,35 @@ class CefContentBrowserClient : public content::ContentBrowserClient {
       int render_view_id,
       int notification_id) OVERRIDE;
   virtual bool CanCreateWindow(
+      const GURL& opener_url,
       const GURL& origin,
       WindowContainerType container_type,
       content::ResourceContext* context,
       int render_process_id) OVERRIDE;
   virtual std::string GetWorkerProcessTitle(
       const GURL& url, content::ResourceContext* context) OVERRIDE;
-  virtual content::SpeechInputManagerDelegate* GetSpeechInputManagerDelegate()
-      OVERRIDE;
+  virtual content::SpeechRecognitionManagerDelegate*
+      GetSpeechRecognitionManagerDelegate() OVERRIDE;
   virtual void ResourceDispatcherHostCreated() OVERRIDE;
   virtual ui::Clipboard* GetClipboard() OVERRIDE;
-  virtual MHTMLGenerationManager* GetMHTMLGenerationManager() OVERRIDE;
   virtual net::NetLog* GetNetLog() OVERRIDE;
   virtual content::AccessTokenStore* CreateAccessTokenStore() OVERRIDE;
   virtual bool IsFastShutdownPossible() OVERRIDE;
-  virtual void OverrideWebkitPrefs(RenderViewHost* rvh,
+  virtual void OverrideWebkitPrefs(content::RenderViewHost* rvh,
+                                   const GURL& url,
                                    WebPreferences* prefs) OVERRIDE;
-  virtual void UpdateInspectorSetting(RenderViewHost* rvh,
+  virtual void UpdateInspectorSetting(content::RenderViewHost* rvh,
                                       const std::string& key,
                                       const std::string& value) OVERRIDE;
-  virtual void ClearInspectorSettings(RenderViewHost* rvh) OVERRIDE;
-  virtual void BrowserURLHandlerCreated(BrowserURLHandler* handler) OVERRIDE;
-  virtual void ClearCache(RenderViewHost* rvh)  OVERRIDE;
-  virtual void ClearCookies(RenderViewHost* rvh)  OVERRIDE;
+  virtual void ClearInspectorSettings(content::RenderViewHost* rvh) OVERRIDE;
+  virtual void BrowserURLHandlerCreated(content::BrowserURLHandler* handler)
+      OVERRIDE;
+  virtual void ClearCache(content::RenderViewHost* rvh)  OVERRIDE;
+  virtual void ClearCookies(content::RenderViewHost* rvh)  OVERRIDE;
   virtual FilePath GetDefaultDownloadDirectory() OVERRIDE;
   virtual std::string GetDefaultDownloadName() OVERRIDE;
-  virtual bool AllowSocketAPI(const GURL& url) OVERRIDE;
+  virtual bool AllowSocketAPI(content::BrowserContext* browser_context,
+                              const GURL& url) OVERRIDE;
 
 #if defined(OS_POSIX) && !defined(OS_MACOSX)
   virtual int GetCrashSignalFD(const CommandLine& command_line) OVERRIDE;
@@ -186,9 +194,6 @@ class CefContentBrowserClient : public content::ContentBrowserClient {
 
  private:
   CefBrowserMainParts* browser_main_parts_;
-
-  scoped_ptr<CefResourceDispatcherHostDelegate>
-      resource_dispatcher_host_delegate_;
 };
 
 #endif  // CEF_LIBCEF_BROWSER_CONTENT_BROWSER_CLIENT_H_

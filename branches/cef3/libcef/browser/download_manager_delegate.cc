@@ -74,7 +74,7 @@ bool CefDownloadManagerDelegate::ShouldStartDownload(int32 download_id) {
 void CefDownloadManagerDelegate::ChooseDownloadPath(
     WebContents* web_contents,
     const FilePath& suggested_path,
-    void* data) {
+    int32 download_id) {
   FilePath result;
 #if defined(OS_WIN)
   std::wstring file_part = FilePath(suggested_path).BaseName().value();
@@ -102,9 +102,9 @@ void CefDownloadManagerDelegate::ChooseDownloadPath(
 #endif
 
   if (result.empty()) {
-    download_manager_->FileSelectionCanceled(data);
+    download_manager_->FileSelectionCanceled(download_id);
   } else {
-    download_manager_->FileSelected(result, data);
+    download_manager_->FileSelected(result, download_id);
   }
 }
 

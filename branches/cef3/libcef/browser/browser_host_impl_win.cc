@@ -14,7 +14,7 @@
 #include "libcef/browser/thread_util.h"
 
 #include "base/win/windows_version.h"
-#include "content/browser/tab_contents/tab_contents_view_win.h"
+#include "content/public/browser/web_contents_view.h"
 #include "ui/base/win/hwnd_util.h"
 
 #pragma comment(lib, "dwmapi.lib")
@@ -179,9 +179,7 @@ bool CefBrowserHostImpl::PlatformCreateWindow() {
   AddRef();
 
   // Parent the TabContents to the browser window.
-  TabContentsViewWin* view =
-      static_cast<TabContentsViewWin*>(tab_contents_->GetView());
-  view->SetParent(window_info_.window);
+  SetParent(tab_contents_->GetView()->GetNativeView(), window_info_.window);
 
   // Size the web view window to the browser window.
   RECT cr;
