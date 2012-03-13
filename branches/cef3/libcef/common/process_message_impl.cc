@@ -35,8 +35,9 @@ CefRefPtr<CefProcessMessage> CefProcessMessage::Create(const CefString& name) {
 CefProcessMessageImpl::CefProcessMessageImpl(Cef_Request_Params* value,
                                              bool will_delete,
                                              bool read_only)
-  : parent(value, NULL, will_delete ? kOwnerWillDelete : kOwnerNoDelete,
-           read_only, NULL) {
+  : CefValueBase<CefProcessMessage, Cef_Request_Params>(
+        value, NULL, will_delete ? kOwnerWillDelete : kOwnerNoDelete,
+        read_only, NULL) {
 }
 
 bool CefProcessMessageImpl::CopyTo(Cef_Request_Params& target) {

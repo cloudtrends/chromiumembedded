@@ -10,8 +10,9 @@
 CefCommandLineImpl::CefCommandLineImpl(CommandLine* value,
                                        bool will_delete,
                                        bool read_only)
-  : parent(value, NULL, will_delete ? kOwnerWillDelete : kOwnerNoDelete,
-           read_only, NULL) {
+  : CefValueBase<CefCommandLine, CommandLine>(
+        value, NULL, will_delete ? kOwnerWillDelete : kOwnerNoDelete,
+        read_only, NULL) {
 }
 
 bool CefCommandLineImpl::IsValid() {

@@ -72,9 +72,9 @@ void ClientHandler::OnTitleChange(CefRefPtr<CefBrowser> browser,
                                   const CefString& title) {
   REQUIRE_UI_THREAD();
 
-  GtkWidget* window =
-      gtk_widget_get_ancestor(GTK_WIDGET(browser->GetWindowHandle()),
-                              GTK_TYPE_WINDOW);
+  GtkWidget* window = gtk_widget_get_ancestor(
+      GTK_WIDGET(browser->GetHost()->GetWindowHandle()),
+      GTK_TYPE_WINDOW);
   std::string titleStr(title);
   gtk_window_set_title(GTK_WINDOW(window), titleStr.c_str());
 }

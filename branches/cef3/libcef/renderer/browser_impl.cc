@@ -16,6 +16,7 @@
 #include "libcef/renderer/webkit_glue.h"
 
 #include "base/string16.h"
+#include "base/string_util.h"
 #include "base/utf_string_conversions.h"
 #include "content/public/renderer/document_state.h"
 #include "content/public/renderer/navigation_state.h"
@@ -571,10 +572,10 @@ void CefBrowserImpl::OnRequest(const Cef_Request_Params& params) {
         params.arguments.GetString(0, &command);
         DCHECK(!command.empty());
 
-        if (command == L"GetSource") {
+        if (LowerCaseEqualsASCII(command, "getsource")) {
           response = web_frame->contentAsMarkup().utf8();
           success = true;
-        } else if (command == L"GetText") {
+        } else if (LowerCaseEqualsASCII(command, "gettext")) {
           response = UTF16ToUTF8(webkit_glue::DumpDocumentText(web_frame));
           success = true;
         } else if (web_frame->executeCommand(command)) {

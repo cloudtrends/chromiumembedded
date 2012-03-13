@@ -975,7 +975,7 @@ bool CefV8ValueImpl::DeleteValue(int index) {
 
 CefRefPtr<CefV8Value> CefV8ValueImpl::GetValue(const CefString& key) {
   CEF_REQUIRE_RT_RETURN(NULL);
-  CEF_V8_REQUIRE_OBJECT_RETURN(false);
+  CEF_V8_REQUIRE_OBJECT_RETURN(NULL);
 
   if (key.empty()) {
     NOTREACHED() << "invalid input parameter";
@@ -994,7 +994,7 @@ CefRefPtr<CefV8Value> CefV8ValueImpl::GetValue(const CefString& key) {
 
 CefRefPtr<CefV8Value> CefV8ValueImpl::GetValue(int index) {
   CEF_REQUIRE_RT_RETURN(NULL);
-  CEF_V8_REQUIRE_OBJECT_RETURN(false);
+  CEF_V8_REQUIRE_OBJECT_RETURN(NULL);
 
   if (index < 0) {
     NOTREACHED() << "invalid input parameter";
@@ -1212,8 +1212,8 @@ CefRefPtr<CefV8Value> CefV8ValueImpl::ExecuteFunctionWithContext(
       CefRefPtr<CefV8Context> context,
       CefRefPtr<CefV8Value> object,
       const CefV8ValueList& arguments)  {
-  CEF_REQUIRE_RT_RETURN(false);
-  CEF_V8_REQUIRE_FUNCTION_RETURN(false);
+  CEF_REQUIRE_RT_RETURN(NULL);
+  CEF_V8_REQUIRE_FUNCTION_RETURN(NULL);
 
   v8::HandleScope handle_scope;
 

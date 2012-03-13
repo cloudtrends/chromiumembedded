@@ -103,15 +103,17 @@ CefBinaryValueImpl::CefBinaryValueImpl(base::BinaryValue* value,
                                        void* parent_value,
                                        ValueMode value_mode,
                                        CefValueController* controller)
-  : parent(value, parent_value, value_mode, true, controller) {
+  : CefValueBase<CefBinaryValue, base::BinaryValue>(
+        value, parent_value, value_mode, true, controller) {
 }
 
 CefBinaryValueImpl::CefBinaryValueImpl(char* data,
                                        size_t data_size,
                                        bool copy)
-  : parent(copy ? base::BinaryValue::CreateWithCopiedBuffer(data, data_size) :
-                  base::BinaryValue::Create(data, data_size),
-           NULL, kOwnerWillDelete, true, NULL) {
+  : CefValueBase<CefBinaryValue, base::BinaryValue>(
+        copy ? base::BinaryValue::CreateWithCopiedBuffer(data, data_size) :
+               base::BinaryValue::Create(data, data_size),
+        NULL, kOwnerWillDelete, true, NULL) {
 }
 
 
@@ -456,7 +458,8 @@ CefDictionaryValueImpl::CefDictionaryValueImpl(
     ValueMode value_mode,
     bool read_only,
     CefValueController* controller)
-  : parent(value, parent_value, value_mode, read_only, controller) {
+  : CefValueBase<CefDictionaryValue, base::DictionaryValue>(
+        value, parent_value, value_mode, read_only, controller) {
 }
 
 
@@ -804,5 +807,6 @@ CefListValueImpl::CefListValueImpl(
     ValueMode value_mode,
     bool read_only,
     CefValueController* controller)
-  : parent(value, parent_value, value_mode, read_only, controller) {
+  : CefValueBase<CefListValue, base::ListValue>(
+        value, parent_value, value_mode, read_only, controller) {
 }

@@ -203,8 +203,6 @@ class CefValueControllerNonThreadSafe : public CefValueController {
 template<class CefType, class ValueType>
 class CefValueBase : public CefType, public CefValueController::Object {
  public:
-  typedef typename CefValueBase<CefType, ValueType> parent;
-
   // Specifies how the value will be used.
   enum ValueMode {
     // A reference to a value managed by an existing controller. These values

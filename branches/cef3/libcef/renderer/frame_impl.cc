@@ -89,7 +89,7 @@ void CefFrameImpl::GetSource(CefRefPtr<CefStringVisitor> visitor) {
   CEF_REQUIRE_RT_RETURN_VOID();
 
   if (frame_) {
-    CefString content = frame_->contentAsMarkup().utf8();
+    CefString content = std::string(frame_->contentAsMarkup().utf8());
     visitor->Visit(content);
   }
 }

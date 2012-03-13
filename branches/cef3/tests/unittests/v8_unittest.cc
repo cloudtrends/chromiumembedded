@@ -213,7 +213,7 @@ class V8RendererTest : public TestApp::Test {
     EXPECT_TRUE(value->IsUInt());
     EXPECT_TRUE(value->IsDouble());
     EXPECT_EQ(12, value->GetIntValue());
-    EXPECT_EQ(12, value->GetUIntValue());
+    EXPECT_EQ((uint32)12, value->GetUIntValue());
     EXPECT_EQ(12, value->GetDoubleValue());
 
     EXPECT_FALSE(value->IsUndefined());
@@ -235,7 +235,7 @@ class V8RendererTest : public TestApp::Test {
     EXPECT_TRUE(value->IsUInt());
     EXPECT_TRUE(value->IsDouble());
     EXPECT_EQ(12, value->GetIntValue());
-    EXPECT_EQ(12, value->GetUIntValue());
+    EXPECT_EQ((uint32)12, value->GetUIntValue());
     EXPECT_EQ(12, value->GetDoubleValue());
 
     EXPECT_FALSE(value->IsUndefined());
@@ -524,9 +524,10 @@ class V8RendererTest : public TestApp::Test {
     // Enter the V8 context.
     EXPECT_TRUE(context->Enter());
 
-    CefRefPtr<Accessor> accessor = new Accessor;
+    Accessor* accessor = new Accessor;
+    CefRefPtr<CefV8Accessor> accessorPtr(accessor);
 
-    CefRefPtr<CefV8Value> object = CefV8Value::CreateObject(accessor.get());
+    CefRefPtr<CefV8Value> object = CefV8Value::CreateObject(accessor);
     EXPECT_TRUE(object.get());
     accessor->object_ = object;
 
@@ -598,9 +599,10 @@ class V8RendererTest : public TestApp::Test {
     EXPECT_TRUE(context->Enter());
 
     CefRefPtr<CefV8Exception> exception;
-    CefRefPtr<Accessor> accessor = new Accessor;
+    Accessor* accessor = new Accessor;
+    CefRefPtr<CefV8Accessor> accessorPtr(accessor);
 
-    CefRefPtr<CefV8Value> object = CefV8Value::CreateObject(accessor.get());
+    CefRefPtr<CefV8Value> object = CefV8Value::CreateObject(accessor);
     EXPECT_TRUE(object.get());
 
     EXPECT_FALSE(object->HasValue(kName));
@@ -669,9 +671,10 @@ class V8RendererTest : public TestApp::Test {
     EXPECT_TRUE(context->Enter());
 
     CefRefPtr<CefV8Exception> exception;
-    CefRefPtr<Accessor> accessor = new Accessor;
+    Accessor* accessor = new Accessor;
+    CefRefPtr<CefV8Accessor> accessorPtr(accessor);
 
-    CefRefPtr<CefV8Value> object = CefV8Value::CreateObject(accessor.get());
+    CefRefPtr<CefV8Value> object = CefV8Value::CreateObject(accessor);
     EXPECT_TRUE(object.get());
 
     EXPECT_FALSE(object->HasValue(kName));
@@ -732,9 +735,10 @@ class V8RendererTest : public TestApp::Test {
     EXPECT_TRUE(context->Enter());
 
     CefRefPtr<CefV8Exception> exception;
-    CefRefPtr<Accessor> accessor = new Accessor;
+    Accessor* accessor = new Accessor;
+    CefRefPtr<CefV8Accessor> accessorPtr(accessor);
 
-    CefRefPtr<CefV8Value> object = CefV8Value::CreateObject(accessor.get());
+    CefRefPtr<CefV8Value> object = CefV8Value::CreateObject(accessor);
     EXPECT_TRUE(object.get());
 
     EXPECT_FALSE(object->HasValue(kName));
@@ -1086,10 +1090,11 @@ class V8RendererTest : public TestApp::Test {
     // Enter the V8 context.
     EXPECT_TRUE(context->Enter());
 
-    CefRefPtr<Handler> handler = new Handler;
+    Handler* handler = new Handler;
+    CefRefPtr<CefV8Handler> handlerPtr(handler);
 
     CefRefPtr<CefV8Value> func =
-        CefV8Value::CreateFunction(kFuncName, handler.get());
+        CefV8Value::CreateFunction(kFuncName, handler);
     EXPECT_TRUE(func.get());
 
     CefRefPtr<CefV8Value> obj = CefV8Value::CreateObject(NULL);
@@ -1142,10 +1147,11 @@ class V8RendererTest : public TestApp::Test {
     // Enter the V8 context.
     EXPECT_TRUE(context->Enter());
 
-    CefRefPtr<Handler> handler = new Handler;
+    Handler* handler = new Handler;
+    CefRefPtr<CefV8Handler> handlerPtr(handler);
 
     CefRefPtr<CefV8Value> func =
-        CefV8Value::CreateFunction("myfunc", handler.get());
+        CefV8Value::CreateFunction("myfunc", handler);
     EXPECT_TRUE(func.get());
 
     CefV8ValueList args;
@@ -1187,10 +1193,11 @@ class V8RendererTest : public TestApp::Test {
     // Enter the V8 context.
     EXPECT_TRUE(context->Enter());
 
-    CefRefPtr<Handler> handler = new Handler;
+    Handler* handler = new Handler;
+    CefRefPtr<CefV8Handler> handlerPtr(handler);
 
     CefRefPtr<CefV8Value> func =
-        CefV8Value::CreateFunction("myfunc", handler.get());
+        CefV8Value::CreateFunction("myfunc", handler);
     EXPECT_TRUE(func.get());
 
     CefV8ValueList args;
@@ -1237,10 +1244,11 @@ class V8RendererTest : public TestApp::Test {
     // Enter the V8 context.
     EXPECT_TRUE(context->Enter());
 
-    CefRefPtr<Handler> handler = new Handler;
+    Handler* handler = new Handler;
+    CefRefPtr<CefV8Handler> handlerPtr(handler);
 
     CefRefPtr<CefV8Value> func =
-        CefV8Value::CreateFunction("myfunc", handler.get());
+        CefV8Value::CreateFunction("myfunc", handler);
     EXPECT_TRUE(func.get());
 
     CefV8ValueList args;
@@ -1283,11 +1291,12 @@ class V8RendererTest : public TestApp::Test {
     // Enter the V8 context.
     EXPECT_TRUE(context->Enter());
 
-    CefRefPtr<Handler> handler = new Handler;
+    Handler* handler = new Handler;
+    CefRefPtr<CefV8Handler> handlerPtr(handler);
     handler->context_ = context;
 
     CefRefPtr<CefV8Value> func =
-        CefV8Value::CreateFunction("myfunc", handler.get());
+        CefV8Value::CreateFunction("myfunc", handler);
     EXPECT_TRUE(func.get());
 
     // Exit the V8 context.
@@ -1408,14 +1417,15 @@ class V8RendererTest : public TestApp::Test {
         IMPLEMENT_REFCOUNTING(Handler);
       };
 
-      CefRefPtr<Handler> handler = new Handler;
+      Handler* handler = new Handler;
+      CefRefPtr<CefV8Handler> handlerPtr(handler);
 
       // main frame context
       handler->context_ = GetContext();
 
       // Function that will be called from the parent frame context.
       CefRefPtr<CefV8Value> func =
-          CefV8Value::CreateFunction("v8_context_entered_test", handler.get());
+          CefV8Value::CreateFunction("v8_context_entered_test", handler);
       EXPECT_TRUE(func.get());
 
       CefRefPtr<CefV8Value> object = context->GetGlobal();
