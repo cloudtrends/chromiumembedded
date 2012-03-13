@@ -63,7 +63,7 @@ void ClientHandler::OnAddressChange(CefRefPtr<CefBrowser> browser,
                                     const CefString& url) {
   REQUIRE_UI_THREAD();
 
-  if (m_BrowserHwnd == browser->GetWindowHandle() && frame->IsMain()) {
+  if (m_BrowserId == browser->GetIdentifier() && frame->IsMain()) {
     // Set the edit window text
     NSTextField* textField = (NSTextField*)m_EditHwnd;
     std::string urlStr(url);
@@ -77,7 +77,7 @@ void ClientHandler::OnTitleChange(CefRefPtr<CefBrowser> browser,
   REQUIRE_UI_THREAD();
 
   // Set the frame window title bar
-  NSView* view = (NSView*)browser->GetWindowHandle();
+  NSView* view = (NSView*)browser->GetHost()->GetWindowHandle();
   NSWindow* window = [view window];
   std::string titleStr(title);
   NSString* str = [NSString stringWithUTF8String:titleStr.c_str()];
