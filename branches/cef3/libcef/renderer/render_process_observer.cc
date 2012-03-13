@@ -46,6 +46,10 @@ void CefRenderProcessObserver::WebKitInitialized() {
   WebKit::WebRuntimeFeatures::enableMediaPlayer(
       media::IsMediaLibraryInitialized());
 
+  // TODO(cef): Enable these once the implementation supports it.
+  WebKit::WebRuntimeFeatures::enableNotifications(false);
+  WebKit::WebRuntimeFeatures::enableGeolocation(false);
+
   // Notify the render process handler.
   CefRefPtr<CefApp> application = CefContentClient::Get()->application();
   if (application.get()) {
