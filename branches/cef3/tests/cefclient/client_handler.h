@@ -22,7 +22,8 @@ class ClientHandler : public CefClient,
                       public CefLifeSpanHandler,
                       public CefLoadHandler,
                       public CefRequestHandler,
-                      public CefDisplayHandler {
+                      public CefDisplayHandler,
+                      public CefGeolocationHandler {
  public:
   ClientHandler();
   virtual ~ClientHandler();
@@ -38,6 +39,9 @@ class ClientHandler : public CefClient,
     return this;
   }
   virtual CefRefPtr<CefDisplayHandler> GetDisplayHandler() OVERRIDE {
+    return this;
+  }
+  virtual CefRefPtr<CefGeolocationHandler> GetGeolocationHandler() OVERRIDE {
     return this;
   }
 
@@ -84,6 +88,13 @@ class ClientHandler : public CefClient,
                                 const CefString& message,
                                 const CefString& source,
                                 int line) OVERRIDE;
+
+  // CefGeolocationHandler methods
+  virtual void OnRequestGeolocationPermission(
+      CefRefPtr<CefBrowser> browser,
+      const CefString& requesting_url,
+      int request_id,
+      CefRefPtr<CefGeolocationCallback> callback) OVERRIDE;
 
   void SetMainHwnd(CefWindowHandle hwnd);
   CefWindowHandle GetMainHwnd() { return m_MainHwnd; }

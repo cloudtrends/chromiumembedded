@@ -3,15 +3,18 @@
 // found in the LICENSE file.
 
 #include "libcef/browser/content_browser_client.h"
+#include "libcef/browser/browser_context.h"
 #include "libcef/browser/browser_host_impl.h"
 #include "libcef/browser/browser_main.h"
 #include "libcef/browser/browser_message_filter.h"
 #include "libcef/browser/browser_settings.h"
+#include "libcef/browser/context.h"
 #include "libcef/browser/thread_util.h"
 #include "libcef/common/cef_switches.h"
 
 #include "base/command_line.h"
 #include "base/file_path.h"
+#include "content/public/browser/access_token_store.h"
 #include "content/public/common/content_switches.h"
 #include "googleurl/src/gurl.h"
 #include "third_party/skia/include/core/SkBitmap.h"
@@ -25,6 +28,31 @@
 #elif defined(OS_MACOSX)
 #include "content/browser/tab_contents/web_contents_view_mac.h"
 #endif
+
+namespace {
+
+// In-memory store for access tokens used by geolocation.
+class CefAccessTokenStore : public content::AccessTokenStore {
+ public:
+  CefAccessTokenStore() {}
+
+  virtual void LoadAccessTokens(
+      const LoadAccessTokensCallbackType& callback) OVERRIDE {
+    callback.Run(access_token_set_,
+        _Context->browser_context()->GetRequestContext());
+  }
+
+  virtual void SaveAccessToken(
+      const GURL& server_url, const string16& access_token) OVERRIDE {
+    access_token_set_[server_url] = access_token;
+  }
+
+ private:
+  AccessTokenSet access_token_set_;
+};
+
+}  // namespace
+
 
 CefContentBrowserClient::CefContentBrowserClient()
     : browser_main_parts_(NULL) {
@@ -324,7 +352,7 @@ net::NetLog* CefContentBrowserClient::GetNetLog() {
 }
 
 content::AccessTokenStore* CefContentBrowserClient::CreateAccessTokenStore() {
-  return NULL;
+  return new CefAccessTokenStore;
 }
 
 bool CefContentBrowserClient::IsFastShutdownPossible() {

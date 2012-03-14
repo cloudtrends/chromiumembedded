@@ -34,76 +34,61 @@
 // tools directory for more information.
 //
 
-#ifndef CEF_INCLUDE_CEF_CLIENT_H_
-#define CEF_INCLUDE_CEF_CLIENT_H_
+#ifndef CEF_INCLUDE_CEF_GEOLOCATION_HANDLER_H_
+#define CEF_INCLUDE_CEF_GEOLOCATION_HANDLER_H_
 #pragma once
 
 #include "include/cef_base.h"
-#include "include/cef_display_handler.h"
-#include "include/cef_geolocation_handler.h"
-#include "include/cef_life_span_handler.h"
-#include "include/cef_load_handler.h"
-#include "include/cef_process_message.h"
-#include "include/cef_request_handler.h"
+#include "include/cef_browser.h"
 
 ///
-// Implement this interface to provide handler implementations.
+// Callback interface used for asynchronous continuation of geolocation
+// permission requests.
 ///
-/*--cef(source=client,no_debugct_check)--*/
-class CefClient : public virtual CefBase {
+/*--cef(source=library)--*/
+class CefGeolocationCallback : public virtual CefBase {
  public:
   ///
-  // Return the handler for browser life span events.
+  // Call to allow or deny geolocation access.
+  ///
+  /*--cef(capi_name=cont)--*/
+  virtual void Continue(bool allow) =0;
+};
+
+
+///
+// Implement this interface to handle events related to geolocation permission
+// requests. The methods of this class will be called on the browser process IO
+// thread.
+///
+/*--cef(source=client)--*/
+class CefGeolocationHandler : public virtual CefBase {
+ public:
+  ///
+  // Called when a page requests permission to access geolocation information.
+  // |requesting_url| is the URL requesting permission and |request_id| is the
+  // unique ID for the permission request. Call CefGeolocationCallback::Continue
+  // to allow or deny the permission request.
   ///
   /*--cef()--*/
-  virtual CefRefPtr<CefLifeSpanHandler> GetLifeSpanHandler() {
-    return NULL;
+  virtual void OnRequestGeolocationPermission(
+      CefRefPtr<CefBrowser> browser,
+      const CefString& requesting_url,
+      int request_id,
+      CefRefPtr<CefGeolocationCallback> callback) {
   }
 
   ///
-  // Return the handler for browser load status events.
+  // Called when a geolocation access request is canceled. |requesting_url| is
+  // the URL that originally requested permission and |request_id| is the unique
+  // ID for the permission request.
   ///
   /*--cef()--*/
-  virtual CefRefPtr<CefLoadHandler> GetLoadHandler() {
-    return NULL;
-  }
-
-  ///
-  // Return the handler for browser request events.
-  ///
-  /*--cef()--*/
-  virtual CefRefPtr<CefRequestHandler> GetRequestHandler() {
-    return NULL;
-  }
-
-  ///
-  // Return the handler for browser display state events.
-  ///
-  /*--cef()--*/
-  virtual CefRefPtr<CefDisplayHandler> GetDisplayHandler() {
-    return NULL;
-  }
-
-  ///
-  // Return the handler for geolocation permissions requests. If no handler is
-  // provided geolocation access will be denied by default.
-  ///
-  /*--cef()--*/
-  virtual CefRefPtr<CefGeolocationHandler> GetGeolocationHandler() {
-    return NULL;
-  }
-
-  ///
-  // Called when a new message is received from a different process. Return true
-  // if the message was handled or false otherwise. Do not keep a reference to
-  // or attempt to access the message outside of this callback.
-  ///
-  /*--cef()--*/
-  virtual bool OnProcessMessageRecieved(CefRefPtr<CefBrowser> browser,
-                                        CefProcessId source_process,
-                                        CefRefPtr<CefProcessMessage> message) {
-    return false;
+  virtual void OnCancelGeolocationPermission(
+      CefRefPtr<CefBrowser> browser,
+      const CefString& requesting_url,
+      int request_id) {
   }
 };
 
-#endif  // CEF_INCLUDE_CEF_CLIENT_H_
+#endif  // CEF_INCLUDE_CEF_GEOLOCATION_HANDLER_H_

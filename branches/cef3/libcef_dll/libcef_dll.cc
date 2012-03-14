@@ -29,6 +29,7 @@
 #include "libcef_dll/cpptoc/callback_cpptoc.h"
 #include "libcef_dll/cpptoc/dictionary_value_cpptoc.h"
 #include "libcef_dll/cpptoc/frame_cpptoc.h"
+#include "libcef_dll/cpptoc/geolocation_callback_cpptoc.h"
 #include "libcef_dll/cpptoc/list_value_cpptoc.h"
 #include "libcef_dll/cpptoc/post_data_cpptoc.h"
 #include "libcef_dll/cpptoc/post_data_element_cpptoc.h"
@@ -44,6 +45,7 @@
 #include "libcef_dll/cpptoc/zip_reader_cpptoc.h"
 #include "libcef_dll/ctocpp/app_ctocpp.h"
 #include "libcef_dll/ctocpp/display_handler_ctocpp.h"
+#include "libcef_dll/ctocpp/geolocation_handler_ctocpp.h"
 #include "libcef_dll/ctocpp/life_span_handler_ctocpp.h"
 #include "libcef_dll/ctocpp/load_handler_ctocpp.h"
 #include "libcef_dll/ctocpp/proxy_handler_ctocpp.h"
@@ -135,6 +137,8 @@ CEF_EXPORT void cef_shutdown() {
   DCHECK_EQ(CefDictionaryValueCppToC::DebugObjCt, 0);
   DCHECK_EQ(CefDisplayHandlerCToCpp::DebugObjCt, 0);
   DCHECK_EQ(CefFrameCppToC::DebugObjCt, 0);
+  DCHECK_EQ(CefGeolocationCallbackCppToC::DebugObjCt, 0);
+  DCHECK_EQ(CefGeolocationHandlerCToCpp::DebugObjCt, 0);
   DCHECK_EQ(CefLifeSpanHandlerCToCpp::DebugObjCt, 0);
   DCHECK_EQ(CefListValueCppToC::DebugObjCt, 0);
   DCHECK_EQ(CefLoadHandlerCToCpp::DebugObjCt, 0);

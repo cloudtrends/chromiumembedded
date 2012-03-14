@@ -14,6 +14,7 @@
 #include "libcef_dll/cpptoc/process_message_cpptoc.h"
 #include "libcef_dll/ctocpp/client_ctocpp.h"
 #include "libcef_dll/ctocpp/display_handler_ctocpp.h"
+#include "libcef_dll/ctocpp/geolocation_handler_ctocpp.h"
 #include "libcef_dll/ctocpp/life_span_handler_ctocpp.h"
 #include "libcef_dll/ctocpp/load_handler_ctocpp.h"
 #include "libcef_dll/ctocpp/request_handler_ctocpp.h"
@@ -71,6 +72,20 @@ CefRefPtr<CefDisplayHandler> CefClientCToCpp::GetDisplayHandler() {
 
   // Return type: refptr_same
   return CefDisplayHandlerCToCpp::Wrap(_retval);
+}
+
+CefRefPtr<CefGeolocationHandler> CefClientCToCpp::GetGeolocationHandler() {
+  if (CEF_MEMBER_MISSING(struct_, get_geolocation_handler))
+    return NULL;
+
+  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
+
+  // Execute
+  cef_geolocation_handler_t* _retval = struct_->get_geolocation_handler(
+      struct_);
+
+  // Return type: refptr_same
+  return CefGeolocationHandlerCToCpp::Wrap(_retval);
 }
 
 bool CefClientCToCpp::OnProcessMessageRecieved(CefRefPtr<CefBrowser> browser,

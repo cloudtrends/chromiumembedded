@@ -12,6 +12,7 @@
 
 #include "libcef_dll/cpptoc/client_cpptoc.h"
 #include "libcef_dll/cpptoc/display_handler_cpptoc.h"
+#include "libcef_dll/cpptoc/geolocation_handler_cpptoc.h"
 #include "libcef_dll/cpptoc/life_span_handler_cpptoc.h"
 #include "libcef_dll/cpptoc/load_handler_cpptoc.h"
 #include "libcef_dll/cpptoc/request_handler_cpptoc.h"
@@ -85,6 +86,22 @@ struct _cef_display_handler_t* CEF_CALLBACK client_get_display_handler(
   return CefDisplayHandlerCppToC::Wrap(_retval);
 }
 
+struct _cef_geolocation_handler_t* CEF_CALLBACK client_get_geolocation_handler(
+    struct _cef_client_t* self) {
+  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
+
+  DCHECK(self);
+  if (!self)
+    return NULL;
+
+  // Execute
+  CefRefPtr<CefGeolocationHandler> _retval = CefClientCppToC::Get(
+      self)->GetGeolocationHandler();
+
+  // Return type: refptr_same
+  return CefGeolocationHandlerCppToC::Wrap(_retval);
+}
+
 int CEF_CALLBACK client_on_process_message_recieved(struct _cef_client_t* self,
     cef_browser_t* browser, enum cef_process_id_t source_process,
     struct _cef_process_message_t* message) {
@@ -121,6 +138,7 @@ CefClientCppToC::CefClientCppToC(CefClient* cls)
   struct_.struct_.get_load_handler = client_get_load_handler;
   struct_.struct_.get_request_handler = client_get_request_handler;
   struct_.struct_.get_display_handler = client_get_display_handler;
+  struct_.struct_.get_geolocation_handler = client_get_geolocation_handler;
   struct_.struct_.on_process_message_recieved =
       client_on_process_message_recieved;
 }

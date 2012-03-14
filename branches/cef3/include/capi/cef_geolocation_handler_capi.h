@@ -34,8 +34,8 @@
 // more information.
 //
 
-#ifndef CEF_INCLUDE_CAPI_CEF_CLIENT_CAPI_H_
-#define CEF_INCLUDE_CAPI_CEF_CLIENT_CAPI_H_
+#ifndef CEF_INCLUDE_CAPI_CEF_GEOLOCATION_HANDLER_CAPI_H_
+#define CEF_INCLUDE_CAPI_CEF_GEOLOCATION_HANDLER_CAPI_H_
 #pragma once
 
 #ifdef __cplusplus
@@ -46,58 +46,59 @@ extern "C" {
 
 
 ///
-// Implement this structure to provide handler implementations.
+// Callback structure used for asynchronous continuation of geolocation
+// permission requests.
 ///
-typedef struct _cef_client_t {
+typedef struct _cef_geolocation_callback_t {
   ///
   // Base structure.
   ///
   cef_base_t base;
 
   ///
-  // Return the handler for browser life span events.
+  // Call to allow or deny geolocation access.
   ///
-  struct _cef_life_span_handler_t* (CEF_CALLBACK *get_life_span_handler)(
-      struct _cef_client_t* self);
+  void (CEF_CALLBACK *cont)(struct _cef_geolocation_callback_t* self,
+      int allow);
+} cef_geolocation_callback_t;
+
+
+///
+// Implement this structure to handle events related to geolocation permission
+// requests. The functions of this structure will be called on the browser
+// process IO thread.
+///
+typedef struct _cef_geolocation_handler_t {
+  ///
+  // Base structure.
+  ///
+  cef_base_t base;
 
   ///
-  // Return the handler for browser load status events.
+  // Called when a page requests permission to access geolocation information.
+  // |requesting_url| is the URL requesting permission and |request_id| is the
+  // unique ID for the permission request. Call
+  // cef_geolocation_callback_t::Continue to allow or deny the permission
+  // request.
   ///
-  struct _cef_load_handler_t* (CEF_CALLBACK *get_load_handler)(
-      struct _cef_client_t* self);
+  void (CEF_CALLBACK *on_request_geolocation_permission)(
+      struct _cef_geolocation_handler_t* self, struct _cef_browser_t* browser,
+      const cef_string_t* requesting_url, int request_id,
+      struct _cef_geolocation_callback_t* callback);
 
   ///
-  // Return the handler for browser request events.
+  // Called when a geolocation access request is canceled. |requesting_url| is
+  // the URL that originally requested permission and |request_id| is the unique
+  // ID for the permission request.
   ///
-  struct _cef_request_handler_t* (CEF_CALLBACK *get_request_handler)(
-      struct _cef_client_t* self);
-
-  ///
-  // Return the handler for browser display state events.
-  ///
-  struct _cef_display_handler_t* (CEF_CALLBACK *get_display_handler)(
-      struct _cef_client_t* self);
-
-  ///
-  // Return the handler for geolocation permissions requests. If no handler is
-  // provided geolocation access will be denied by default.
-  ///
-  struct _cef_geolocation_handler_t* (CEF_CALLBACK *get_geolocation_handler)(
-      struct _cef_client_t* self);
-
-  ///
-  // Called when a new message is received from a different process. Return true
-  // (1) if the message was handled or false (0) otherwise. Do not keep a
-  // reference to or attempt to access the message outside of this callback.
-  ///
-  int (CEF_CALLBACK *on_process_message_recieved)(struct _cef_client_t* self,
-      struct _cef_browser_t* browser, enum cef_process_id_t source_process,
-      struct _cef_process_message_t* message);
-} cef_client_t;
+  void (CEF_CALLBACK *on_cancel_geolocation_permission)(
+      struct _cef_geolocation_handler_t* self, struct _cef_browser_t* browser,
+      const cef_string_t* requesting_url, int request_id);
+} cef_geolocation_handler_t;
 
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif  // CEF_INCLUDE_CAPI_CEF_CLIENT_CAPI_H_
+#endif  // CEF_INCLUDE_CAPI_CEF_GEOLOCATION_HANDLER_CAPI_H_

@@ -36,6 +36,7 @@
 #define ID_TESTS_HTML5VIDEO             32769
 #define ID_TESTS_XMLHTTPREQUEST         32770
 #define ID_TESTS_DRAGDROP               32771
+#define ID_TESTS_GEOLOCATION            32772
 #define IDC_STATIC                      -1
 #define IDS_LOGO                        1000
 #define IDS_LOGOBALL                    1001

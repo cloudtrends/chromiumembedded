@@ -16,12 +16,11 @@ class CefAuthCallbackImpl : public CefAuthCallback {
  public:
   CefAuthCallbackImpl(const net::NetworkDelegate::AuthCallback& callback,
                       net::AuthCredentials* credentials)
-      : is_pending(true),
-        callback_(callback),
+      : callback_(callback),
         credentials_(credentials) {
   }
   ~CefAuthCallbackImpl() {
-    if (is_pending) {
+    if (!callback_.is_null()) {
       // The auth callback is still pending. Cancel it now.
       if (CEF_CURRENTLY_ON_IOT()) {
         CancelNow(callback_);
@@ -35,10 +34,10 @@ class CefAuthCallbackImpl : public CefAuthCallback {
   virtual void Continue(const CefString& username,
                         const CefString& password) OVERRIDE {
     if (CEF_CURRENTLY_ON_IOT()) {
-      if (is_pending) {
+      if (!callback_.is_null()) {
         credentials_->Set(username, password);
         callback_.Run(net::NetworkDelegate::AUTH_REQUIRED_RESPONSE_SET_AUTH);
-        is_pending = false;
+        callback_.Reset();
       }
     } else {
       CEF_POST_TASK(CEF_IOT,
@@ -48,27 +47,26 @@ class CefAuthCallbackImpl : public CefAuthCallback {
 
   virtual void Cancel() OVERRIDE {
     if (CEF_CURRENTLY_ON_IOT()) {
-      if (is_pending) {
+      if (!callback_.is_null()) {
         CancelNow(callback_);
-        is_pending = false;
+        callback_.Reset();
       }
     } else {
       CEF_POST_TASK(CEF_IOT, base::Bind(&CefAuthCallbackImpl::Cancel, this));
     }
   }
 
+  void Disconnect() {
+    callback_.Reset();
+  }
+
+ private:
   static void CancelNow(const net::NetworkDelegate::AuthCallback& callback) {
     CEF_REQUIRE_IOT();
     callback.Run(net::NetworkDelegate::AUTH_REQUIRED_RESPONSE_NO_ACTION);
   }
 
-  void Disconnect() {
-    is_pending = false;
-  }
-
- private:
-  bool is_pending;
-  const net::NetworkDelegate::AuthCallback& callback_;
+  net::NetworkDelegate::AuthCallback callback_;
   net::AuthCredentials* credentials_;
 
   IMPLEMENT_REFCOUNTING(CefAuthCallbackImpl);

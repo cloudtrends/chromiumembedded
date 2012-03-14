@@ -381,3 +381,7 @@ void RunXMLHTTPRequestTest(CefRefPtr<CefBrowser> browser) {
 void RunDragDropTest(CefRefPtr<CefBrowser> browser) {
   browser->GetMainFrame()->LoadURL("http://html5demos.com/drag");
 }
+
+void RunGeolocationTest(CefRefPtr<CefBrowser> browser) {
+  browser->GetMainFrame()->LoadURL("http://html5demos.com/geo");
+}

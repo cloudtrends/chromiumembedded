@@ -46,6 +46,7 @@ void RunWebGLTest(CefRefPtr<CefBrowser> browser);
 void RunHTML5VideoTest(CefRefPtr<CefBrowser> browser);
 void RunXMLHTTPRequestTest(CefRefPtr<CefBrowser> browser);
 void RunDragDropTest(CefRefPtr<CefBrowser> browser);
+void RunGeolocationTest(CefRefPtr<CefBrowser> browser);
 
 #if defined(OS_WIN)
 void RunTransparentPopupTest(CefRefPtr<CefBrowser> browser);
