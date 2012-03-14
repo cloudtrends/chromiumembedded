@@ -27,9 +27,7 @@ Debug       Contains libcef.dll and other components required to run the debug
 
 docs        Contains C++ API documentation generated from the CEF header files.
 
-include     Contains all required CEF and NPAPI-related header files.  Read
-            the include/internal/npapi/README-TRANSFER.txt file for more
-            information about the NPAPI-related header files.
+include     Contains all required CEF header files.
 
 lib         Contains Debug and Release versions of the libcef.lib library file
             that all CEF-based applications must link against.
@@ -72,22 +70,26 @@ Required components:
 * Unicode support
     icudt.dll
 
-* Localized resources
-    locales/
-  Note: A .pak file is loaded from this folder based on the value of
-  CefSettings.locale. Only configured locales need to be distributed. If no
-  locale is configured the default locale of "en-US" will be used. The
-  locales folder must exist in the same directory as libcef.dll.
-
-* Other resources
-    chrome.pak
-  Note: The chrome.pak file must exist in the same directory as libcef.dll.
-
 Optional components:
 
+* Localized resources
+    locales/
+  Note: Contains localized strings for WebKit UI controls. A .pak file is loaded
+  from this folder based on the CefSettings.locale value. Only configured
+  locales need to be distributed. If no locale is configured the default locale
+  of "en-US" will be used. Locale file loading can be disabled completely using
+  CefSettings.pack_loading_disabled. The locales folder path can be customized
+  using CefSettings.locales_dir_path.
+
+* Other resources
+    cef.pak
+  Note: Contains WebKit image and inspector resources. Pack file loading can be
+  disabled completely using CefSettings.pack_loading_disabled. The cef.pak file
+  path can be customized using CefSettings.pack_file_path.
+
 * FFmpeg audio and video support
-    avcodec-53.dll
-    avformat-53.dll
+    avcodec-54.dll
+    avformat-54.dll
     avutil-51.dll
   Note: Without these components HTML5 audio and video will not function.
 
@@ -96,11 +98,8 @@ Optional components:
     d3dx9_43.dll
     libEGL.dll
     libGLESv2.dll
-  Note: Without these components the default ANGLE_IN_PROCESS graphics
-  implementation for HTML5 accelerated content like 2D canvas, 3D CSS and
-  WebGL will not function. To use the desktop GL graphics implementation which
-  does not require these components (and does not work on all systems) set
-  CefSettings.graphics_implementation to DESKTOP_IN_PROCESS.
+  Note: Without these components HTML5 accelerated content like 2D canvas, 3D
+  CSS and WebGL will not function.
 
 
 LICENSING

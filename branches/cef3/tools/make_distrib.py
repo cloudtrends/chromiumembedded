@@ -159,6 +159,9 @@ script_dir = os.path.dirname(__file__)
 # CEF root directory
 cef_dir = os.path.abspath(os.path.join(script_dir, os.pardir))
 
+# src directory
+src_dir = os.path.abspath(os.path.join(cef_dir, os.pardir))
+
 # retrieve url, revision and date information
 cef_info = get_svn_info(cef_dir)
 cef_url = cef_info['url']
@@ -176,7 +179,7 @@ for line in lines:
   if len(parts) == 2:
     chrome[parts[0]] = parts[1]
 
-cef_ver = '1.'+chrome['BUILD']+'.'+cef_rev
+cef_ver = '3.'+chrome['BUILD']+'.'+cef_rev
 chromium_ver = chrome['MAJOR']+'.'+chrome['MINOR']+'.'+chrome['BUILD']+'.'+chrome['PATCH']
 
 # Test the operating system.
@@ -273,40 +276,44 @@ if platform == 'windows':
 
   # transfer build/Debug files
   if not options.allowpartial or path_exists(os.path.join(cef_dir, 'Debug')):
+    binary_dir = os.path.join(src_dir, 'build/Debug');
+    
     dst_dir = os.path.join(output_dir, 'Debug')
     make_dir(dst_dir, options.quiet)
     copy_files(os.path.join(script_dir, 'distrib/win/*.dll'), dst_dir, options.quiet)
-    copy_files(os.path.join(cef_dir, 'Debug/*.dll'), dst_dir, options.quiet)
-    copy_file(os.path.join(cef_dir, 'Debug/cefclient.exe'), dst_dir, options.quiet)
-    copy_file(os.path.join(cef_dir, 'Debug/chrome.pak'), dst_dir, options.quiet)
-    copy_dir(os.path.join(cef_dir, 'Debug/locales'), os.path.join(dst_dir, 'locales'), \
+    copy_files(os.path.join(binary_dir, '*.dll'), dst_dir, options.quiet)
+    copy_file(os.path.join(binary_dir, 'cefclient.exe'), dst_dir, options.quiet)
+    copy_file(os.path.join(binary_dir, 'cef.pak'), dst_dir, options.quiet)
+    copy_dir(os.path.join(binary_dir, 'locales'), os.path.join(dst_dir, 'locales'), \
              options.quiet)
   
     # transfer lib/Debug files
     dst_dir = os.path.join(output_dir, 'lib/Debug')
     make_dir(dst_dir, options.quiet)
-    copy_file(os.path.join(cef_dir, 'Debug/lib/libcef.lib'), dst_dir, options.quiet)
+    copy_file(os.path.join(binary_dir, 'lib/libcef.lib'), dst_dir, options.quiet)
   else:
     sys.stderr.write("No Debug build files.\n")
 
   # transfer build/Release files
   if not options.allowpartial or path_exists(os.path.join(cef_dir, 'Release')):
+    binary_dir = os.path.join(src_dir, 'build/Release');
+    
     dst_dir = os.path.join(output_dir, 'Release')
     make_dir(dst_dir, options.quiet)
     copy_files(os.path.join(script_dir, 'distrib/win/*.dll'), dst_dir, options.quiet)
-    copy_files(os.path.join(cef_dir, 'Release/*.dll'), dst_dir, options.quiet)
-    copy_file(os.path.join(cef_dir, 'Release/cefclient.exe'), dst_dir, options.quiet)
-    copy_file(os.path.join(cef_dir, 'Release/chrome.pak'), dst_dir, options.quiet)
-    copy_dir(os.path.join(cef_dir, 'Release/locales'), os.path.join(dst_dir, 'locales'), \
+    copy_files(os.path.join(binary_dir, '*.dll'), dst_dir, options.quiet)
+    copy_file(os.path.join(binary_dir, 'cefclient.exe'), dst_dir, options.quiet)
+    copy_file(os.path.join(binary_dir, 'cef.pak'), dst_dir, options.quiet)
+    copy_dir(os.path.join(binary_dir, 'locales'), os.path.join(dst_dir, 'locales'), \
              options.quiet)
 
     # transfer lib/Release files
     dst_dir = os.path.join(output_dir, 'lib/Release')
     make_dir(dst_dir, options.quiet)
-    copy_file(os.path.join(cef_dir, 'Release/lib/libcef.lib'), dst_dir, options.quiet)
+    copy_file(os.path.join(binary_dir, 'lib/libcef.lib'), dst_dir, options.quiet)
 
     # transfer symbols
-    copy_file(os.path.join(cef_dir, 'Release/libcef.pdb'), symbol_dir, options.quiet)
+    copy_file(os.path.join(binary_dir, 'libcef.pdb'), symbol_dir, options.quiet)
   else:
     sys.stderr.write("No Release build files.\n")
 
@@ -350,28 +357,28 @@ elif platform == 'macosx':
   if not options.allowpartial or path_exists(os.path.join(cef_dir, '../xcodebuild/Debug')):
     dst_dir = os.path.join(output_dir, 'Debug')
     make_dir(dst_dir, options.quiet)
-    copy_file(os.path.join(cef_dir, '../xcodebuild/Debug/ffmpegsumo.so'), dst_dir, options.quiet)
-    copy_file(os.path.join(cef_dir, '../xcodebuild/Debug/libcef.dylib'), dst_dir, options.quiet)
+    copy_file(os.path.join(src_dir, 'xcodebuild/Debug/ffmpegsumo.so'), dst_dir, options.quiet)
+    copy_file(os.path.join(src_dir, 'xcodebuild/Debug/libcef.dylib'), dst_dir, options.quiet)
   
   # transfer xcodebuild/Release files
   if not options.allowpartial or path_exists(os.path.join(cef_dir, '../xcodebuild/Release')):
     dst_dir = os.path.join(output_dir, 'Release')
     make_dir(dst_dir, options.quiet)
-    copy_file(os.path.join(cef_dir, '../xcodebuild/Release/ffmpegsumo.so'), dst_dir, options.quiet)
-    copy_file(os.path.join(cef_dir, '../xcodebuild/Release/libcef.dylib'), dst_dir, options.quiet)
+    copy_file(os.path.join(src_dir, 'xcodebuild/Release/ffmpegsumo.so'), dst_dir, options.quiet)
+    copy_file(os.path.join(src_dir, 'xcodebuild/Release/libcef.dylib'), dst_dir, options.quiet)
 
     # create the real dSYM file from the "fake" dSYM file
     sys.stdout.write("Creating the real dSYM file...\n")
-    src_path = os.path.join(cef_dir, '../xcodebuild/Release/libcef.dylib.dSYM/Contents/Resources/DWARF/libcef.dylib')
+    src_path = os.path.join(src_dir, 'xcodebuild/Release/libcef.dylib.dSYM/Contents/Resources/DWARF/libcef.dylib')
     dst_path = os.path.join(symbol_dir, 'libcef.dylib.dSYM')
     run('dsymutil '+src_path+' -o '+dst_path, cef_dir)
 
   # transfer resource files
   dst_dir = os.path.join(output_dir, 'Resources')
   make_dir(dst_dir, options.quiet)
-  copy_files(os.path.join(cef_dir, '../third_party/WebKit/Source/WebCore/Resources/*.*'), dst_dir, options.quiet)
-  copy_file(os.path.join(cef_dir, '../xcodebuild/Release/cefclient.app/Contents/Resources/chrome.pak'), dst_dir, options.quiet)
-  copy_files(os.path.join(cef_dir, '../xcodebuild/Release/cefclient.app/Contents/Resources/*.lproj'), dst_dir, options.quiet)
+  copy_files(os.path.join(src_dir, 'third_party/WebKit/Source/WebCore/Resources/*.*'), dst_dir, options.quiet)
+  copy_file(os.path.join(src_dir, 'xcodebuild/Release/cefclient.app/Contents/Resources/cef.pak'), dst_dir, options.quiet)
+  copy_files(os.path.join(src_dir, 'xcodebuild/Release/cefclient.app/Contents/Resources/*.lproj'), dst_dir, options.quiet)
   remove_dir(os.path.join(dst_dir, 'English.lproj'))
   
   # transfer additional files, if any
@@ -403,7 +410,7 @@ elif platform == 'linux':
     make_dir(dst_dir, options.quiet)
     copy_dir(os.path.join(linux_build_dir, 'Debug/lib.target'), os.path.join(dst_dir, 'lib.target'), options.quiet)
     copy_file(os.path.join(linux_build_dir, 'Debug/cefclient'), dst_dir, options.quiet)
-    copy_file(os.path.join(linux_build_dir, 'Debug/chrome.pak'), dst_dir, options.quiet)
+    copy_file(os.path.join(linux_build_dir, 'Debug/cef.pak'), dst_dir, options.quiet)
     copy_dir(os.path.join(linux_build_dir, 'Debug/locales'), os.path.join(dst_dir, 'locales'), options.quiet)
 
   else:
@@ -415,7 +422,7 @@ elif platform == 'linux':
     make_dir(dst_dir, options.quiet)
     copy_dir(os.path.join(linux_build_dir, 'Release/lib.target'), os.path.join(dst_dir, 'lib.target'), options.quiet)
     copy_file(os.path.join(linux_build_dir, 'Release/cefclient'), dst_dir, options.quiet)
-    copy_file(os.path.join(linux_build_dir, 'Release/chrome.pak'), dst_dir, options.quiet)
+    copy_file(os.path.join(linux_build_dir, 'Release/cef.pak'), dst_dir, options.quiet)
     copy_dir(os.path.join(linux_build_dir, 'Release/locales'), os.path.join(dst_dir, 'locales'), options.quiet)
 
   else:

@@ -42,7 +42,6 @@
 #define IDS_LOGOBALL                    1001
 #define IDS_LOCALSTORAGE                1002
 #define IDS_XMLHTTPREQUEST              1003
-#define IDS_TRANSPARENCY                1004
 
 // Avoid files associated with MacOS
 #define _X86_

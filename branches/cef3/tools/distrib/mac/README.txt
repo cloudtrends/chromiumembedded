@@ -26,9 +26,7 @@ Debug       Contains libcef.dylib and other components required to run the debug
 
 docs        Contains C++ API documentation generated from the CEF header files.
 
-include     Contains all required CEF and NPAPI-related header files.  Read
-            the include/internal/npapi/README-TRANSFER.txt file for more
-            information about the NPAPI-related header files.
+include     Contains all required CEF header files.
 
 libcef_dll  Contains the source code for the libcef_dll_wrapper static library
             that all applications using the CEF C++ API must link against.
@@ -66,18 +64,24 @@ Required components:
 * CEF core library
     libcef.dylib
 
-* Localized resources
-    Resources/*.lproj/
-  Note: A .pak file is loaded from this folder based on the value of
-  CefSettings.locale. Only configured locales need to be distributed. If no
-  locale is configured the default locale of "en" will be used.
-
-* Other resources
-    Resources/chrome.pak
+* Cursor resources
     Resources/*.png
     Resources/*.tiff
 
 Optional components:
+
+* Localized resources
+    Resources/*.lproj/
+  Note: Contains localized strings for WebKit UI controls. A .pak file is loaded
+  from this folder based on the CefSettings.locale value. Only configured
+  locales need to be distributed. If no locale is configured the default locale
+  of "en" will be used. Locale file loading can be disabled completely using
+  CefSettings.pack_loading_disabled.
+
+* Other resources
+    Resources/cef.pak
+  Note: Contains WebKit image and inspector resources. Pack file loading can be
+  disabled completely using CefSettings.pack_loading_disabled.
 
 * FFmpeg audio and video support
     ffmpegsumo.so

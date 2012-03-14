@@ -26,9 +26,7 @@ Debug       Contains libcef.so and other components required to run the debug
 
 docs        Contains C++ API documentation generated from the CEF header files.
 
-include     Contains all required CEF and NPAPI-related header files.  Read
-            the include/internal/npapi/README-TRANSFER.txt file for more
-            information about the NPAPI-related header files.
+include     Contains all required CEF header files.
 
 libcef_dll  Contains the source code for the libcef_dll_wrapper static library
             that all applications using the CEF C++ API must link against.
@@ -61,16 +59,23 @@ Required components:
 * CEF core library
     libcef.so
 
+Optional components:
+
 * Localized resources
     locales/
-  Note: A .pak file is loaded from this folder based on the value of
-  CefSettings.locale. Only configured locales need to be distributed. If no
-  locale is configured the default locale of "en-US" will be used. The
-  locales folder must exist in the same directory as the executable.
+  Note: Contains localized strings for WebKit UI controls. A .pak file is loaded
+  from this folder based on the value of environment variables which are read
+  with the following precedence order: LANGUAGE, LC_ALL, LC_MESSAGES and LANG.
+  Only configured locales need to be distributed. If no locale is configured the
+  default locale of "en-US" will be used. Locale file loading can be disabled
+  completely using CefSettings.pack_loading_disabled. The locales folder path
+  can be customized using CefSettings.locales_dir_path.
 
 * Other resources
-    chrome.pak
-  Note: The chrome.pak file must exist in the same directory as the executable.
+    cef.pak
+  Note: Contains WebKit image and inspector resources. Pack file loading can be
+  disabled completely using CefSettings.pack_loading_disabled. The cef.pak file
+  path can be customized using CefSettings.pack_file_path.
 
 
 LICENSING

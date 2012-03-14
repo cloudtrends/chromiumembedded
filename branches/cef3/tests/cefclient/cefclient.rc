@@ -32,7 +32,6 @@ IDS_LOGO BINARY "res\\logo.png"
 IDS_LOGOBALL BINARY "res\\logoball.png"
 IDS_LOCALSTORAGE BINARY "res\\localstorage.html"
 IDS_XMLHTTPREQUEST BINARY "res\\xmlhttprequest.html"
-IDS_TRANSPARENCY BINARY "res\\transparency.html"
 
 /////////////////////////////////////////////////////////////////////////////
 //
