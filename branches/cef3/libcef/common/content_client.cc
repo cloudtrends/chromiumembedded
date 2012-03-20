@@ -42,6 +42,11 @@ void CefContentClient::AddNPAPIPlugins(
     webkit::npapi::PluginList* plugin_list) {
 }
 
+bool CefContentClient::HasWebUIScheme(const GURL& url) const {
+  // There are no WebUI URLs in CEF.
+  return false;
+}
+
 bool CefContentClient::CanHandleWhileSwappedOut(const IPC::Message& msg) {
   return false;
 }

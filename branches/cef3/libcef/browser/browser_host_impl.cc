@@ -1028,10 +1028,6 @@ CefBrowserHostImpl::CefBrowserHostImpl(const CefWindowInfo& window_info,
 
   placeholder_frame_ =
       new CefFrameHostImpl(this, CefFrameHostImpl::kInvalidFrameId, true);
-
-  CefDevToolsDelegate* devtools_delegate = _Context->devtools_delegate();
-  if (devtools_delegate)
-    devtools_delegate->AddWebContents(tab_contents);
 }
 
 CefRefPtr<CefFrame> CefBrowserHostImpl::GetOrCreateFrame(

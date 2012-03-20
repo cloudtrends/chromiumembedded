@@ -44,7 +44,6 @@ class CefBrowserMainParts : public content::BrowserMainParts {
   virtual void PostDestroyThreads() OVERRIDE {}
 
   ui::Clipboard* GetClipboard();
-  CefDevToolsDelegate* devtools_delegate() { return devtools_delegate_; }
   CefBrowserContext* browser_context() const { return browser_context_.get(); }
 
  private:

@@ -5,21 +5,17 @@
 #include "libcef/browser/devtools_delegate.h"
 
 #include <algorithm>
-#include <string>
 
 #include "content/public/browser/devtools_http_handler.h"
-#include "content/public/browser/web_contents.h"
 #include "content/public/common/content_client.h"
 #include "grit/cef_resources.h"
 #include "net/url_request/url_request_context_getter.h"
 #include "ui/base/resource/resource_bundle.h"
 
-
 CefDevToolsDelegate::CefDevToolsDelegate(
     int port,
     net::URLRequestContextGetter* context_getter)
-    : content::WebContentsObserver(),
-      context_getter_(context_getter) {
+    : context_getter_(context_getter) {
   devtools_http_handler_ = content::DevToolsHttpHandler::Start(
       "127.0.0.1",
       port,
@@ -33,20 +29,6 @@ CefDevToolsDelegate::~CefDevToolsDelegate() {
 void CefDevToolsDelegate::Stop() {
   // The call below destroys this.
   devtools_http_handler_->Stop();
-}
-
-void CefDevToolsDelegate::WebContentsDestroyed(content::WebContents* contents) {
-  std::remove(web_contents_list_.begin(), web_contents_list_.end(), contents);
-}
-
-content::DevToolsHttpHandlerDelegate::InspectableTabs
-CefDevToolsDelegate::GetInspectableTabs() {
-  DevToolsHttpHandlerDelegate::InspectableTabs tabs;
-  std::vector<content::WebContents*>::iterator it = web_contents_list_.begin();
-  for (; it != web_contents_list_.end(); ++it) {
-    tabs.push_back(*it);
-  }
-  return tabs;
 }
 
 std::string CefDevToolsDelegate::GetDiscoveryPageHTML() {
@@ -65,9 +47,4 @@ bool CefDevToolsDelegate::BundlesFrontendResources() {
 
 std::string CefDevToolsDelegate::GetFrontendResourcesBaseURL() {
   return "";
-}
-
-void CefDevToolsDelegate::AddWebContents(content::WebContents* web_contents) {
-  web_contents_list_.push_back(web_contents);
-  Observe(web_contents);
 }

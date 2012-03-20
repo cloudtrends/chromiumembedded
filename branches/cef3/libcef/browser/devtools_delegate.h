@@ -8,9 +8,9 @@
 
 #include <vector>
 
+#include "base/basictypes.h"
 #include "base/compiler_specific.h"
 #include "content/public/browser/devtools_http_handler_delegate.h"
-#include "content/public/browser/web_contents_observer.h"
 
 namespace net {
 class URLRequestContextGetter;
@@ -20,9 +20,7 @@ namespace content {
 class DevToolsHttpHandler;
 }
 
-class CefDevToolsDelegate
-    : public content::DevToolsHttpHandlerDelegate,
-      public content::WebContentsObserver {
+class CefDevToolsDelegate : public content::DevToolsHttpHandlerDelegate {
  public:
   CefDevToolsDelegate(int port, net::URLRequestContextGetter* context_getter);
   virtual ~CefDevToolsDelegate();
@@ -30,21 +28,13 @@ class CefDevToolsDelegate
   // Stops http server.
   void Stop();
 
-  // WebContentsObserver overrides.
-  virtual void WebContentsDestroyed(content::WebContents* contents) OVERRIDE;
-
   // DevToolsHttpProtocolHandler::Delegate overrides.
-  virtual content::DevToolsHttpHandlerDelegate::InspectableTabs
-      GetInspectableTabs() OVERRIDE;
   virtual std::string GetDiscoveryPageHTML() OVERRIDE;
   virtual net::URLRequestContext* GetURLRequestContext() OVERRIDE;
   virtual bool BundlesFrontendResources() OVERRIDE;
   virtual std::string GetFrontendResourcesBaseURL() OVERRIDE;
 
-  void AddWebContents(content::WebContents* web_contents);
-
  private:
-  std::vector<content::WebContents*> web_contents_list_;
   net::URLRequestContextGetter* context_getter_;
   content::DevToolsHttpHandler* devtools_http_handler_;
 

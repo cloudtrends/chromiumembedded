@@ -344,11 +344,6 @@ CefBrowserContext* CefContext::browser_context() const {
       browser_context();
 }
 
-CefDevToolsDelegate* CefContext::devtools_delegate() const {
-  return main_delegate_->browser_client()->browser_main_parts()->
-      devtools_delegate();
-}
-
 void CefContext::FinishShutdownOnUIThread(
     base::WaitableEvent* browser_shutdown_event,
     base::WaitableEvent* uithread_shutdown_event) {
