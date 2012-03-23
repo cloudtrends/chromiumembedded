@@ -158,6 +158,11 @@ IPC_MESSAGE_ROUTED1(CefHostMsg_FrameDetached,
 IPC_MESSAGE_ROUTED1(CefHostMsg_FrameFocusChange,
                     int64 /* frame_id */)
 
+// Sent when a new URL is about to be loaded in the main frame. Used for the
+// cookie manager.
+IPC_MESSAGE_ROUTED1(CefHostMsg_LoadingURLChange,
+                    GURL /* loading_url */)
+
 // Sent when the renderer has a request for the browser. The browser may respond
 // with a CefMsg_Response.
 IPC_MESSAGE_ROUTED1(CefHostMsg_Request,

@@ -134,7 +134,8 @@ class CefSchemeHandlerFactory : public virtual CefBase {
   ///
   // Return a new resource handler instance to handle the request. |browser| will
   // be the browser window that initiated the request. If the request was
-  // initiated using the CefWebURLRequest API |browser| will be NULL.
+  // initiated using the CefWebURLRequest API |browser| will be NULL. The
+  // |request| object passed to this method will not contain cookie data.
   ///
   /*--cef()--*/
   virtual CefRefPtr<CefResourceHandler> Create(

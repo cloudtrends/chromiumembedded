@@ -12,9 +12,11 @@
 #include "include/cef_frame.h"
 #include "include/cef_request_handler.h"
 
+#include "net/cookies/cookie_monster.h"
 #include "net/url_request/url_request_job.h"
 
 namespace net {
+class HttpResponseHeaders;
 class URLRequest;
 }
 
@@ -26,6 +28,7 @@ class CefResourceRequestJob : public net::URLRequestJob {
                         CefRefPtr<CefResourceHandler> handler);
   virtual ~CefResourceRequestJob();
 
+ private:
   // net::URLRequestJob methods.
   virtual void Start() OVERRIDE;
   virtual void Kill() OVERRIDE;
@@ -36,14 +39,36 @@ class CefResourceRequestJob : public net::URLRequestJob {
       OVERRIDE;
   virtual bool GetMimeType(std::string* mime_type) const OVERRIDE;
 
- private:
   void SendHeaders();
+
+  // Used for sending cookies with the request.
+  void AddCookieHeaderAndStart();
+  void DoLoadCookies();
+  void CheckCookiePolicyAndLoad(const net::CookieList& cookie_list);
+  void OnCookiesLoaded(
+      const std::string& cookie_line,
+      const std::vector<net::CookieStore::CookieInfo>& cookie_infos);
+  void DoStartTransaction();
+  void StartTransaction();
+
+  // Used for saving cookies returned as part of the response.
+  net::HttpResponseHeaders* GetResponseHeaders();
+  void SaveCookiesAndNotifyHeadersComplete();
+  void SaveNextCookie();
+  void OnCookieSaved(bool cookie_status);
+  void CookieHandled();
+  void FetchResponseCookies(std::vector<std::string>* cookies);
 
   CefRefPtr<CefResourceHandler> handler_;
   CefRefPtr<CefResponse> response_;
   GURL redirect_url_;
   int64 remaining_bytes_;
+  CefRefPtr<CefRequest> cef_request_;
   CefRefPtr<CefResourceRequestJobCallback> callback_;
+  scoped_refptr<net::HttpResponseHeaders> response_headers_;
+  std::vector<std::string> response_cookies_;
+  size_t response_cookies_save_index_;
+  base::WeakPtrFactory<CefResourceRequestJob> weak_factory_;
 
   friend class CefResourceRequestJobCallback;
 

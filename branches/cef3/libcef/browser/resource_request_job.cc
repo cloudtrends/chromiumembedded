@@ -6,6 +6,7 @@
 #include "libcef/browser/resource_request_job.h"
 
 #include <map>
+#include <vector>
 
 #include "include/cef_callback.h"
 #include "libcef/browser/thread_util.h"
@@ -14,8 +15,10 @@
 
 #include "base/logging.h"
 #include "net/base/io_buffer.h"
+#include "net/base/load_flags.h"
 #include "net/http/http_response_headers.h"
 #include "net/url_request/url_request.h"
+#include "net/url_request/url_request_context.h"
 
 using net::URLRequestStatus;
 
@@ -39,7 +42,7 @@ class CefResourceRequestJobCallback : public CefCallback {
       // Return early if the callback has already been detached.
       if (!job_)
         return;
-      
+
       if (type_ == HEADERS_AVAILABLE) {
         // Callback for headers available.
         if (!job_->has_response_started()) {
@@ -118,7 +121,9 @@ CefResourceRequestJob::CefResourceRequestJob(
     CefRefPtr<CefResourceHandler> handler)
     : net::URLRequestJob(request),
       handler_(handler),
-      remaining_bytes_(0) {
+      remaining_bytes_(0),
+      response_cookies_save_index_(0),
+      ALLOW_THIS_IN_INITIALIZER_LIST(weak_factory_(this)) {
 }
 
 CefResourceRequestJob::~CefResourceRequestJob() {
@@ -127,24 +132,52 @@ CefResourceRequestJob::~CefResourceRequestJob() {
 void CefResourceRequestJob::Start() {
   CEF_REQUIRE_IOT();
 
-  // Create the callback that will be used to notify when header information is
-  // available.
-  callback_ = new CefResourceRequestJobCallback(this,
-      CefResourceRequestJobCallback::HEADERS_AVAILABLE);
+  cef_request_ = CefRequest::CreateRequest();
 
-  CefRefPtr<CefRequest> req(CefRequest::CreateRequest());
+    // Populate the request data.
+    static_cast<CefRequestImpl*>(cef_request_.get())->Set(request_);
 
-  // Populate the request data.
-  static_cast<CefRequestImpl*>(req.get())->Set(request());
+    // Add default headers if not already specified.
+    const net::URLRequestContext* context = request_->context();
+    if (context) {
+      CefRequest::HeaderMap::const_iterator it;
+      CefRequest::HeaderMap headerMap;
+      cef_request_->GetHeaderMap(headerMap);
+      bool changed = false;
 
-  // Handler can decide whether to process the request.
-  bool rv = handler_->ProcessRequest(req, callback_.get());
-  if (!rv) {
-    // Cancel the request.
-    NotifyStartError(URLRequestStatus(URLRequestStatus::FAILED, ERR_ABORTED));
-  }
+      if (!context->accept_language().empty()) {
+        it = headerMap.find(net::HttpRequestHeaders::kAcceptLanguage);
+        if (it == headerMap.end()) {
+          headerMap.insert(
+              std::make_pair(net::HttpRequestHeaders::kAcceptLanguage,
+                             context->accept_language()));
+        }
+        changed = true;
+      }
 
-  return;
+      if (!context->accept_charset().empty()) {
+        it = headerMap.find(net::HttpRequestHeaders::kAcceptCharset);
+        if (it == headerMap.end()) {
+          headerMap.insert(
+              std::make_pair(net::HttpRequestHeaders::kAcceptCharset,
+                             context->accept_charset()));
+        }
+        changed = true;
+      }
+
+      it = headerMap.find(net::HttpRequestHeaders::kUserAgent);
+      if (it == headerMap.end()) {
+        headerMap.insert(
+            std::make_pair(net::HttpRequestHeaders::kUserAgent,
+                           context->GetUserAgent(request_->url())));
+        changed = true;
+      }
+
+      if (changed)
+        cef_request_->SetHeaderMap(headerMap);
+    }
+
+    AddCookieHeaderAndStart();
 }
 
 void CefResourceRequestJob::Kill() {
@@ -213,11 +246,7 @@ bool CefResourceRequestJob::ReadRawData(net::IOBuffer* dest, int dest_size,
 void CefResourceRequestJob::GetResponseInfo(net::HttpResponseInfo* info) {
   CEF_REQUIRE_IOT();
 
-  if (response_.get()) {
-    CefResponseImpl* responseImpl =
-        static_cast<CefResponseImpl*>(response_.get());
-    info->headers = responseImpl->GetResponseHeaders();
-  }
+  info->headers = GetResponseHeaders();
 }
 
 bool CefResourceRequestJob::IsRedirectResponse(GURL* location,
@@ -284,5 +313,168 @@ void CefResourceRequestJob::SendHeaders() {
     set_expected_content_size(remaining_bytes_);
 
   // Continue processing the request.
-  NotifyHeadersComplete();
+  SaveCookiesAndNotifyHeadersComplete();
+}
+
+void CefResourceRequestJob::AddCookieHeaderAndStart() {
+  // No matter what, we want to report our status as IO pending since we will
+  // be notifying our consumer asynchronously via OnStartCompleted.
+  SetStatus(URLRequestStatus(URLRequestStatus::IO_PENDING, 0));
+
+  // If the request was destroyed, then there is no more work to do.
+  if (!request_)
+    return;
+
+  net::CookieStore* cookie_store =
+      request_->context()->cookie_store();
+  if (cookie_store &&
+      !(request_->load_flags() & net::LOAD_DO_NOT_SEND_COOKIES)) {
+    net::CookieMonster* cookie_monster = cookie_store->GetCookieMonster();
+    if (cookie_monster) {
+      cookie_monster->GetAllCookiesForURLAsync(
+          request_->url(),
+          base::Bind(&CefResourceRequestJob::CheckCookiePolicyAndLoad,
+                      weak_factory_.GetWeakPtr()));
+    } else {
+      DoLoadCookies();
+    }
+  } else {
+    DoStartTransaction();
+  }
+}
+
+void CefResourceRequestJob::DoLoadCookies() {
+  net::CookieOptions options;
+  options.set_include_httponly();
+  request_->context()->cookie_store()->GetCookiesWithInfoAsync(
+      request_->url(), options,
+      base::Bind(&CefResourceRequestJob::OnCookiesLoaded,
+                  weak_factory_.GetWeakPtr()));
+}
+
+void CefResourceRequestJob::CheckCookiePolicyAndLoad(
+    const net::CookieList& cookie_list) {
+  if (CanGetCookies(cookie_list))
+    DoLoadCookies();
+  else
+    DoStartTransaction();
+}
+
+void CefResourceRequestJob::OnCookiesLoaded(
+    const std::string& cookie_line,
+    const std::vector<net::CookieStore::CookieInfo>& cookie_infos) {
+  if (!cookie_line.empty()) {
+    CefRequest::HeaderMap headerMap;
+    cef_request_->GetHeaderMap(headerMap);
+    headerMap.insert(
+        std::make_pair(net::HttpRequestHeaders::kCookie, cookie_line));
+    cef_request_->SetHeaderMap(headerMap);
+  }
+  DoStartTransaction();
+}
+
+void CefResourceRequestJob::DoStartTransaction() {
+  // We may have been canceled while retrieving cookies.
+  if (GetStatus().is_success()) {
+    StartTransaction();
+  } else {
+    NotifyCanceled();
+  }
+}
+
+void CefResourceRequestJob::StartTransaction() {
+  // Create the callback that will be used to notify when header information is
+  // available.
+  callback_ = new CefResourceRequestJobCallback(this,
+      CefResourceRequestJobCallback::HEADERS_AVAILABLE);
+
+  // Protect against deletion of this object.
+  base::WeakPtr<CefResourceRequestJob> weak_ptr(weak_factory_.GetWeakPtr());
+
+  // Handler can decide whether to process the request.
+  bool rv = handler_->ProcessRequest(cef_request_, callback_.get());
+  if (weak_ptr.get() && !rv) {
+    // Cancel the request.
+    NotifyCanceled();
+  }
+}
+
+net::HttpResponseHeaders* CefResourceRequestJob::GetResponseHeaders() {
+  DCHECK(response_);
+  if (!response_headers_.get()) {
+    CefResponseImpl* responseImpl =
+        static_cast<CefResponseImpl*>(response_.get());
+    response_headers_ = responseImpl->GetResponseHeaders();
+  }
+  return response_headers_;
+}
+
+void CefResourceRequestJob::SaveCookiesAndNotifyHeadersComplete() {
+  if (request_->load_flags() & net::LOAD_DO_NOT_SAVE_COOKIES) {
+    SetStatus(URLRequestStatus());  // Clear the IO_PENDING status
+    NotifyHeadersComplete();
+    return;
+  }
+
+  response_cookies_.clear();
+  response_cookies_save_index_ = 0;
+
+  FetchResponseCookies(&response_cookies_);
+
+  // Now, loop over the response cookies, and attempt to persist each.
+  SaveNextCookie();
+}
+
+void CefResourceRequestJob::SaveNextCookie() {
+  if (response_cookies_save_index_ == response_cookies_.size()) {
+    response_cookies_.clear();
+    response_cookies_save_index_ = 0;
+    SetStatus(URLRequestStatus());  // Clear the IO_PENDING status
+    NotifyHeadersComplete();
+    return;
+  }
+
+  // No matter what, we want to report our status as IO pending since we will
+  // be notifying our consumer asynchronously via OnStartCompleted.
+  SetStatus(URLRequestStatus(URLRequestStatus::IO_PENDING, 0));
+
+  net::CookieOptions options;
+  options.set_include_httponly();
+  if (CanSetCookie(
+      response_cookies_[response_cookies_save_index_], &options)) {
+    request_->context()->cookie_store()->SetCookieWithOptionsAsync(
+        request_->url(), response_cookies_[response_cookies_save_index_],
+        options, base::Bind(&CefResourceRequestJob::OnCookieSaved,
+                            weak_factory_.GetWeakPtr()));
+    return;
+  }
+
+  CookieHandled();
+}
+
+void CefResourceRequestJob::OnCookieSaved(bool cookie_status) {
+  CookieHandled();
+}
+
+void CefResourceRequestJob::CookieHandled() {
+  response_cookies_save_index_++;
+  // We may have been canceled within OnSetCookie.
+  if (GetStatus().is_success()) {
+    SaveNextCookie();
+  } else {
+    NotifyCanceled();
+  }
+}
+
+void CefResourceRequestJob::FetchResponseCookies(
+    std::vector<std::string>* cookies) {
+  const std::string name = "Set-Cookie";
+  std::string value;
+
+  void* iter = NULL;
+  net::HttpResponseHeaders* headers = GetResponseHeaders();
+  while (headers->EnumerateHeader(&iter, name, &value)) {
+    if (!value.empty())
+      cookies->push_back(value);
+  }
 }

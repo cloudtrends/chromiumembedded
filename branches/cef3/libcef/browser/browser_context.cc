@@ -252,6 +252,10 @@ net::URLRequestContextGetter* CefBrowserContext::GetRequestContext() {
 net::URLRequestContextGetter*
     CefBrowserContext::GetRequestContextForRenderProcess(
         int renderer_child_id) {
+  CefRefPtr<CefBrowserHostImpl> browser =
+      CefBrowserHostImpl::GetBrowserByChildID(renderer_child_id);
+  if (browser.get())
+    return browser->GetRequestContext();
   return GetRequestContext();
 }
 

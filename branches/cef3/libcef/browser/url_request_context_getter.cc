@@ -18,6 +18,7 @@
 #include "base/file_util.h"
 #include "base/logging.h"
 #include "base/string_split.h"
+#include "chrome/browser/net/sqlite_persistent_cookie_store.h"
 #include "content/public/browser/browser_thread.h"
 #include "net/base/cert_verifier.h"
 #include "net/base/default_server_bound_cert_store.h"
@@ -153,9 +154,10 @@ net::URLRequestContext* CefURLRequestContextGetter::GetURLRequestContext() {
     url_request_context_ = new net::URLRequestContext();
     storage_.reset(new net::URLRequestContextStorage(url_request_context_));
 
+    SetCookieStoragePath(cache_path);
+
     storage_->set_network_delegate(new CefNetworkDelegate);
 
-    storage_->set_cookie_store(new net::CookieMonster(NULL, NULL));
     storage_->set_server_bound_cert_service(new net::ServerBoundCertService(
         new net::DefaultServerBoundCertStore(NULL)));
     url_request_context_->set_accept_language("en-us,en");
@@ -284,6 +286,34 @@ scoped_refptr<base::MessageLoopProxy>
 
 net::HostResolver* CefURLRequestContextGetter::host_resolver() {
   return url_request_context_->host_resolver();
+}
+
+void CefURLRequestContextGetter::SetCookieStoragePath(const FilePath& path) {
+  CEF_REQUIRE_IOT();
+
+  if (url_request_context_->cookie_store() &&
+      ((cookie_store_path_.empty() && path.empty()) ||
+       cookie_store_path_ == path)) {
+    // The path has not changed so don't do anything.
+    return;
+  }
+
+  scoped_refptr<SQLitePersistentCookieStore> persistent_store;
+  if (!path.empty()) {
+    if (file_util::CreateDirectory(path)) {
+      const FilePath& cookie_path = path.AppendASCII("Cookies");
+      persistent_store = new SQLitePersistentCookieStore(cookie_path, false);
+    } else {
+      NOTREACHED() << "The cookie storage directory could not be created";
+    }
+  }
+
+  // Set the new cookie store that will be used for all new requests. The old
+  // cookie store, if any, will be automatically flushed and closed when no
+  // longer referenced.
+  storage_->set_cookie_store(
+      new net::CookieMonster(persistent_store.get(), NULL));
+  cookie_store_path_ = path;
 }
 
 void CefURLRequestContextGetter::CreateProxyConfigService() {

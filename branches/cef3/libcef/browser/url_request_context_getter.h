@@ -38,6 +38,8 @@ class CefURLRequestContextGetter : public net::URLRequestContextGetter {
 
   net::HostResolver* host_resolver();
 
+  void SetCookieStoragePath(const FilePath& path);
+
  private:
   void CreateProxyConfigService();
 
@@ -51,6 +53,8 @@ class CefURLRequestContextGetter : public net::URLRequestContextGetter {
   scoped_ptr<net::URLSecurityManager> url_security_manager_;
   scoped_ptr<net::URLRequestContextStorage> storage_;
   scoped_ptr<CefRequestInterceptor> request_interceptor_;
+
+  FilePath cookie_store_path_;
 
   DISALLOW_COPY_AND_ASSIGN(CefURLRequestContextGetter);
 };

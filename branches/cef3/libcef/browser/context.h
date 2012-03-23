@@ -56,7 +56,7 @@ class CefContext : public CefBase {
   bool RemoveBrowser(CefRefPtr<CefBrowserHostImpl> browser);
   CefRefPtr<CefBrowserHostImpl> GetBrowserByID(int id);
   CefRefPtr<CefBrowserHostImpl> GetBrowserByRoutingID(int render_process_id,
-                                                  int render_view_id);
+                                                      int render_view_id);
   BrowserList* GetBrowserList() { return &browserlist_; }
 
   // Retrieve the path at which cache data will be stored on disk.  If empty,

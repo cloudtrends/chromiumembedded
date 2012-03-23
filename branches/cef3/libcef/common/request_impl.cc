@@ -2,6 +2,9 @@
 // reserved. Use of this source code is governed by a BSD-style license that
 // can be found in the LICENSE file.
 
+#include <string>
+#include <vector>
+
 #include "libcef/common/http_header_utils.h"
 #include "libcef/common/request_impl.h"
 
@@ -97,18 +100,30 @@ void CefRequestImpl::Set(net::URLRequest* request) {
   method_ = request->method();
   first_party_for_cookies_ = request->first_party_for_cookies().spec();
 
+  net::HttpRequestHeaders headers = request->extra_request_headers();
+
+  // Ensure that we do not send username and password fields in the referrer.
+  GURL referrer(request->GetSanitizedReferrer());
+
+  // Strip Referer from request_info_.extra_headers to prevent, e.g., plugins
+  // from overriding headers that are controlled using other means. Otherwise a
+  // plugin could set a referrer although sending the referrer is inhibited.
+  headers.RemoveHeader(net::HttpRequestHeaders::kReferer);
+
+  // Our consumer should have made sure that this is a safe referrer.  See for
+  // instance WebCore::FrameLoader::HideReferrer.
+  if (referrer.is_valid())
+    headers.SetHeader(net::HttpRequestHeaders::kReferer, referrer.spec());
+
   // Transfer request headers
-  CefString referrerStr;
-  referrerStr.FromASCII("Referrer");
-  GetHeaderMap(request->extra_request_headers(), headermap_);
-  headermap_.insert(std::make_pair(referrerStr, request->referrer()));
+  GetHeaderMap(headers, headermap_);
 
   // Transfer post data, if any
   net::UploadData* data = request->get_upload();
   if (data) {
     postdata_ = CefPostData::CreatePostData();
     static_cast<CefPostDataImpl*>(postdata_.get())->Set(*data);
-  } else if(postdata_.get()) {
+  } else if (postdata_.get()) {
     postdata_ = NULL;
   }
 }
@@ -121,7 +136,7 @@ void CefRequestImpl::Get(net::URLRequest* request) {
     request->set_first_party_for_cookies(
         GURL(std::string(first_party_for_cookies_)));
   }
-  
+
   CefString referrerStr;
   referrerStr.FromASCII("Referrer");
   HeaderMap headerMap = headermap_;
@@ -135,7 +150,7 @@ void CefRequestImpl::Get(net::URLRequest* request) {
   net::HttpRequestHeaders headers;
   headers.AddHeadersFromString(HttpHeaderUtils::GenerateHeaders(headerMap));
   request->SetExtraRequestHeaders(headers);
-  
+
   if (postdata_.get()) {
     net::UploadData* upload = new net::UploadData();
     static_cast<CefPostDataImpl*>(postdata_.get())->Get(*upload);

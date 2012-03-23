@@ -156,7 +156,7 @@ CefRefPtr<CefBrowserHostImpl> CefBrowserHostImpl::Create(
 
 // static
 CefRefPtr<CefBrowserHostImpl> CefBrowserHostImpl::GetBrowserForHost(
-    content::RenderViewHost* host) {
+    const content::RenderViewHost* host) {
   DCHECK(host);
   CEF_REQUIRE_UIT();
   TabContents* tab_contents = static_cast<TabContents*>(host->GetDelegate());
@@ -205,6 +205,40 @@ CefRefPtr<CefBrowserHostImpl> CefBrowserHostImpl::GetBrowserByRoutingID(
   } else {
     // Use the thread-safe approach.
     return _Context->GetBrowserByRoutingID(render_process_id, render_view_id);
+  }
+}
+
+// static
+CefRefPtr<CefBrowserHostImpl> CefBrowserHostImpl::GetBrowserByChildID(
+      int render_process_id) {
+  if (CEF_CURRENTLY_ON_UIT()) {
+    // Use the non-thread-safe but potentially faster approach.
+    content::RenderProcessHost* render_process_host =
+        content::RenderProcessHost::FromID(render_process_id);
+    if (!render_process_host)
+      return NULL;
+  
+    content::RenderProcessHost::RenderWidgetHostsIterator iter(
+        render_process_host->GetRenderWidgetHostsIterator());
+    if (!iter.IsAtEnd()) {
+      const content::RenderWidgetHost* widget = iter.GetCurrentValue();
+
+      // This implementation is based on an assumption that each process hosts a
+      // single renderer. Revisit this implementation if the assumption proves
+      // false.
+      iter.Advance();
+      DCHECK(iter.IsAtEnd());
+
+      if (widget && widget->IsRenderView()) {
+        return GetBrowserForHost(content::RenderViewHost::From(
+            const_cast<content::RenderWidgetHost*>(widget)));
+      }
+    }
+    
+    return NULL;
+  } else {
+    // Use the thread-safe approach.
+    return _Context->GetBrowserByRoutingID(render_process_id, 0);
   }
 }
 
@@ -464,6 +498,8 @@ void CefBrowserHostImpl::DestroyBrowser() {
 
   DetachAllFrames();
 
+  request_context_proxy_ = NULL;
+
   // Remove the browser from the list maintained by the context.
   _Context->RemoveBrowser(this);
 }
@@ -478,6 +514,16 @@ gfx::NativeView CefBrowserHostImpl::GetContentView() const {
 TabContents* CefBrowserHostImpl::GetTabContents() const {
   CEF_REQUIRE_UIT();
   return tab_contents_.get();
+}
+
+net::URLRequestContextGetter* CefBrowserHostImpl::GetRequestContext() {
+  CEF_REQUIRE_UIT();
+  if (!request_context_proxy_) {
+    request_context_proxy_ =
+        new CefURLRequestContextGetterProxy(this,
+            _Context->browser_context()->GetRequestContext());
+  }
+  return request_context_proxy_.get();
 }
 
 CefRefPtr<CefFrame> CefBrowserHostImpl::GetFrameForRequest(
@@ -673,6 +719,11 @@ void CefBrowserHostImpl::SendCode(
 
 bool CefBrowserHostImpl::ViewText(const std::string& text) {
   return PlatformViewText(text);
+}
+
+GURL CefBrowserHostImpl::GetLoadingURL() {
+  base::AutoLock lock_scope(state_lock_);
+  return loading_url_;
 }
 
 
@@ -886,6 +937,7 @@ bool CefBrowserHostImpl::OnMessageReceived(const IPC::Message& message) {
     IPC_MESSAGE_HANDLER(CefHostMsg_FrameIdentified, OnFrameIdentified)
     IPC_MESSAGE_HANDLER(CefHostMsg_FrameDetached, DetachFrame)
     IPC_MESSAGE_HANDLER(CefHostMsg_FrameFocusChange, SetFocusedFrame)
+    IPC_MESSAGE_HANDLER(CefHostMsg_LoadingURLChange, OnLoadingURLChange)
     IPC_MESSAGE_HANDLER(CefHostMsg_Request, OnRequest)
     IPC_MESSAGE_HANDLER(CefHostMsg_Response, OnResponse)
     IPC_MESSAGE_HANDLER(CefHostMsg_ResponseAck, OnResponseAck)
@@ -919,6 +971,11 @@ void CefBrowserHostImpl::OnFrameIdentified(int64 frame_id,
                                            string16 name) {
   bool is_main_frame = (parent_frame_id == CefFrameHostImpl::kMainFrameId);
   GetOrCreateFrame(frame_id, parent_frame_id, is_main_frame, name, GURL());
+}
+
+void CefBrowserHostImpl::OnLoadingURLChange(const GURL& loading_url) {
+  base::AutoLock lock_scope(state_lock_);
+  loading_url_ = loading_url;
 }
 
 void CefBrowserHostImpl::OnRequest(const Cef_Request_Params& params) {

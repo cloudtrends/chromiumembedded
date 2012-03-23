@@ -470,6 +470,14 @@ void CefBrowserImpl::DidCreateDataSource(WebKit::WebFrame* frame,
         content::NavigationState::CreateBrowserInitiated(-1, -1,
             content::PAGE_TRANSITION_LINK));
   }
+
+  if (frame->parent() == 0) {
+    GURL url = ds->request().url();
+    if (!url.is_empty()) {
+      // Notify that the loading URL has changed.
+      Send(new CefHostMsg_LoadingURLChange(routing_id(), url));
+    }
+  }
 }
 
 bool CefBrowserImpl::OnMessageReceived(const IPC::Message& message) {

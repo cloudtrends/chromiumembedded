@@ -27,6 +27,7 @@
 #include "libcef_dll/cpptoc/browser_cpptoc.h"
 #include "libcef_dll/cpptoc/browser_host_cpptoc.h"
 #include "libcef_dll/cpptoc/callback_cpptoc.h"
+#include "libcef_dll/cpptoc/cookie_manager_cpptoc.h"
 #include "libcef_dll/cpptoc/dictionary_value_cpptoc.h"
 #include "libcef_dll/cpptoc/frame_cpptoc.h"
 #include "libcef_dll/cpptoc/geolocation_callback_cpptoc.h"
@@ -44,6 +45,7 @@
 #include "libcef_dll/cpptoc/xml_reader_cpptoc.h"
 #include "libcef_dll/cpptoc/zip_reader_cpptoc.h"
 #include "libcef_dll/ctocpp/app_ctocpp.h"
+#include "libcef_dll/ctocpp/cookie_visitor_ctocpp.h"
 #include "libcef_dll/ctocpp/display_handler_ctocpp.h"
 #include "libcef_dll/ctocpp/geolocation_handler_ctocpp.h"
 #include "libcef_dll/ctocpp/life_span_handler_ctocpp.h"
@@ -134,6 +136,8 @@ CEF_EXPORT void cef_shutdown() {
   DCHECK_EQ(CefBrowserCppToC::DebugObjCt, 0);
   DCHECK_EQ(CefBrowserHostCppToC::DebugObjCt, 0);
   DCHECK_EQ(CefCallbackCppToC::DebugObjCt, 0);
+  DCHECK_EQ(CefCookieManagerCppToC::DebugObjCt, 0);
+  DCHECK_EQ(CefCookieVisitorCToCpp::DebugObjCt, 0);
   DCHECK_EQ(CefDictionaryValueCppToC::DebugObjCt, 0);
   DCHECK_EQ(CefDisplayHandlerCToCpp::DebugObjCt, 0);
   DCHECK_EQ(CefFrameCppToC::DebugObjCt, 0);

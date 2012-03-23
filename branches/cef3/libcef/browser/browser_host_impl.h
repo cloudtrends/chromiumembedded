@@ -16,6 +16,7 @@
 #include "include/cef_client.h"
 #include "include/cef_frame.h"
 #include "libcef/browser/frame_host_impl.h"
+#include "libcef/browser/url_request_context_getter_proxy.h"
 #include "libcef/common/response_manager.h"
 
 #include "base/memory/scoped_ptr.h"
@@ -26,6 +27,7 @@
 #include "content/public/browser/notification_registrar.h"
 #include "content/public/browser/web_contents_delegate.h"
 #include "content/public/browser/web_contents_observer.h"
+
 
 struct Cef_Request_Params;
 struct Cef_Response_Params;
@@ -71,7 +73,7 @@ class CefBrowserHostImpl : public CefBrowserHost,
 
   // Returns the browser associated with the specified RenderViewHost.
   static CefRefPtr<CefBrowserHostImpl> GetBrowserForHost(
-      content::RenderViewHost* host);
+      const content::RenderViewHost* host);
   // Returns the browser associated with the specified WebContents.
   static CefRefPtr<CefBrowserHostImpl> GetBrowserForContents(
       content::WebContents* contents);
@@ -81,6 +83,9 @@ class CefBrowserHostImpl : public CefBrowserHost,
   // Returns the browser associated with the specified routing IDs.
   static CefRefPtr<CefBrowserHostImpl> GetBrowserByRoutingID(
       int render_process_id, int render_view_id);
+  // Returns the browser associated with the specified child process ID.
+  static CefRefPtr<CefBrowserHostImpl> GetBrowserByChildID(
+      int render_process_id);
 
   // CefBrowserHost methods.
   virtual CefRefPtr<CefBrowser> GetBrowser() OVERRIDE;
@@ -128,6 +133,9 @@ class CefBrowserHostImpl : public CefBrowserHost,
   // Returns a pointer to the TabContents.
   TabContents* GetTabContents() const;
 
+  // Returns the browser-specific request context.
+  net::URLRequestContextGetter* GetRequestContext();
+
   // Returns the frame associated with the specified URLRequest.
   CefRefPtr<CefFrame> GetFrameForRequest(net::URLRequest* request);
 
@@ -162,6 +170,9 @@ class CefBrowserHostImpl : public CefBrowserHost,
   int render_process_id() const { return render_process_id_; }
   int render_view_id() const { return render_view_id_; }
   int unique_id() const { return unique_id_; }
+
+  // Returns the URL that is currently loading (or loaded) in the main frame.
+  GURL GetLoadingURL();
 
 #if defined(OS_WIN)
   static void RegisterWindowClass();
@@ -221,6 +232,7 @@ class CefBrowserHostImpl : public CefBrowserHost,
 
   // content::WebContentsObserver::OnMessageReceived() message handlers.
   void OnFrameIdentified(int64 frame_id, int64 parent_frame_id, string16 name);
+  void OnLoadingURLChange(const GURL& pending_url);
   void OnRequest(const Cef_Request_Params& params);
   void OnResponse(const Cef_Response_Params& params);
   void OnResponseAck(int request_id);
@@ -310,6 +322,7 @@ class CefBrowserHostImpl : public CefBrowserHost,
   bool can_go_back_;
   bool can_go_forward_;
   bool has_document_;
+  GURL loading_url_;
 
   // Messages we queue while waiting for the RenderView to be ready. We queue
   // them here instead of in the RenderProcessHost to ensure that they're sent
@@ -332,6 +345,9 @@ class CefBrowserHostImpl : public CefBrowserHost,
 
   // Used for managing notification subscriptions.
   content::NotificationRegistrar registrar_;
+
+  // Used for proxying cookie requests.
+  scoped_refptr<CefURLRequestContextGetterProxy> request_context_proxy_;
 
   IMPLEMENT_REFCOUNTING(CefBrowserHostImpl);
   DISALLOW_EVIL_CONSTRUCTORS(CefBrowserHostImpl);
