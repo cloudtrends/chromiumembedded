@@ -260,8 +260,6 @@ void AppGetBrowserSettings(CefBrowserSettings& settings) {
       g_command_line->HasSwitch(cefclient::kWebglDisabled);
   settings.accelerated_compositing_disabled =
       g_command_line->HasSwitch(cefclient::kAcceleratedCompositingDisabled);
-  settings.threaded_compositing_enabled =
-      g_command_line->HasSwitch(cefclient::kThreadedCompositingEnabled);
   settings.accelerated_layers_disabled =
       g_command_line->HasSwitch(cefclient::kAcceleratedLayersDisabled);
   settings.accelerated_video_disabled =

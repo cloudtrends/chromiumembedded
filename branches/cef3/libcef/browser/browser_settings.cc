@@ -135,7 +135,6 @@ void BrowserToWebSettings(const CefBrowserSettings& cef, WebPreferences& web) {
   web.show_composited_layer_borders = false;
   web.accelerated_compositing_enabled =
       GpuProcessHost::gpu_enabled() && !cef.accelerated_compositing_disabled;
-  web.threaded_compositing_enabled = cef.threaded_compositing_enabled;
   web.accelerated_layers_enabled = !cef.accelerated_layers_disabled;
   web.accelerated_video_enabled = !cef.accelerated_video_disabled;
   web.accelerated_2d_canvas_enabled =

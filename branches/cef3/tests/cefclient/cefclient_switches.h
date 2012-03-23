@@ -64,7 +64,6 @@ extern const char kDatabasesDisabled[];
 extern const char kApplicationCacheDisabled[];
 extern const char kWebglDisabled[];
 extern const char kAcceleratedCompositingDisabled[];
-extern const char kThreadedCompositingEnabled[];
 extern const char kAcceleratedLayersDisabled[];
 extern const char kAcceleratedVideoDisabled[];
 extern const char kAcceledated2dCanvasDisabled[];

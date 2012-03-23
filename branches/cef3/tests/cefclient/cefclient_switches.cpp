@@ -68,7 +68,6 @@ const char kApplicationCacheDisabled[] = "application-cache-disabled";
 const char kWebglDisabled[] = "webgl-disabled";
 const char kAcceleratedCompositingDisabled[] =
     "accelerated-compositing-disabled";
-const char kThreadedCompositingEnabled[] = "threaded-compositing-enabled";
 const char kAcceleratedLayersDisabled[] = "accelerated-layers-disabled";
 const char kAcceleratedVideoDisabled[] = "accelerated-video-disabled";
 const char kAcceledated2dCanvasDisabled[] = "accelerated-2d-canvas-disabled";
