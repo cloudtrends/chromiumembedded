@@ -15,6 +15,7 @@
 #include "content/public/browser/content_browser_client.h"
 
 class CefBrowserMainParts;
+class CefMediaObserver;
 
 namespace content {
 class SiteInstance;
@@ -130,6 +131,7 @@ class CefContentBrowserClient : public content::ContentBrowserClient {
   virtual void RequestMediaAccessPermission(
       const content::MediaStreamRequest* request,
       const content::MediaResponseCallback& callback) OVERRIDE;
+  virtual content::MediaObserver* GetMediaObserver() OVERRIDE;
   virtual void RequestDesktopNotificationPermission(
       const GURL& source_origin,
       int callback_context,
@@ -196,6 +198,8 @@ class CefContentBrowserClient : public content::ContentBrowserClient {
 
  private:
   CefBrowserMainParts* browser_main_parts_;
+
+  scoped_ptr<CefMediaObserver> media_observer_;
 };
 
 #endif  // CEF_LIBCEF_BROWSER_CONTENT_BROWSER_CLIENT_H_

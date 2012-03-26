@@ -15,10 +15,10 @@
 #include "base/command_line.h"
 #include "base/file_path.h"
 #include "content/public/browser/access_token_store.h"
+#include "content/public/browser/media_observer.h"
 #include "content/public/common/content_switches.h"
 #include "googleurl/src/gurl.h"
 #include "third_party/skia/include/core/SkBitmap.h"
-
 
 namespace {
 
@@ -43,6 +43,24 @@ class CefAccessTokenStore : public content::AccessTokenStore {
 };
 
 }  // namespace
+
+
+class CefMediaObserver : public content::MediaObserver {
+ public:
+  CefMediaObserver() {}
+  virtual ~CefMediaObserver() {}
+
+  virtual void OnDeleteAudioStream(void* host, int stream_id) OVERRIDE {}
+
+  virtual void OnSetAudioStreamPlaying(void* host, int stream_id,
+                                       bool playing) OVERRIDE {}
+  virtual void OnSetAudioStreamStatus(void* host, int stream_id,
+                                      const std::string& status) OVERRIDE {}
+  virtual void OnSetAudioStreamVolume(void* host, int stream_id,
+                                      double volume) OVERRIDE {}
+  virtual void OnMediaEvent(int render_process_id,
+                            const media::MediaLogEvent& event) OVERRIDE {}
+};
 
 
 CefContentBrowserClient::CefContentBrowserClient()
@@ -281,6 +299,13 @@ void CefContentBrowserClient::RequestMediaAccessPermission(
   // TODO(cef): Give the user an opportunity to approve the device list or run
   // the callback with an empty device list to cancel the request.
   callback.Run(devices);
+}
+
+content::MediaObserver* CefContentBrowserClient::GetMediaObserver() {
+  // TODO(cef): Return NULL once it's supported. See crbug.com/116113.
+  if (!media_observer_.get())
+     media_observer_.reset(new CefMediaObserver());
+  return media_observer_.get();
 }
 
 void CefContentBrowserClient::RequestDesktopNotificationPermission(
