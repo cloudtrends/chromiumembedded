@@ -8,8 +8,7 @@
 #include <gtk/gtk.h>
 
 #include "libcef/browser/thread_util.h"
-
-#include "content/browser/tab_contents/tab_contents_view_gtk.h"
+#include "content/public/browser/web_contents_view.h"
 
 namespace {
 
@@ -76,9 +75,7 @@ bool CefBrowserHostImpl::PlatformCreateWindow() {
   AddRef();
 
   // Parent the TabContents to the browser window.
-  content::TabContentsViewGtk* view =
-      static_cast<content::TabContentsViewGtk*>(tab_contents_->GetView());
-  window_info_.widget = view->GetNativeView();
+  window_info_.widget = tab_contents_->GetView()->GetNativeView();
   gtk_container_add(GTK_CONTAINER(window_info_.parent_widget),
                     window_info_.widget);
 

@@ -18,8 +18,8 @@ class CefCookieStoreProxy : public net::CookieStore {
  public:
   explicit CefCookieStoreProxy(CefBrowserHostImpl* browser,
                                net::URLRequestContext* parent)
-      : browser_(browser),
-        parent_(parent) {
+      : parent_(parent),
+        browser_(browser) {
   }
 
   // net::CookieStore methods.
