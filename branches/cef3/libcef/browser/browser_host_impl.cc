@@ -609,6 +609,9 @@ void CefBrowserHostImpl::LoadURL(int64 frame_id, const std::string& url) {
           return;
         }
 
+        // Update the loading URL.
+        OnLoadingURLChange(gurl);
+
         tab_contents_->GetController().LoadURL(
             gurl,
             content::Referrer(),
