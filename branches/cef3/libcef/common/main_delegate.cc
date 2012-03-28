@@ -21,6 +21,61 @@
 #include "ui/base/resource/resource_bundle.h"
 #include "ui/base/ui_base_paths.h"
 
+#if defined(OS_MACOSX)
+#include "base/mac/bundle_locations.h"
+#include "base/mac/foundation_util.h"
+#include "content/public/common/content_paths.h"
+
+namespace {
+  
+FilePath GetFrameworksPath() {
+  // Start out with the path to the running executable.
+  FilePath path;
+  PathService::Get(base::FILE_EXE, &path);
+
+  // Up to Contents.
+  if (base::mac::IsBackgroundOnlyProcess()) {
+    // The running executable is the helper. Go up five steps:
+    // Contents/Frameworks/Helper.app/Contents/MacOS/Helper
+    // ^ to here                                     ^ from here
+    path = path.DirName().DirName().DirName().DirName().DirName();
+  } else {
+    // One step up to MacOS, another to Contents.
+    path = path.DirName().DirName();
+  }
+  DCHECK_EQ(path.BaseName().value(), "Contents");
+
+  // Go into the frameworks directory.
+  return path.Append("Frameworks");
+}
+
+// The framework bundle path is used for loading resources, libraries, etc.
+void OverrideFrameworkBundlePath() {
+  FilePath helper_path =
+  GetFrameworksPath().Append("Chromium Embedded Framework.framework");
+
+  base::mac::SetOverrideFrameworkBundlePath(helper_path);
+}
+
+void OverrideChildProcessPath() {
+  // Retrieve the name of the running executable.
+  FilePath path;
+  PathService::Get(base::FILE_EXE, &path);
+
+  std::string name = path.BaseName().value();
+
+  FilePath helper_path = GetFrameworksPath().Append(name+" Helper.app")
+      .Append("Contents")
+      .Append("MacOS")
+      .Append(name+" Helper");
+
+  PathService::Override(content::CHILD_PROCESS_EXE, helper_path);
+}
+  
+}  // namespace
+
+#endif  // OS_MACOSX
+
 
 CefMainDelegate::CefMainDelegate(CefRefPtr<CefApp> application)
     : content_client_(application) {
@@ -30,6 +85,10 @@ CefMainDelegate::~CefMainDelegate() {
 }
 
 bool CefMainDelegate::BasicStartupComplete(int* exit_code) {
+#if defined(OS_MACOSX)
+  OverrideFrameworkBundlePath();
+#endif
+  
   CommandLine* command_line = CommandLine::ForCurrentProcess();
   std::string process_type =
       command_line->GetSwitchValueASCII(switches::kProcessType);
@@ -107,6 +166,10 @@ bool CefMainDelegate::BasicStartupComplete(int* exit_code) {
 }
 
 void CefMainDelegate::PreSandboxStartup() {
+#if defined(OS_MACOSX)
+  OverrideChildProcessPath();
+#endif
+
   const CommandLine& command_line = *CommandLine::ForCurrentProcess();
   std::string process_type =
       command_line.GetSwitchValueASCII(switches::kProcessType);

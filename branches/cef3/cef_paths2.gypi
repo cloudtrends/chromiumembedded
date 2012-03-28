@@ -109,6 +109,9 @@
       'tests/cefclient/client_handler_mac.mm',
       'tests/cefclient/resource_util_mac.mm',
     ],
+    'cefclient_sources_mac_helper': [
+      'tests/cefclient/cefclient_helper_mac.cc',
+    ],
     'cefclient_bundle_resources_mac': [
       'tests/cefclient/mac/cefclient.icns',
       'tests/cefclient/mac/English.lproj/InfoPlist.strings',

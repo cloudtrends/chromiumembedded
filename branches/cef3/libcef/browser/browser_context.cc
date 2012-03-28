@@ -220,6 +220,9 @@ FilePath CefBrowserContext::GetPath() {
                                                  kXdgConfigHomeEnvVar,
                                                  kDotConfigDir));
   path_ = config_dir.Append("cef_data");
+#elif defined(OS_MACOSX)
+  CHECK(PathService::Get(base::DIR_APP_DATA, &path_));
+  path_ = path_.Append("cef_data");
 #else
   NOTIMPLEMENTED();
 #endif

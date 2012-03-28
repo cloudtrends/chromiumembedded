@@ -15,6 +15,7 @@ class CefBrowserMessageLoop : public MessageLoopForUI {
 
  public:
   CefBrowserMessageLoop();
+  virtual ~CefBrowserMessageLoop();
 
   // Returns the MessageLoopForUI of the current thread.
   static CefBrowserMessageLoop* current();

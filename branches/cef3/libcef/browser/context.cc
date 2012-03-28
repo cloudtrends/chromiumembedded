@@ -22,6 +22,10 @@
 #include "sandbox/src/sandbox_types.h"
 #include "ui/base/ui_base_switches.h"
 
+#if defined(OS_MACOSX)
+#include "libcef/browser/application_mac.h"
+#endif
+
 #if defined(OS_WIN)
 #include "content/public/app/startup_helper_win.h"
 #endif
@@ -66,6 +70,11 @@ int CefExecuteProcess(const CefMainArgs& args,
       command_line.GetSwitchValueASCII(switches::kProcessType);
   if (process_type.empty())
     return -1;
+
+#if defined(OS_MACOSX)
+  // Create the CefCrApplication instance.
+  CefCrApplicationCreate();
+#endif
 
   CefMainDelegate main_delegate(application);
 

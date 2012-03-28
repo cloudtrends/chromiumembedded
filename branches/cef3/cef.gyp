@@ -48,9 +48,6 @@
       ],
       'mac_bundle_resources': [
         '<@(cefclient_bundle_resources_mac)',
-        # TODO(cef): Needs to be called chrome.pak instead of cef.pak on Mac OS X.
-        '<(PRODUCT_DIR)/cef.pak',
-        '<!@pymod_do_main(repack_locales -o -g <(grit_out_dir) -s <(SHARED_INTERMEDIATE_DIR) -x <(INTERMEDIATE_DIR) <(locales))',
       ],
       'mac_bundle_resources!': [
         # TODO(mark): Come up with a fancier way to do this (mac_info_plist?)
@@ -108,20 +105,82 @@
         }],
         [ 'OS=="mac"', {
           'product_name': 'cefclient',
+          'dependencies': [
+            'cefclient_helper_app',
+          ],
           'copies': [
             {
               # Add library dependencies to the bundle.
-              'destination': '<(PRODUCT_DIR)/cefclient.app/Contents/MacOS/',
+              'destination': '<(PRODUCT_DIR)/cefclient.app/Contents/Frameworks/Chromium Embedded Framework.framework/Libraries/',
               'files': [
                 '<(PRODUCT_DIR)/libcef.dylib',
                 '<(PRODUCT_DIR)/ffmpegsumo.so',
               ],
             },
             {
-              # Add the WebCore resources to the bundle.
-              'destination': '<(PRODUCT_DIR)/cefclient.app/Contents/',
+              # Add localized resources to the bundle.
+              'destination': '<(PRODUCT_DIR)/cefclient.app/Contents/Frameworks/Chromium Embedded Framework.framework/Resources/',
               'files': [
-                '<(DEPTH)/third_party/WebKit/Source/WebCore/Resources/',
+                '<!@pymod_do_main(repack_locales -o -g <(grit_out_dir) -s <(SHARED_INTERMEDIATE_DIR) -x <(INTERMEDIATE_DIR) <(locales))',
+              ],
+            },
+            {
+              # Add the helper app.
+              'destination': '<(PRODUCT_DIR)/cefclient.app/Contents/Frameworks',
+              'files': [
+                '<(PRODUCT_DIR)/cefclient Helper.app',
+              ],
+            },
+          ],
+          'postbuilds': [
+            {
+              'postbuild_name': 'Fix Framework Link',
+              'action': [
+                'install_name_tool',
+                '-change',
+                '@executable_path/libcef.dylib',
+                '@executable_path/../Frameworks/Chromium Embedded Framework.framework/Libraries/libcef.dylib',
+                '${BUILT_PRODUCTS_DIR}/${EXECUTABLE_PATH}'
+              ],
+            },
+            {
+              'postbuild_name': 'Copy Pack File',
+              'action': [
+                'cp',
+                '-f',
+                '${BUILT_PRODUCTS_DIR}/cef.pak',
+                '${BUILT_PRODUCTS_DIR}/cefclient.app/Contents/Frameworks/Chromium Embedded Framework.framework/Resources/chrome.pak'
+              ],
+            },
+            {
+              'postbuild_name': 'Copy WebCore Resources',
+              'action': [
+                'cp',
+                '-Rf',
+                '${BUILT_PRODUCTS_DIR}/../../third_party/WebKit/Source/WebCore/Resources/',
+                '${BUILT_PRODUCTS_DIR}/cefclient.app/Contents/Frameworks/Chromium Embedded Framework.framework/Resources/'
+              ],
+            },
+            {
+              # Modify the Info.plist as needed.
+              'postbuild_name': 'Tweak Info.plist',
+              'action': ['../build/mac/tweak_info_plist.py',
+                         '--svn=1'],
+            },
+            {
+              # This postbuid step is responsible for creating the following
+              # helpers:
+              #
+              # cefclient Helper EH.app and cefclient Helper NP.app are created
+              # from cefclient Helper.app.
+              #
+              # The EH helper is marked for an executable heap. The NP helper
+              # is marked for no PIE (ASLR).
+              'postbuild_name': 'Make More Helpers',
+              'action': [
+                '../build/mac/make_more_helpers.sh',
+                'Frameworks',
+                'cefclient',
               ],
             },
           ],
@@ -688,6 +747,8 @@
         [ 'OS=="mac"', {
           'sources': [
             '<@(includes_mac)',
+            'libcef/browser/application_mac.h',
+            'libcef/browser/application_mac.mm',
             'libcef/browser/browser_host_impl_mac.mm',
             'libcef/browser/browser_main_mac.mm',
           ],
@@ -701,5 +762,86 @@
         }],
       ],
     },
-  ]
+  ],
+  'conditions': [
+    ['OS=="mac"', {
+      'targets': [
+        {
+          'target_name': 'cefclient_helper_app',
+          'type': 'executable',
+          'variables': { 'enable_wexit_time_destructors': 1, },
+          'product_name': 'cefclient Helper',
+          'mac_bundle': 1,
+          'dependencies': [
+            'cef_pak',
+            'libcef',
+            'libcef_dll_wrapper',
+          ],
+          'defines': [
+            'USING_CEF_SHARED',
+          ],
+          'include_dirs': [
+            '.',
+            # cefclient includes are relative to the tests directory to make
+            # creation of binary releases easier.
+            'tests'
+          ],
+          'sources': [
+            '<@(cefclient_sources_mac_helper)',
+          ],
+          # TODO(mark): Come up with a fancier way to do this.  It should only
+          # be necessary to list helper-Info.plist once, not the three times it
+          # is listed here.
+          'mac_bundle_resources!': [
+            'tests/cefclient/mac/helper-Info.plist',
+          ],
+          # TODO(mark): For now, don't put any resources into this app.  Its
+          # resources directory will be a symbolic link to the browser app's
+          # resources directory.
+          'mac_bundle_resources/': [
+            ['exclude', '.*'],
+          ],
+          'xcode_settings': {
+            'INFOPLIST_FILE': 'tests/cefclient/mac/helper-Info.plist',
+          },
+          'postbuilds': [
+            {
+              # The framework defines its load-time path
+              # (DYLIB_INSTALL_NAME_BASE) relative to the main executable
+              # (chrome).  A different relative path needs to be used in
+              # cefclient_helper_app.
+              'postbuild_name': 'Fix Framework Link',
+              'action': [
+                'install_name_tool',
+                '-change',
+                '@executable_path/libcef.dylib',
+                '@executable_path/../../../../Frameworks/Chromium Embedded Framework.framework/Libraries/libcef.dylib',
+                '${BUILT_PRODUCTS_DIR}/${EXECUTABLE_PATH}'
+              ],
+            },
+            {
+              # Modify the Info.plist as needed.  The script explains why this
+              # is needed.  This is also done in the chrome and chrome_dll
+              # targets.  In this case, --breakpad=0, --keystone=0, and --svn=0
+              # are used because Breakpad, Keystone, and Subversion keys are
+              # never placed into the helper.
+              'postbuild_name': 'Tweak Info.plist',
+              'action': ['../build/mac/tweak_info_plist.py',
+                         '--breakpad=0',
+                         '--keystone=0',
+                         '--svn=0'],
+            },
+            {
+              # Make sure there isn't any Objective-C in the helper app's
+              # executable.
+              'postbuild_name': 'Verify No Objective-C',
+              'action': [
+                '../build/mac/verify_no_objc.sh',
+              ],
+            },
+          ],
+        },  # target cefclient_helper_app
+      ],
+    }],  # OS=="mac"
+  ],
 }
