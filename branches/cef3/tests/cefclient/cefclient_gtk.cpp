@@ -84,7 +84,7 @@ gboolean PopupWindowActivated(GtkWidget* widget) {
   return FALSE;  // Don't stop this message.
 }
 
-// Callback for Debug > Accelerated 2D Canvas:... menu item.
+// Callback for Debug > Accelerated 2D Canvas... menu item.
 gboolean Accelerated2DCanvasActivated(GtkWidget* widget) {
   if (g_handler.get() && g_handler->GetBrowserId())
     RunAccelerated2DCanvasTest(g_handler->GetBrowser());
@@ -92,7 +92,7 @@ gboolean Accelerated2DCanvasActivated(GtkWidget* widget) {
   return FALSE;  // Don't stop this message.
 }
 
-// Callback for Debug > Accelerated Layers:... menu item.
+// Callback for Debug > Accelerated Layers... menu item.
 gboolean AcceleratedLayersActivated(GtkWidget* widget) {
   if (g_handler.get() && g_handler->GetBrowserId())
     RunAcceleratedLayersTest(g_handler->GetBrowser());
@@ -100,7 +100,7 @@ gboolean AcceleratedLayersActivated(GtkWidget* widget) {
   return FALSE;  // Don't stop this message.
 }
 
-// Callback for Debug > WebGL:... menu item.
+// Callback for Debug > WebGL... menu item.
 gboolean WebGLActivated(GtkWidget* widget) {
   if (g_handler.get() && g_handler->GetBrowserId())
     RunWebGLTest(g_handler->GetBrowser());
@@ -112,6 +112,14 @@ gboolean WebGLActivated(GtkWidget* widget) {
 gboolean HTML5VideoActivated(GtkWidget* widget) {
   if (g_handler.get() && g_handler->GetBrowserId())
     RunHTML5VideoTest(g_handler->GetBrowser());
+
+  return FALSE;  // Don't stop this message.
+}
+
+// Callback for Debug > HTML5 Drag & Drop... menu item.
+gboolean HTML5DragDropActivated(GtkWidget* widget) {
+  if (g_handler.get() && g_handler->GetBrowserId())
+    RunDragDropTest(g_handler->GetBrowser());
 
   return FALSE;  // Don't stop this message.
 }
@@ -193,6 +201,8 @@ GtkWidget* CreateMenuBar() {
                G_CALLBACK(WebGLActivated));
   AddMenuEntry(debug_menu, "HTML5 Video",
                G_CALLBACK(HTML5VideoActivated));
+  AddMenuEntry(debug_menu, "HTML5 Drag & Drop",
+               G_CALLBACK(HTML5DragDropActivated));
   return menu_bar;
 }
 

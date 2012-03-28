@@ -8,15 +8,6 @@
     'chromium_code': 1,
     'grit_out_dir': '<(SHARED_INTERMEDIATE_DIR)/cef',
   },
-  'conditions': [
-    [ 'os_posix==1 and OS!="mac" and OS!="android" and gcc_version==46', {
-      'target_defaults': {
-        # Disable warnings about c++0x compatibility, as some names (such
-        # as nullptr) conflict with upcoming c++0x types.
-        'cflags_cc': ['-Wno-c++0x-compat'],
-      },
-    }],
-  ],
   'includes': [
     # Bring in the source file lists.
     'cef_paths2.gypi',
@@ -751,6 +742,12 @@
             'libcef/browser/application_mac.mm',
             'libcef/browser/browser_host_impl_mac.mm',
             'libcef/browser/browser_main_mac.mm',
+            # Include necessary Mozilla sources. Remove these lines once they're
+            # included by content_browser.gypi. See crbug.com/120719.
+            '<(DEPTH)/third_party/mozilla/NSString+Utils.h',
+            '<(DEPTH)/third_party/mozilla/NSString+Utils.mm',
+            '<(DEPTH)/third_party/mozilla/NSURL+Utils.h',
+            '<(DEPTH)/third_party/mozilla/NSURL+Utils.m',
           ],
         }],
         [ 'OS=="linux" or OS=="freebsd" or OS=="openbsd"', {
@@ -764,6 +761,13 @@
     },
   ],
   'conditions': [
+    ['os_posix==1 and OS!="mac" and OS!="android" and gcc_version==46', {
+      'target_defaults': {
+        # Disable warnings about c++0x compatibility, as some names (such
+        # as nullptr) conflict with upcoming c++0x types.
+        'cflags_cc': ['-Wno-c++0x-compat'],
+      },
+    }],
     ['OS=="mac"', {
       'targets': [
         {

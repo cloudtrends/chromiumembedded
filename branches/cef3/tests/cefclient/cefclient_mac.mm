@@ -196,6 +196,7 @@ NSButton* MakeButton(NSRect* rect, NSString* title, NSView* parent) {
 - (IBAction)testAcceleratedLayers:(id)sender;
 - (IBAction)testWebGL:(id)sender;
 - (IBAction)testHTML5Video:(id)sender;
+- (IBAction)testDragDrop:(id)sender;
 @end
 
 @implementation ClientAppDelegate
@@ -246,6 +247,9 @@ NSButton* MakeButton(NSRect* rect, NSString* title, NSView* parent) {
                keyEquivalent:@""];
   [testMenu addItemWithTitle:@"HTML5 Video"
                       action:@selector(testHTML5Video:)
+               keyEquivalent:@""];
+  [testMenu addItemWithTitle:@"Drag & Drop"
+                      action:@selector(testDragDrop:)
                keyEquivalent:@""];
   [testItem setSubmenu:testMenu];
   [menubar addItem:testItem];
@@ -391,6 +395,11 @@ NSButton* MakeButton(NSRect* rect, NSString* title, NSView* parent) {
 - (IBAction)testHTML5Video:(id)sender {
   if (g_handler.get() && g_handler->GetBrowserId())
     RunHTML5VideoTest(g_handler->GetBrowser());
+}
+
+- (IBAction)testDragDrop:(id)sender {
+  if (g_handler.get() && g_handler->GetBrowserId())
+    RunDragDropTest(g_handler->GetBrowser());
 }
 
 // Sent by the default notification center immediately before the application

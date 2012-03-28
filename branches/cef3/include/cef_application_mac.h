@@ -40,6 +40,9 @@
 // Use the existing CrAppProtocol definition.
 #include "base/message_pump_mac.h"
 
+// Use the existing CrAppControlProtocol definition.
+#include "base/mac/scoped_sending_event.h"
+
 // Use the existing empty protocol definitions.
 #import "base/mac/cocoa_protocols.h"
 
@@ -52,6 +55,11 @@
 @protocol CrAppProtocol
 // Must return true if -[NSApplication sendEvent:] is currently on the stack.
 - (BOOL)isHandlingSendEvent;
+@end
+
+// Copy of CrAppControlProtocol definition from base/mac/scoped_sending_event.h.
+@protocol CrAppControlProtocol<CrAppProtocol>
+- (void)setHandlingSendEvent:(BOOL)handlingSendEvent;
 @end
 
 // The Mac OS X 10.6 SDK introduced new protocols used for delegates.  These
@@ -92,8 +100,7 @@ DEFINE_EMPTY_PROTOCOL(NSWindowDelegate)
 
 // All CEF client applications must subclass NSApplication and implement this
 // protocol.
-@protocol CefAppProtocol<CrAppProtocol>
-- (void)setHandlingSendEvent:(BOOL)handlingSendEvent;
+@protocol CefAppProtocol<CrAppControlProtocol>
 @end
 
 // Controls the state of |isHandlingSendEvent| in the event loop so that it is
