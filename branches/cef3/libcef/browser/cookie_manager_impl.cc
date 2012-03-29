@@ -71,18 +71,18 @@ class VisitCookiesCallback : public base::RefCounted<VisitCookiesCallback> {
 }  // namespace
 
 
-CefCookieManagerImpl::CefCookieManagerImpl()
-  : is_global_(true) {
-  SetGlobal();
-}
-
-  // Creates a new cookie monster with storage at the specified |path|.
-CefCookieManagerImpl::CefCookieManagerImpl(const CefString& path)
-  :is_global_(false) {
-  SetStoragePath(path);
+CefCookieManagerImpl::CefCookieManagerImpl(bool is_global)
+  : is_global_(is_global) {
 }
 
 CefCookieManagerImpl::~CefCookieManagerImpl() {
+}
+
+void CefCookieManagerImpl::Initialize(const CefString& path) {
+  if (is_global_)
+    SetGlobal();
+  else
+    SetStoragePath(path);
 }
 
 bool CefCookieManagerImpl::VisitAllCookies(
@@ -246,7 +246,9 @@ CefRefPtr<CefCookieManager> CefCookieManager::GetGlobalManager() {
     return NULL;
   }
 
-  return new CefCookieManagerImpl();
+  CefRefPtr<CefCookieManagerImpl> manager(new CefCookieManagerImpl(true));
+  manager->Initialize(CefString());
+  return manager.get();
 }
 
 // static
@@ -258,5 +260,7 @@ CefRefPtr<CefCookieManager> CefCookieManager::CreateManager(
     return NULL;
   }
 
-  return new CefCookieManagerImpl(path);
+  CefRefPtr<CefCookieManagerImpl> manager(new CefCookieManagerImpl(false));
+  manager->Initialize(path);
+  return manager.get();
 }
