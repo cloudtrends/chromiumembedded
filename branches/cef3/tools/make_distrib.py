@@ -348,38 +348,45 @@ elif platform == 'macosx':
   # transfer cefclient files
   transfer_gypi_files(cef_dir, cef_paths2['cefclient_sources_mac'], \
                       'tests/cefclient/', cefclient_dir, options.quiet)
+  transfer_gypi_files(cef_dir, cef_paths2['cefclient_sources_mac_helper'], \
+                      'tests/cefclient/', cefclient_dir, options.quiet)
 
   # transfer cefclient/mac files
   copy_dir(os.path.join(cef_dir, 'tests/cefclient/mac/'), os.path.join(output_dir, 'cefclient/mac/'), \
            options.quiet)
-  
+
   # transfer xcodebuild/Debug files
-  if not options.allowpartial or path_exists(os.path.join(cef_dir, '../xcodebuild/Debug')):
+  build_dir = os.path.join(src_dir, 'xcodebuild/Debug')
+  if not options.allowpartial or path_exists(build_dir):
     dst_dir = os.path.join(output_dir, 'Debug')
     make_dir(dst_dir, options.quiet)
-    copy_file(os.path.join(src_dir, 'xcodebuild/Debug/ffmpegsumo.so'), dst_dir, options.quiet)
-    copy_file(os.path.join(src_dir, 'xcodebuild/Debug/libcef.dylib'), dst_dir, options.quiet)
+    copy_file(os.path.join(build_dir, 'ffmpegsumo.so'), dst_dir, options.quiet)
+    copy_file(os.path.join(build_dir, 'libcef.dylib'), dst_dir, options.quiet)
+  else:
+    build_dir = None
   
   # transfer xcodebuild/Release files
-  if not options.allowpartial or path_exists(os.path.join(cef_dir, '../xcodebuild/Release')):
+  build_dir = os.path.join(src_dir, 'xcodebuild/Release')
+  if not options.allowpartial or path_exists(build_dir):
     dst_dir = os.path.join(output_dir, 'Release')
     make_dir(dst_dir, options.quiet)
-    copy_file(os.path.join(src_dir, 'xcodebuild/Release/ffmpegsumo.so'), dst_dir, options.quiet)
-    copy_file(os.path.join(src_dir, 'xcodebuild/Release/libcef.dylib'), dst_dir, options.quiet)
+    copy_file(os.path.join(build_dir, 'ffmpegsumo.so'), dst_dir, options.quiet)
+    copy_file(os.path.join(build_dir, 'libcef.dylib'), dst_dir, options.quiet)
 
     # create the real dSYM file from the "fake" dSYM file
     sys.stdout.write("Creating the real dSYM file...\n")
-    src_path = os.path.join(src_dir, 'xcodebuild/Release/libcef.dylib.dSYM/Contents/Resources/DWARF/libcef.dylib')
+    src_path = os.path.join(build_dir, 'libcef.dylib.dSYM/Contents/Resources/DWARF/libcef.dylib')
     dst_path = os.path.join(symbol_dir, 'libcef.dylib.dSYM')
     run('dsymutil '+src_path+' -o '+dst_path, cef_dir)
+  else:
+    build_dir = None
 
-  # transfer resource files
-  dst_dir = os.path.join(output_dir, 'Resources')
-  make_dir(dst_dir, options.quiet)
-  copy_files(os.path.join(src_dir, 'third_party/WebKit/Source/WebCore/Resources/*.*'), dst_dir, options.quiet)
-  copy_file(os.path.join(src_dir, 'xcodebuild/Release/cefclient.app/Contents/Resources/cef.pak'), dst_dir, options.quiet)
-  copy_files(os.path.join(src_dir, 'xcodebuild/Release/cefclient.app/Contents/Resources/*.lproj'), dst_dir, options.quiet)
-  remove_dir(os.path.join(dst_dir, 'English.lproj'))
+  if not build_dir is None:
+    # transfer resource files
+    dst_dir = os.path.join(output_dir, 'Resources')
+    make_dir(dst_dir, options.quiet)
+    copy_files(os.path.join(build_dir, 'cefclient.app/Contents/Frameworks/Chromium Embedded Framework.framework/Resources/*.*'), \
+               dst_dir, options.quiet)
   
   # transfer additional files, if any
   transfer_files(cef_dir, script_dir, os.path.join(script_dir, 'distrib/mac/transfer.cfg'), \
@@ -394,7 +401,8 @@ elif platform == 'macosx':
   src_file = os.path.join(output_dir, 'cefclient.xcodeproj/project.pbxproj')
   data = read_file(src_file)
   data = data.replace('../../../build/mac/', 'tools/')
-  data = data.replace('../../../', '')
+  data = data.replace('../../../build', 'build')
+  data = data.replace('../../../xcodebuild', 'xcodebuild')
   write_file(src_file, data)
 
 elif platform == 'linux':

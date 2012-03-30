@@ -46,6 +46,10 @@ USAGE
 
 Xcode 3 and 4: Open the cefclient.xcodeproj project and build.
 
+When using Xcode 4.2 or newer you will need to change the "Compiler for
+C/C++/Objective-C" setting to "LLVM GCC 4.2" under "Build Settings" for
+each target.
+
 Please visit the CEF Website for additional usage information.
 
 http://code.google.com/p/chromiumembedded
@@ -79,7 +83,7 @@ Optional components:
   CefSettings.pack_loading_disabled.
 
 * Other resources
-    Resources/cef.pak
+    Resources/chrome.pak
   Note: Contains WebKit image and inspector resources. Pack file loading can be
   disabled completely using CefSettings.pack_loading_disabled.
 
