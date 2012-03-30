@@ -492,7 +492,7 @@ void CefBrowserHostImpl::DestroyBrowser() {
     queued_messages_.pop();
   }
 
-  registrar_.RemoveAll();
+  registrar_.reset(NULL);
   content::WebContentsObserver::Observe(NULL);
   tab_contents_.reset(NULL);
 
@@ -1083,8 +1083,9 @@ CefBrowserHostImpl::CefBrowserHostImpl(const CefWindowInfo& window_info,
   tab_contents_.reset(tab_contents);
   tab_contents->SetDelegate(this);
 
-  registrar_.Add(this, content::NOTIFICATION_WEB_CONTENTS_TITLE_UPDATED,
-                 content::Source<content::WebContents>(tab_contents));
+  registrar_.reset(new content::NotificationRegistrar);
+  registrar_->Add(this, content::NOTIFICATION_WEB_CONTENTS_TITLE_UPDATED,
+                  content::Source<content::WebContents>(tab_contents));
 
   placeholder_frame_ =
       new CefFrameHostImpl(this, CefFrameHostImpl::kInvalidFrameId, true);

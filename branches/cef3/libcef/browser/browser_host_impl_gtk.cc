@@ -8,13 +8,20 @@
 #include <gtk/gtk.h>
 
 #include "libcef/browser/thread_util.h"
+
+#include "base/bind.h"
 #include "content/public/browser/web_contents_view.h"
 
 namespace {
 
-void window_destroyed(GtkWidget* widget, CefBrowserHostImpl* browser) {
+void DestroyBrowser(CefRefPtr<CefBrowserHostImpl> browser) {
   browser->DestroyBrowser();
   browser->Release();
+}
+
+void window_destroyed(GtkWidget* widget, CefBrowserHostImpl* browser) {
+  // Destroy the browser host after window destruction is complete.
+  CEF_POST_TASK(CEF_UIT, base::Bind(DestroyBrowser, browser));
 }
 
 }  // namespace

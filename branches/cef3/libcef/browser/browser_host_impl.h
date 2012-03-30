@@ -344,7 +344,7 @@ class CefBrowserHostImpl : public CefBrowserHost,
   CefResponseManager response_manager_;
 
   // Used for managing notification subscriptions.
-  content::NotificationRegistrar registrar_;
+  scoped_ptr<content::NotificationRegistrar> registrar_;
 
   // Used for proxying cookie requests.
   scoped_refptr<CefURLRequestContextGetterProxy> request_context_proxy_;
