@@ -143,6 +143,9 @@ parser.add_option('--output-dir', dest='outputdir', metavar='DIR',
 parser.add_option('--allow-partial',
                   action='store_true', dest='allowpartial', default=False,
                   help='allow creation of partial distributions')
+parser.add_option('--no-symbols',
+                  action='store_true', dest='nosymbols', default=False,
+                  help='do not create symbol files')
 parser.add_option('-q', '--quiet',
                   action='store_true', dest='quiet', default=False,
                   help='do not output detailed status information')
@@ -197,11 +200,12 @@ output_dir = os.path.abspath(os.path.join(options.outputdir, \
 remove_dir(output_dir, options.quiet)
 make_dir(output_dir, options.quiet)
 
-# symbol directory
-symbol_dir = os.path.abspath(os.path.join(options.outputdir, \
-                                          'cef_binary_'+cef_ver+'_'+platform+'_symbols'))
-remove_dir(symbol_dir, options.quiet)
-make_dir(symbol_dir, options.quiet)
+if not options.nosymbols:
+  # symbol directory
+  symbol_dir = os.path.abspath(os.path.join(options.outputdir, \
+                                            'cef_binary_'+cef_ver+'_'+platform+'_symbols'))
+  remove_dir(symbol_dir, options.quiet)
+  make_dir(symbol_dir, options.quiet)
 
 # transfer the LICENSE.txt file
 copy_file(os.path.join(cef_dir, 'LICENSE.txt'), output_dir, options.quiet)
@@ -312,8 +316,9 @@ if platform == 'windows':
     make_dir(dst_dir, options.quiet)
     copy_file(os.path.join(binary_dir, 'lib/libcef.lib'), dst_dir, options.quiet)
 
-    # transfer symbols
-    copy_file(os.path.join(binary_dir, 'libcef.pdb'), symbol_dir, options.quiet)
+    if not options.nosymbols:
+      # transfer symbols
+      copy_file(os.path.join(binary_dir, 'libcef.pdb'), symbol_dir, options.quiet)
   else:
     sys.stderr.write("No Release build files.\n")
 
@@ -373,11 +378,12 @@ elif platform == 'macosx':
     copy_file(os.path.join(build_dir, 'ffmpegsumo.so'), dst_dir, options.quiet)
     copy_file(os.path.join(build_dir, 'libcef.dylib'), dst_dir, options.quiet)
 
-    # create the real dSYM file from the "fake" dSYM file
-    sys.stdout.write("Creating the real dSYM file...\n")
-    src_path = os.path.join(build_dir, 'libcef.dylib.dSYM/Contents/Resources/DWARF/libcef.dylib')
-    dst_path = os.path.join(symbol_dir, 'libcef.dylib.dSYM')
-    run('dsymutil '+src_path+' -o '+dst_path, cef_dir)
+    if not options.nosymbols:
+      # create the real dSYM file from the "fake" dSYM file
+      sys.stdout.write("Creating the real dSYM file...\n")
+      src_path = os.path.join(build_dir, 'libcef.dylib.dSYM/Contents/Resources/DWARF/libcef.dylib')
+      dst_path = os.path.join(symbol_dir, 'libcef.dylib.dSYM')
+      run('dsymutil '+src_path+' -o '+dst_path, cef_dir)
   else:
     build_dir = None
 
@@ -454,8 +460,9 @@ if not options.quiet:
   sys.stdout.write('Creating '+zip_file+"...\n")
 create_archive(output_dir, os.path.join(output_dir, os.pardir, zip_file))
 
-# Create an archive of the symbol directory
-zip_file = os.path.split(symbol_dir)[1] + '.zip'
-if not options.quiet:
-  sys.stdout.write('Creating '+zip_file+"...\n")
-create_archive(symbol_dir, os.path.join(symbol_dir, os.pardir, zip_file))
+if not options.nosymbols:
+  # Create an archive of the symbol directory
+  zip_file = os.path.split(symbol_dir)[1] + '.zip'
+  if not options.quiet:
+    sys.stdout.write('Creating '+zip_file+"...\n")
+  create_archive(symbol_dir, os.path.join(symbol_dir, os.pardir, zip_file))

@@ -48,6 +48,9 @@
       ],
       'xcode_settings': {
         'INFOPLIST_FILE': 'tests/cefclient/mac/Info.plist',
+        # Necessary to avoid an "install_name_tool: changing install names or
+        # rpaths can't be redone" error.
+        'OTHER_LDFLAGS': ['-Wl,-headerpad_max_install_names'],
       },
       'conditions': [
         ['OS=="win" and win_use_allocator_shim==1', {
