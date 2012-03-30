@@ -38,6 +38,43 @@
 @end
 
 
+// Common base class for CEF browser windows. Contains methods relating to hole
+// punching required in order to display OpenGL underlay windows.
+@interface CefBrowserWindow : NSWindow {
+@private
+  int underlaySurfaceCount_;
+}
+
+// Informs the window that an underlay surface has been added/removed. The
+// window is non-opaque while underlay surfaces are present.
+- (void)underlaySurfaceAdded;
+- (void)underlaySurfaceRemoved;
+
+@end
+
+@implementation CefBrowserWindow
+
+- (void)underlaySurfaceAdded {
+  DCHECK_GE(underlaySurfaceCount_, 0);
+  ++underlaySurfaceCount_;
+
+  // We're having the OpenGL surface render under the window, so the window
+  // needs to be not opaque.
+  if (underlaySurfaceCount_ == 1)
+    [self setOpaque:NO];
+}
+
+- (void)underlaySurfaceRemoved {
+  --underlaySurfaceCount_;
+  DCHECK_GE(underlaySurfaceCount_, 0);
+
+  if (underlaySurfaceCount_ == 0)
+    [self setOpaque:YES];
+}
+
+@end
+
+
 bool CefBrowserHostImpl::PlatformViewText(const std::string& text) {
   NOTIMPLEMENTED();
   return false;
@@ -65,7 +102,7 @@ bool CefBrowserHostImpl::PlatformCreateWindow() {
     contentRect.size.width = window_rect.size.width;
     contentRect.size.height = window_rect.size.height;
 
-    newWnd = [[NSWindow alloc]
+    newWnd = [[CefBrowserWindow alloc]
               initWithContentRect:window_rect
               styleMask:(NSTitledWindowMask |
                          NSClosableWindowMask |
