@@ -13,45 +13,43 @@ The below vim configuration file enables a number of useful features for CEF/Chr
 Copy the contents to ~/.vimrc (or ~/.gvimrc if using a graphical editor like [http://code.google.com/p/macvim/ MacVim]).
 
 {{{
-" Turn on syntax highlighting.
-syntax on
-
 " Show line numbers.
 set number
 
-" Highlight lines beyond 80 characters in length.
-:au BufWinEnter * let w:m2=matchadd('ErrorMsg', '\%>80v.\+', -1)
+" Turn on syntax highlighting.
+syntax on
 
-" Always detect *.mm files as Objective-C.
-augroup filetypedetect
-au! BufRead,BufNewFile *.mm setfiletype objc 
-augroup END
+" Detect if the current file type is a C-like language.
+autocmd FileType c,cpp,objc call SetupForCLang() 
 
-" Apply Google C++ style formatting for indentation, bracket placement, etc.
+" Configuration for C-like languages.
+function! SetupForCLang()
+    " Highlight lines longer than 80 characters.
+    :au BufWinEnter * let w:m2=matchadd('ErrorMsg', '\%>80v.\+', -1)
+
+    " Use 2 spaces for indentation.
+    setlocal shiftwidth=2
+    setlocal tabstop=2
+    setlocal softtabstop=2
+    setlocal expandtab
+
+    " Enable these lines to wrap at 80 characters.
+    " setlocal textwidth=80
+    " setlocal wrap
+
+    setlocal cindent
+    setlocal cinoptions=h1,l1,g1,t0,i4,+4,(0,w1,W4
+
+    setlocal indentexpr=GoogleCppIndent()
+
+    let b:undo_indent = "setl sw< ts< sts< et< tw< wrap< cin< cino< inde<"
+
+    " Enable these lines to map F5 to the CEF syntax highlighter. Change the path to match your system.
+    " map! <F5> <Esc>:!python ~/code/chromium/src/cef/tools/check_style.py %:p 2> lint.out<CR>:cfile lint.out<CR>:silent !rm lint.out<CR>:redraw!<CR>:cc<CR>
+    " map  <F5> <Esc>:!python ~/code/chromium/src/cef/tools/check_style.py %:p 2> lint.out<CR>:cfile lint.out<CR>:silent !rm lint.out<CR>:redraw!<CR>:cc<CR>
+endfunction
+
 " From https://github.com/vim-scripts/google.vim/blob/master/indent/google.vim
-
-" Vim indent file
-" Language:	C++
-" Maintainer:	Konstantin Lepa <konstantin.lepa@gmail.com>
-" Last Change:	2010 May 20
-" License: MIT
-" Version: 1.1.0
-"
-" Changes {{{
-" 1.1.0 2011-01-17
-"   Refactored source code.
-"   Some fixes.
-"
-" 1.0.1 2010-05-20
-"   Added some changes. Thanks to Eric Rannaud <eric.rannaud@gmail.com>
-"
-"}}}
-
-if exists("b:did_indent")
-    finish
-endif
-let b:did_indent = 1
-
 function! GoogleCppIndent()
     let l:cline_num = line('.')
 
@@ -106,20 +104,4 @@ function! GoogleCppIndent()
 
     return l:orig_indent
 endfunction
-
-setlocal shiftwidth=2
-setlocal tabstop=2
-setlocal softtabstop=2
-setlocal expandtab
-
-" Enable these lines if you prefer to wrap at 80 chars.
-" setlocal textwidth=80
-" setlocal wrap
-
-setlocal cindent
-setlocal cinoptions=h1,l1,g1,t0,i4,+4,(0,w1,W4
-
-setlocal indentexpr=GoogleCppIndent()
-
-let b:undo_indent = "setl sw< ts< sts< et< tw< wrap< cin< cino< inde<"
 }}}
