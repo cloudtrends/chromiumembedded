@@ -7,7 +7,6 @@ The below vim configuration file enables a number of useful features for CEF/Chr
   * Turn on syntax highlighting.
   * Show line numbers.
   * Highlight lines beyond 80 characters in length.
-  * Always detect `*`.mm files as Objective-C.
   * Apply Google C++ style formatting for indentation, bracket placement, etc.
 
 Copy the contents to ~/.vimrc (or ~/.gvimrc if using a graphical editor like [http://code.google.com/p/macvim/ MacVim]).
@@ -44,7 +43,7 @@ function! SetupForCLang()
 
     let b:undo_indent = "setl sw< ts< sts< et< tw< wrap< cin< cino< inde<"
 
-    " Enable these lines to map F5 to the CEF syntax highlighter. Change the path to match your system.
+    " Enable these lines to map F5 to the CEF style checker. Change the path to match your system.
     " map! <F5> <Esc>:!python ~/code/chromium/src/cef/tools/check_style.py %:p 2> lint.out<CR>:cfile lint.out<CR>:silent !rm lint.out<CR>:redraw!<CR>:cc<CR>
     " map  <F5> <Esc>:!python ~/code/chromium/src/cef/tools/check_style.py %:p 2> lint.out<CR>:cfile lint.out<CR>:silent !rm lint.out<CR>:redraw!<CR>:cc<CR>
 endfunction
