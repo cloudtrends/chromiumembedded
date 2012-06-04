@@ -4,7 +4,7 @@
 
 Chromium and CEF use the [http://code.google.com/p/v8/ V8 JavaScript Engine] for their internal JavaScript (JS) implementation. Each frame in a browser window has its own JS context that provides scope and security for JS code executing in that frame (see the "Working with Contexts" section for more information). CEF exposes a large number of JS features for integration in client applications.
 
-All code that interacts with JS must be executed on the UI thread. To execute code on the UI thread use the CefPostTask() function.
+All code that interacts with JS must be executed on the UI thread. To execute code on the UI thread with CEF1 use the CefPostTask() function.
 
 {{{
 #include "include/cef.h"
@@ -28,15 +28,9 @@ void RunScript(CefRefPtr<CefBrowser> browser)
 }
 }}}
 
-The interface described below has been further improved in newer revisions of CEF. This document will be updated to reflect those changes once a new binary release is available. In summary:
+With CEF3 WebKit and JS execution run in a separate renderer process. The main thread in a renderer process is identified as TID_RENDERER and all V8 execution must take place on this thread.
 
-1. OnJSBinding() has been replaced with OnContextCreated() and OnContextReleased(). These two methods define the complete life span for the V8 context associated with a frame.
-
-2. Do not hold onto or use a V8 context reference past the call to OnContextReleased() for that context.
-
-3. The lifespan of all V8 objects is unspecified (up to the GC). Be careful when maintaining references directly from V8 objects to your own internal implementation objects. In many cases it may be better to use a proxy object that your application associates with the V8 context and which can be "disconnected" (allowing your internal implementation object to be freed) when OnContextReleased() is called for the context.
-
-See the comments in cef.h and examples in tests/unittests/v8_unittest.cc and tests/cefclient/cefclient.cpp for additional information beyond what is presented in this document.
+See the comments in cef_v8.h and examples in tests/unittests/v8_unittest.cc and tests/cefclient/cefclient.cpp for additional information beyond what is presented in this document.
 
 = ExecuteJavaScript =
 
@@ -56,13 +50,16 @@ The ExecuteJavaScript() function can be used to interact with functions and vari
 
 = Window Binding =
 
-Window binding allows the client application to attach values to a frame's `window` object. Window bindings are implemented using the CefJSBindingHandler::OnJSBinding() method.
+Window binding allows the client application to attach values to a frame's `window` object. Window bindings are implemented using the CefV8ContextHandler::OnContextCreated() method.
 
 {{{
-void MyHandler::OnJSBinding(CefRefPtr<CefBrowser> browser,
-                            CefRefPtr<CefFrame> frame,
-                            CefRefPtr<CefV8Value> object) OVERRIDE
+void MyHandler::OnContextCreated(CefRefPtr<CefBrowser> browser,
+                                 CefRefPtr<CefFrame> frame,
+                                 CefRefPtr<CefV8Context> context) OVERRIDE
 {
+  // Retrieve the context's window object.
+  CefRefPtr<CefV8Value> object = context->GetGlobal();
+
   // Create a new V8 string value. See the "Basic JS Types" section below.
   CefRefPtr<CefV8Value> str = CefV8Value::CreateString("My Value!");
 
@@ -275,10 +272,13 @@ public:
 Functions can be used to create complex window bindings.
 
 {{{
-void MyHandler::OnJSBinding(CefRefPtr<CefBrowser> browser,
-                            CefRefPtr<CefFrame> frame,
-                            CefRefPtr<CefV8Value> object) OVERRIDE
+void MyHandler::OnContextCreated(CefRefPtr<CefBrowser> browser,
+                                 CefRefPtr<CefFrame> frame,
+                                 CefRefPtr<CefV8Context> context) OVERRIDE
 {
+  // Retrieve the context's window object.
+  CefRefPtr<CefV8Value> object = context->GetGlobal();
+
   // Create an instance of my CefV8Handler object.
   CefRefPtr<CefV8Handler> handler = new MyV8Handler();
 
@@ -331,6 +331,12 @@ alert(test.myfunc()); // Shows an alert box with "My Value!"
 
 Each frame in a browser window has its own V8 context. The context defines the scope for all variables, objects and functions defined in that frame. V8 will be inside a context if the current code location has a CefV8Handler, CefV8Accessor or CefJSBindingHandler callback higher in the call stack.
 
+The OnContextCreated() and OnContextReleased() methods define the complete life span for the V8 context associated with a frame. You should be careful to follow the below rules when using these methods:
+
+1. Do not hold onto or use a V8 context reference past the call to OnContextReleased() for that context.
+
+2. The lifespan of all V8 objects is unspecified (up to the GC). Be careful when maintaining references directly from V8 objects to your own internal implementation objects. In many cases it may be better to use a proxy object that your application associates with the V8 context and which can be "disconnected" (allowing your internal implementation object to be freed) when OnContextReleased() is called for the context.
+
 If V8 is not currently inside a context, or if you need to retrieve and store a reference to a context, you can use one of two available CefV8Context static methods. GetCurrentContext() returns the context for the frame that is currently executing JS. GetEnteredContext() returns the context for the frame where JS execution began. For example, if a function in frame1 calls a function in frame2 then the current context will be frame2 and the entered context will be frame1.
 
 Arrays, objects and functions may only be created, modified and, in the case of functions, executed, if V8 is inside a context. If V8 is not inside a context then the application needs to enter a context by calling Enter() and exit the context by calling Exit(). The Enter() and Exit() methods should only be used:
@@ -338,7 +344,6 @@ Arrays, objects and functions may only be created, modified and, in the case of 
 1. When creating a V8 object, function or array outside of an existing context. For example, when creating a JS object in response to a native menu callback.
 
 2. When creating a V8 object, function or array in a context other than the current context. For example, if a call originating from frame1 needs to modify the context of frame2.
-
 
 = Executing Functions =
 
@@ -351,10 +356,13 @@ When registering a JS function callback with native code the application should 
 1. Create a "register" function in OnJSBinding().
 
 {{{
-virtual void OnJSBinding(CefRefPtr<CefBrowser> browser,
-                         CefRefPtr<CefFrame> frame,
-                         CefRefPtr<CefV8Value> object) OVERRIDE
+void MyHandler::OnContextCreated(CefRefPtr<CefBrowser> browser,
+                                 CefRefPtr<CefFrame> frame,
+                                 CefRefPtr<CefV8Context> context) OVERRIDE
 {
+  // Retrieve the context's window object.
+  CefRefPtr<CefV8Value> object = context->GetGlobal();
+
   CefRefPtr<CefV8Handler> handler = new MyV8Handler(this);
   object->SetValue("register",
                    CefV8Value::CreateFunction("register", handler),
