@@ -4,16 +4,21 @@
 
 A fully functional embedded browser window using CEF can be easily created as follows:
 {{{
-// Define an instance of our CefHandler implementation. Various methods in the MyHandler
-// instance will be called to customize browser behavior. 
-CefRefPtr<CefHandler> handler(new MyHandler());
+// Create an instance of our CefClient implementation. Various methods in the
+// MyClient instance will be called to notify about and customize browser
+// behavior. 
+CefRefPtr<CefClient> client(new MyClient());
 
-// Provide information about the parent window, client rectangle, etc.
-CefWindowInfo info = {...};
+// Information about the parent window, client rectangle, etc.
+CefWindowInfo info;
+info.SetAsChild(...);
 
-// Create the new browser window object, which eventually results in a call to
-// MyHandler::HandleAfterCreated().
-CefBrowser::CreateBrowser(info, false, handler, L"http://www.google.com");
+// Browser initialization settings.
+CefBrowserSettings settings;
+
+// Create the new browser window object asynchronously. This eventually results
+// in a call to CefLifeSpanHandler::OnAfterCreated().
+CefBrowser::CreateBrowser(info, client, "http://www.google.com", settings);
 }}}
 See cefclient under the tests directory for an example client application.
 
@@ -28,55 +33,59 @@ The CEF respository is organized as follows.
     * *cefclient* -- A simple CEF client application.
     * *unittests* -- Unit tests for CEF interfaces.
 
-== Browser Notifications ==
+== Browser Integration ==
 
-Browser notifications are delivered from the browser to the client via registered delegate interfaces.  CefHandler is the primary delegate interface and CefJSHandler may be used to implement custom JavaScript objects.
+Integration between the client and browser is implemented using delegate interfaces. CefClient is the primary delegate interface and exposes other delegate interfaces that the client can implement. Some supported features include:
 
-The following notifications are supported by CefHandler.
+  * Windows, Mac OS-X and Linux support
+  * Most HTML5 features
+  * JavaScript native binding & extension support (cef_v8.h)
+  * Off-screen rendering (cef_render_handler.h)
+  * Resource request loading, interception and substitution (cef_request_handler.h)
+  * Custom scheme handling (cef_scheme.h)
+  * Direct DOM access (cef_dom.h)
+  * GPU acceleration
+  * HTML5 drag&drop support including native callbacks (cef_drag_handler.h)
+  * Geolocation support
+  * Direct cookie access (cef_cookie.h)
+  * Control over user data persistence (cef_cookie.h, cef_storage.h)
+  * Browser/frame load and navigation notifications (cef_load_handler.h)
+  * Cross-origin white lists (cef_origin_whitelist.h)
+  * Custom proxy handling (cef_proxy_handler.h)
+  * User-defined cross-process communication (CEF3 only)
+  * JavaScript alert, confirm, prompt and onbeforeunload dialog upport (cef_jsdialog_handler.h)
+  * Context menu support (cef_menu_handler.h)
+  * Printing support (cef_print_handler.h)
+  * Keyboard and focus notifications/interception (cef_keyboard_handler.h, cef_focus_handler.h)
+  * Search/find support (cef_find_handler.h)
+  * Response filtering (cef_content_filter.h)
+  * Download handling (cef_download_handler.h)
+  * External protocol handling (cef_request_handler.h)
+  * Support for making web requests directly from native code (cef_web_urlrequest.h)
+  * Modal dialogs
+  * Separate UI message loop on Windows (CefSettings.multi_threaded_message_loop)
+  * Command line parsing (cef_command_line.h)
+  * URL parsing (cef_url.h)
+  * XML reading/parsing (cef_xml_reader.h)
+  * Zip reading/parsing (cef_zip_reader.h)
 
-  * Before Window Creation (HandleBeforeCreated). The application can cancel or customize the creation of browser windows.
-  * After Window Creation (HandleAfterCreated).  The application can register custom CefJSHandler objects.
-  * Update Address Bar (HandleAddressChange).  Change the address bar to the specified string.  This is sent after navigation is committed and before the page has begun loading.
-  * Update Title (HandleTitleChange).  Change the title to the specified string.  This is sent while the page is loading.
-  * Before Browse (HandleBeforeBrowse). The application can cancel navigation. Information provided with this event includes the URL, post data and request headers.
-  * Load Start (HandleLoadStart). The browser is about to begin loading a URL.
-  * Load End (HandleLoadEnd). The browser has finished loading a URL.
-  * Load Error (HandleLoadError). An error has occurred during the load.  The application can provide custom error pages.
-  * Before Resource Load (HandleBeforeResourceLoad).  The browser is about to begin loading a resource. The application can provide an alternate data source (in-memory buffer, for instance) or cancel the load.
-  * Before Menu (HandleBeforeMenu).  The browser is about to show a context menu. The application can either cancel the menu or show a custom menu in its place.  The default behavior of the browser implementation is to show a basic context menu based on the disposition type.
-  * Get Menu Label (HandleGetMenuLabel).  Called one time for each item in a default context menu before that menu is displayed.  The application can change the text from the English default to something else (a different language, for instance).
-  * Menu Action (HandleMenuAction).  The user has selected an action from the default context menu.  The application can choose to handle the action in a custom manner.
-  * Print Options (HandlePrintOptions). Called before the print settings dialog is displayed to allow customization of paper size, orientation and margins.
-  * Print Header & Footer (HandlePrintHeaderFooter).  Called after the web view is rendered to the print context but before the page is ended.  The application can insert a custom header/footer string at any of six predefined locations (top left, top center, top right, bottom left, bottom center, bottom right) or do custom drawing on the print context.  Information provided with this event includes the current URL, title, page number, total pages, print context, page bounding box and DPI scale factor.
-  * JavaScript Alert (HandleJSAlert). The application can customize the display of JavaScript alert messages.
-  * JavaScript Confirm (HandleJSConfirm). The application can customize the display of JavaScript confirm messages.
-  * JavaScript Prompt (HandleJSPrompt). The application can customize the display of JavaScript prompt messages.
-  * JavaScript Window Object Binding (HandleJSBinding). The application can attach user-defined method and variable handlers to a frame's JavaScript 'window' object.
-  * Before Window Close (HandleBeforeWindowClose). Called just before a browser window is closed.
-  * Take Focus (HandleTakeFocus). Called when the browser component is about to loose focus.
-  * Set Focus (HandleSetFocus). Called when the browser component is requesting focus.
-  * Key Event (HandleKeyEvent). Called when the browser component receives a keyboard event.
-  * Tooltips (HandleTooltip). Called to allow modification of tooltip text.
-  * Console Messages (HandleConsoleMessage). Called to display a console message.
-  * Find Results (HandleFindResult). Called to report find results for custom handling by the application.
-
-The following notifications are supported by CefV8Handler.
-
-  * Execute Method (Execute). The application executes the specified method.  All JavaScript arguments are provided with this event and the application can specify a return value.
+For more information about CEF3 supported features see http://magpcss.org/ceforum/viewtopic.php?f=10&t=645.
 
 == Browser Events ==
 
-Browser events are delivered to the browser by the client via CefBrowser and CefFrame methods.
+Application-initiated browser events are delivered to CEF by calling CefBrowser and CefFrame methods.
 
   * Back, Forward, Reload and Stop Load. Control navigation of browser.
   * Undo, Redo, Cut, Copy, Paste, Delete, Select All. Control selection on the target frame.
   * Print. Print the target frame.
+  * Get Source. Retrieve the target frame's HTML source as a string.
   * View Source. Save the target frame's HTML source to a temporary file and open it in the default text viewing application.
   * Load URL. Load the specified URL into the target frame.
   * Load String. Load the specified string into the target frame with an optionally specified dummy URL.
   * Load Stream. Load the specified binary data into the target frame with an optionally specified dummy URL.
   * Load Request. Load the specified request (URL, method, request data and headers) into the target frame.
-  * Execute JavaScript.  Execute an arbitrary JavaScript command in the target frame.
+  * Execute JavaScript. Execute an arbitrary JavaScript command in the target frame.
+  * Zoom. Increase or decrease the display size of web content in the target frame.
 
 == Embedded NPAPI Plugins ==
 
@@ -84,11 +93,11 @@ CEF supports the creation of embedded Netscape-style plugins.  Embedded plugins 
 
 == JavaScript Extensions ==
 
-CEF supports JavaScript extensions that can interface with native application code. See the CefRegisterExtension() function in cef.h and the "JavaScript Extension Handler" and "UI App Example" tests in the cefclient application for example usage.
+CEF supports JavaScript extensions that can interface with native application code. See the CefRegisterExtension() function in cef_v8.h and the "JavaScript Extension Handler" and "UI App Example" tests in the cefclient application for example usage. For more information about JavaScript usage see the JavaScriptIntegration Wiki document.
 
 == Custom Schemes ==
 
-CEF supports registration and handling of custom schemes such as myscheme://mydomain.  See the CefRegisterScheme() function in cef.h and the "Scheme Handler" test in the cefclient application for example usage.
+CEF supports registration and handling of custom schemes such as myscheme://mydomain.  See the CefRegisterScheme() function in cef_scheme.h and the "Scheme Handler" test in the cefclient application for example usage.
 
 == Framework Implementation Overview ==
 
@@ -96,7 +105,7 @@ All classes that belong to the chromium embedded framework are prefixed with "Ce
 
 === Framework Setup and Tear Down ===
 
-The UI message loop is hosted in a single thread created by the framework.  The client is responsible for setting up and shutting down this thread for each process that uses the framework by calling CefInitialize() and CefShutdown() respectively.
+The UI message loop is hosted in a single thread created by the framework.  The client is responsible for setting up and shutting down this thread for each process that uses the framework by calling CefInitialize() and CefShutdown() respectively. On Windows the UI message loop can be run on a separate thread using the CefSettings.multi_threaded_message_loop setting.
 
 === Reference Counting ===
 
@@ -104,21 +113,22 @@ All framework classes implement the CefBase interface and all instance pointers 
 
 === Platform Neutrality ===
 
-The CEF framework is designed to be platform neutral.  While we currently only support Windows there are plans to add support for other platforms in the future.  In order to make multi-platform support as painless as possible the framework defines a set of implementation-neutral interfaces and typedef's that wrap platform-dependent behavior.
+The CEF framework is designed to be platform neutral.  It currently supports Windows, Mac OS-X and Linux.  In order to make multi-platform support as painless as possible the framework defines a set of implementation-neutral interfaces and typedef's that wrap platform-dependent behavior.
 
 === Thread Safety ===
 
-All implementations of framework interfaces must be safe for access from multiple threads.  The CefThreadSafeBase template provides atomic AddRef() and Release() implementations.  It also provides Lock() and Unlock() methods for synchronizing access to blocks of code.
+All implementations of framework interfaces must be safe for access from multiple threads unless otherwise noted.  The IMPLEMENT_REFCOUNTING macro provides atomic AddRef() and Release() implementations.  The IMPLEMENT_LOCKING macro provides Lock() and Unlock() methods for synchronizing access to blocks of code.
 
 === Framework Interfaces ===
 
-The framework defines the following interfaces.
+The framework defines the following basic interfaces.
 
-  * *CefBrowser* is the main browser window host class. A new browser window is created by calling the static CefBrowser::CreateBrowser() method.
-  * *CefFrame* represents a single frame in the browser window.  Each browser window also has a top-level main frame that can be accessed via the CefBrowser::GetMainFrame() method.
-  * *CefHandler* is the main browser delegate interface passed into the CefBrowser::CreateBrowser() method.
+  * *CefBrowser* is the main browser window class. A new browser window is created by calling the static CreateBrowser() or CreateBrowserSync() methods.
+  * *CefFrame* represents a single frame in the browser window.  Each browser window also has a top-level main frame that can be accessed via the GetMainFrame() method.
+  * *CefClient* is the main browser delegate interface passed into the CreateBrowser() method.
   * *CefRequest* represents request data such as url, method, post data and headers.
-  * *CefPostData* and *CefPostDataElement* represent the post data that may be part of a request.
-  * *CefSchemeHandlerFactory* and *CefSchemeHandler* are used to handle requests using custom schemes such as myscheme://mydomain.
-  * *CefStreamReader*, *CefStreamWriter*, *CefReadHandler* and *CefWriteHandler* are simple interfaces for reading and writing data.
-  * *CefV8Handler* and *CefV8Value* are used to create and access JavaScript objects.
+  * *CefSchemeHandlerFactory* is used to handle requests using custom schemes such as myscheme://mydomain.
+  * *CefReadHandler* and *CefWriteHandler* are simple interfaces for reading and writing data.
+  * *CefV8Handler*, *CefV8Value* and *CefV8Context* are used to create and access JavaScript objects.
+
+See header files in the include directory for complete API documentation.
