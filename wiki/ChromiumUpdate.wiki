@@ -10,10 +10,9 @@ The Chromium developers work very hard to introduce new features and capabilitie
 svn diff -r oldrev:newrev > diff_oldrev-newrev.txt
 }}}
 
-The following files should be evaluated for changes:
+With CEF1 the following files should be evaluated for changes:
 
 {{{
-chrome/browser/net/sqlite_persistent_cookie_store.*
 content/browser/in_process_webkit/*
 third_party/WebKit/Source/WebKit/chromium/public/*
 webkit/glue/webpreferences.h (watch for new WebKit features that may need to be enabled)
@@ -21,12 +20,18 @@ webkit/support/simple_database_system.*
 webkit/tools/test_shell/*
 }}}
 
+With CEF3 the following files should be evaluated for changes:
+
+{{{
+content/content_shell/*
+content/content_shell.gypi
+}}}
+
 On Windows you can create a batch script called "diff.bat" in the CEF directory:
 
 {{{
 @echo off
 set TARGET="%1-%2.diff"
-call svn diff -r %1:%2 ../chrome/browser/net/sqlite_persistent_cookie_store.* > %TARGET%
 call svn diff -r %1:%2 ../content/browser/in_process_webkit >> %TARGET%
 call svn diff -r %1:%2 ../webkit/glue/webpreferences.h >> %TARGET%
 call svn diff -r %1:%2 ../webkit/support/simple_database_system.* >> %TARGET%
@@ -39,13 +44,13 @@ And run it as follows:
 diff.bat OLDREV NEWREV
 }}}
 
-This will be your guide to identifying what has changed. CEF began life as a customized version of test_shell and there's still a one-to-one relationship between many of the files.
+This will be your guide to identifying what has changed. CEF began life as a customized version of test_shell (CEF1) or content_shell (CEF3) and there's still a one-to-one relationship between many of the files.
 
 3. Make the necessary changes to CEF, build (clean if necessary) and fix whatever is broken.
 
 4. Run the various CEF tests to make sure everything still works. This step will hopefully be automated at some point in the future.
 
-Looking at the [http://build.chromium.org/buildbot/waterfall.fyi/waterfall?branch=&builder=Chromium+Embedded CEF Build Bot] stdio log will give you a sense of what you can expect to find broken when you update. In most cases (say, 90% of the time) the breakage is due to naming changes, minor code reorganization and/or project name/location changes. The remaining 10% can require pretty significant changes to CEF, usually due to the ongoing refactoring of webkit/glue to webkit/api. If you identify a change to Chromium that has broken a required feature for CEF, and you can't work around the breakage by making reasonable changes to CEF, then you should work with the Chromium team to resolve the problem.
+In most cases (say, 90% of the time) any code breakage will be due to naming changes, minor code reorganization and/or project name/location changes. The remaining 10% can require pretty significant changes to CEF, usually due to the ongoing refactoring in Chromium code. If you identify a change to Chromium that has broken a required feature for CEF, and you can't work around the breakage by making reasonable changes to CEF, then you should work with the Chromium team to resolve the problem.
 
 1. Identify the specific Chromium revision that broke the feature and make sure you understand why the change was made.
 
