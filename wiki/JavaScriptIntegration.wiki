@@ -81,7 +81,7 @@ Window bindings are reloaded each time a frame is reloaded giving the client app
 
 = Extensions =
 
-Exceptions are like window bindings except they are loaded into the context for every frame and cannot be modified once loaded. Extensions are registered using the CefRegisterExtension() function.
+Extensions are like window bindings except they are loaded into the context for every frame and cannot be modified once loaded. Extensions are registered using the CefRegisterExtension() function.
 
 {{{
 // Define the extension contents.
