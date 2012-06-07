@@ -1,0 +1,179 @@
+#summary Information about CEF branches and instructions for downloading, building and packaging source code.
+
+== Background ==
+
+The CEF project is an extension of the Chromium project hosted at http://www.chromium.org. CEF maintains development and release branches that track Chromium branches. CEF source code can be built manually or with automated tools.
+
+== Development ==
+
+Ongoing development of CEF occurs in [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Ftrunk trunk]. This location tracks the current [http://src.chromium.org/viewvc/chrome/trunk/ Chromium trunk] and is not recommended for production use.
+
+The following URLs should be used for downloading development versions of CEF.
+
+  * CEF1 - http://chromiumembedded.googlecode.com/svn/trunk/cef1
+  * CEF3 - http://chromiumembedded.googlecode.com/svn/trunk/cef3
+
+== Release Branches ==
+
+CEF provides release branches that track specific [http://src.chromium.org/viewvc/chrome/releases/ Chromium releases]. Users developing applications for production environments are encouraged to use release branches for the following reasons:
+
+  * Binary CEF builds are tied to specific Chromium releases.
+  * Release versions of CEF/Chromium are better tested and more appropriate for release applications.
+  * Within a release branch the CEF API is "frozen" and generally only security/bug fixes are applied.
+  * CEF release branches can include patches to Chromium/WebKit source if necessary.
+  * CEF trunk development won't interfere with consumer release schedules.
+
+CEF release version numbers have the format X.Y.Z where X is the CEF version (1 or 3), Y is the release branch and Z is the CEF revision number. Detailed Chromium and CEF version information is available in the include/cef_version.h header file that will be created during the build process.
+
+Current CEF release branches are as follows.
+
+|| Release Branch || Chromium Version || CEF1 Support || CEF3 Support ||
+|| [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Fbranches%2F963 963] || 17 || Yes || No ||
+|| [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Fbranches%2F1025 1025] || 18 || Yes || No ||
+|| [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Fbranches%2F1084 1084] || 19 || Yes || No ||
+|| [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Fbranches%2F1155 1155] || 21 || Yes || Yes ||
+
+The following URLs should be used for downloading release verisons of CEF where YYYY is the release branch number.
+
+  * CEF1 - http://chromiumembedded.googlecode.com/svn/branches/YYYY/cef1
+  * CEF3 - http://chromiumembedded.googlecode.com/svn/branches/YYYY/cef3
+
+Note that the 963 and 1025 branches contain only CEF1 source code (no "cef1" subfolder exists for those branch directories).
+
+Information about how CEF release branches are created is available [http://code.google.com/p/chromiumembedded/issues/detail?id=325 here].
+
+== Building from Source ==
+
+Building from source code is currently supported on Windows, Mac OS-X and Linux environments.
+
+  * Building on most platforms will require at least 4GB of system memory.
+  * Mac OS-X - 10.6 (Snow Leopard) and 10.7 (Lion) are the only Mac build platforms currently supported.
+    * If built using 10.6 the resulting executables will run on 10.5, 10.6 and 10.7.
+    * If built using 10.7 the resulting executables will run on 10.6 and 10.7.
+  * Linux - CEF has been tested to build successfully on Ubuntu 10.04 32bit, Ubuntu 11.10 64bit, Ubuntu 12.04 64bit and Debian Squeeze 64bit. It should also theoretically build on other 32bit and 64bit versions of Ubuntu, Debian, Fedora and openSUSE but your mileage may vary.
+
+To build Chromium and CEF from source code you must start by configuring your build environment.
+
+1. Install the build prerequisites for your operating system and development environment.
+
+  * Windows - http://www.chromium.org/developers/how-tos/build-instructions-windows
+  * Mac OS-X - http://code.google.com/p/chromium/wiki/MacBuildInstructions
+  * Linux - http://code.google.com/p/chromium/wiki/LinuxBuildInstructions
+
+2. Configure environment settings that will effect the [http://code.google.com/p/gyp/ GYP] build.
+
+  * CEF does not currently support component builds.
+  * Windows - If multiple versions of Visual Studio are installed on your system you can set the GYP_MSVS_VERSION environment variable to create project files for that version. For example, set the value to "2008" or "2010" to create project files for VS2008 or VS2010 respectively.
+  * Mac OS-X - On Lion and higher, the 10.5 SDK is not available, so you must configure GYP to use the 10.6 SDK. Click [http://code.google.com/p/chromium/wiki/Xcode4Tips here] for more information.
+
+=== Automated Method ===
+
+CEF provides tools for automatically downloading, building and packaging Chromium and CEF source code. This method can be used for both development (trunk) and release builds. To use the automated method:
+
+1. Download the automate.py tool.
+
+{{{
+svn checkout http://chromiumembedded.googlecode.com/svn/trunk/cef1/tools/automate /path/to/automate
+}}}
+
+2. Run the automate.py script at whatever interval is appropriate (for each CEF commit, once per day, once per week, etc). Use the correct URL for the CEF version that you want to download and build.
+
+{{{
+python /path/to/automate/automate.py --download-dir=/path/to/download --url=http://chromiumembedded.googlecode.com/svn/branches/1084/cef1
+}}}
+
+If the process succeeds a binary distribution package will be created in the /path/to/download/chromium/src/cef/binary_distrib directory.
+
+See [http://code.google.com/p/chromiumembedded/source/browse/trunk/cef1/tools/automate/automate.README.txt automate.README.txt] for complete usage instructions.
+
+This method also integrates nicely with automated build systems like [http://www.jetbrains.com/teamcity/ TeamCity].
+
+=== Manual Downloading  ===
+
+Chromium and CEF can be downloaded and built as a manual process. This is more complicated and is not recommended for all users.
+
+==== Development ====
+
+These download instructions apply only to the development (trunk) version of CEF1 and CEF3.
+
+1. Install depot_tools and download the Chromium source code as described at http://dev.chromium.org/developers/how-tos/get-the-code.
+
+2. Download the CEF source code to a "cef" directory inside the Chromium "src" directory. You should download either CEF1 or CEF3 but not both. If Chromium code was downloaded to "/path/to/chromium/src" then CEF code should be downloaded to "/path/to/chromium/src/cef". Note that the directory must be named "cef" for both CEF1 and CEF3.
+
+{{{
+cd /path/to/chromium/src
+svn co http://chromiumembedded.googlecode.com/svn/trunk/cef1 cef
+}}}
+
+3. View the CHROMIUM_BUILD_COMPATIBILITY.txt file in the CEF top-level directory to identify what Chromium revision you need. This will change over time as CEF is updated to work with newer Chromium revisions.
+
+4. Update the Chromium checkout to the appropriate revision.
+
+{{{
+cd /path/to/chromium
+gclient sync --revision src@chromium_revision --jobs 8 --force
+}}}
+
+==== Release Branch ====
+
+These download instructions apply only to release branches of CEF1 and CEF3.
+
+1. Install depot_tools as described at http://dev.chromium.org/developers/how-tos/get-the-code. Do not download the Chromium source code yet.
+
+2. View the CHROMIUM_BUILD_COMPATIBILITY.txt file in the CEF top-level directory to identify what Chromium release branch you need. This will change over time as CEF is updated to work with newer Chromium release branches.
+
+3. Create a chromium checkout directory (for example, /path/to/chromium) and configure gclient to use the required release branch. Make sure to use the release branch number discovered in step #2.
+
+{{{
+cd /path/to/chromium
+gclient config http://src.chromium.org/svn/releases/19.0.1084.9
+}}}
+
+4. Download the Chromium source code.
+
+{{{
+cd /path/to/chromium
+gclient sync --jobs 8 --force
+}}}
+
+5. Download the CEF source code to a "cef" directory inside the Chromium "src" directory. You should download either CEF1 or CEF3 but not both. If Chromium code was downloaded to "/path/to/chromium/src" then CEF code should be downloaded to "/path/to/chromium/src/cef". Note that the directory must be named "cef" for both CEF1 and CEF3.
+
+{{{
+cd /path/to/chromium/src
+svn co http://chromiumembedded.googlecode.com/svn/branches/1084/cef1 cef
+}}}
+
+=== Manual Building ===
+
+1. Run the cef_create_projects script (.bat on Windows, .sh on OS-X and Linux) to generate the build files based on the [http://code.google.com/p/gyp/ GYP] configuration.
+
+{{{
+cd /path/to/chromium/src/cef
+./cef_create_projects.sh
+}}}
+
+2. Build CEF.
+
+  * Windows - Open the Visual Studio solution file and build.
+  * Mac OS-X - Open the Xcode project file and build.
+  * Linux - Run "make -j4 cefclient" from the Chromium "src" directory.
+
+Alternately, the build_projects script (.bat on Windows, .sh on OS-X and Linux) can be used to build on the command line using the default system tools.
+
+{{{
+cd /path/to/chromium/src/cef/tools
+build_projects.sh Debug
+}}}
+
+=== Manual Packaging ===
+
+After building both Debug and Release configurations you can use the make_distrib tool (.bat on Windows, .sh on OS-X and Linux) to create a binary distribution.
+
+{{{
+cd /path/to/chromium/src/cef/tools
+make_distrib.sh
+}}}
+
+If the process succeeds a binary distribution package will be created in the /path/to/chromium/src/cef/binary_distrib directory.
+
+See the [http://code.google.com/p/chromiumembedded/source/browse/trunk/cef1/tools/make_distrib.py#140 make_distrib.py] script for additional usage options.
