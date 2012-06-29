@@ -59,6 +59,7 @@ To build Chromium and CEF from source code you must start by configuring your bu
   * Windows - http://www.chromium.org/developers/how-tos/build-instructions-windows
   * Mac OS-X - http://code.google.com/p/chromium/wiki/MacBuildInstructions
   * Linux - http://code.google.com/p/chromium/wiki/LinuxBuildInstructions
+  * Use a version 1.6.x SVN client as some people have reported problems with version 1.7.x. Version 1.6.x is included with depot_tools on Windows.
 
 2. Configure environment settings that will effect the [http://code.google.com/p/gyp/ GYP] build.
 
