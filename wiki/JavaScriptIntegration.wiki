@@ -28,7 +28,7 @@ void RunScript(CefRefPtr<CefBrowser> browser)
 }
 }}}
 
-With CEF3 WebKit and JS execution run in a separate renderer process. The main thread in a renderer process is identified as TID_RENDERER and all V8 execution must take place on this thread.
+With CEF3 WebKit and JS execution run in a separate renderer process. The main thread in a renderer process is identified as TID_RENDERER and all V8 execution must take place on this thread. JS APIs that communicate between the browser and renderer processes should be designed using asynchronous callbacks. See http://www.chromium.org/developers/design-documents/extensions/how-the-extension-system-works/api-pattern-design-doc for an example.
 
 See the comments in cef_v8.h and examples in tests/unittests/v8_unittest.cc and tests/cefclient/cefclient.cpp for additional information beyond what is presented in this document.
 
