@@ -64,7 +64,7 @@ To build Chromium and CEF from source code you must start by configuring your bu
 2. Configure environment settings that will effect the [http://code.google.com/p/gyp/ GYP] build.
 
   * CEF does not currently support component builds.
-  * Windows - If multiple versions of Visual Studio are installed on your system you can set the GYP_MSVS_VERSION environment variable to create project files for that version. For example, set the value to "2008" or "2010" to create project files for VS2008 or VS2010 respectively.
+  * Windows - If multiple versions of Visual Studio are installed on your system you can set the GYP_MSVS_VERSION environment variable to create project files for that version. For example, set the value to "2008" for VS2008, "2010" for VS2010 or "2010e" for VS2010 Express. Check the Chromium documentation for the correct value when using other Visual Studio versions.
   * Mac OS-X - On Lion and higher, the 10.5 SDK is not available, so you must configure GYP to use the 10.6 SDK. Click [http://code.google.com/p/chromium/wiki/Xcode4Tips here] for more information.
 
 === Automated Method ===
