@@ -60,7 +60,7 @@ To build Chromium and CEF from source code you must start by configuring your bu
   * Windows - http://www.chromium.org/developers/how-tos/build-instructions-windows
   * Mac OS-X - http://code.google.com/p/chromium/wiki/MacBuildInstructions
   * Linux - http://code.google.com/p/chromium/wiki/LinuxBuildInstructions
-  * Use a version 1.6.x SVN client as some people have reported problems with version 1.7.x. Version 1.6.x is included with depot_tools on Windows.
+  * Use a version 1.6.x SVN client as some people have reported problems with version 1.7.x. Version 1.6.x is included with depot_tools on Windows. A 1.6.X version of TortoiseSVN for Windows can be downloaded here: http://sourceforge.net/projects/tortoisesvn/files/1.6.16/Application/
 
 2. Configure environment settings that will effect the [http://code.google.com/p/gyp/ GYP] build.
 
@@ -99,6 +99,14 @@ Chromium and CEF can be downloaded and built as a manual process. This is more c
 These download instructions apply only to the development (trunk) version of CEF1 and CEF3.
 
 1. Install depot_tools and download the Chromium source code as described at http://dev.chromium.org/developers/how-tos/get-the-code.
+
+Depot tools can also be downloaded using a version 1.6.X SVN client:
+
+{{{
+svn co http://src.chromium.org/svn/trunk/tools/depot_tools
+}}}
+
+To avoid potential problems make sure that your depot_tools and chromium source download paths are as short as possible and do not contain spaces or special characters.
 
 2. Download the CEF source code to a "cef" directory inside the Chromium "src" directory. You should download either CEF1 or CEF3 but not both. If Chromium code was downloaded to "/path/to/chromium/src" then CEF code should be downloaded to "/path/to/chromium/src/cef". Note that the directory must be named "cef" for both CEF1 and CEF3.
 
