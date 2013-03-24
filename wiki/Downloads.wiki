@@ -1,3 +1,5 @@
 #summary Location for downloading CEF files.
 
-CEF files may be downloaded from http://www.magpcss.net/cef_downloads/.
+Current CEF binary releases may be downloaded from http://www.magpcss.net/cef_downloads/.
+
+Older releases may continue to be available from https://code.google.com/p/chromiumembedded/downloads/list for a limited time.
