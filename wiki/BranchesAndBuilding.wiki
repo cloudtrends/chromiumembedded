@@ -35,6 +35,7 @@ Current CEF release branches are as follows.
 || [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Fbranches%2F1271 1271] || 23 || Yes || Yes ||
 || [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Fbranches%2F1364 1364] || 25 || Yes || Yes ||
 || [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Fbranches%2F1453 1453] || 27 || Yes || Yes ||
+|| [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Fbranches%2F1547 1547] || 29 || No  || Yes ||
 
 The following URLs should be used for downloading release verisons of CEF where YYYY is the release branch number.
 
