@@ -73,7 +73,11 @@ To build Chromium and CEF from source code you must start by configuring your bu
 
 === Automated Method ===
 
-CEF provides tools for automatically downloading, building and packaging Chromium and CEF source code. This method can be used for both development (trunk) and release builds. To use the automated method:
+CEF provides tools for automatically downloading, building and packaging Chromium and CEF source code. This method can be used for both development (trunk) and release builds.
+
+*Only the SVN workflow is currently supported by the automated method.*
+
+To use the automated method:
 
 1. Download the automate.py tool.
 
@@ -96,6 +100,8 @@ This method also integrates nicely with automated build systems like [http://www
 === Manual Downloading  ===
 
 Chromium and CEF can be downloaded and built as a manual process. This is more complicated and is not recommended for all users.
+
+*The below instructions apply to the SVN workflow. For users who prefer the Git workflow please see the Chromium instructions available [https://code.google.com/p/chromium/wiki/UsingGit here] and clone the appropriate Git SVN mirror as described [https://code.google.com/p/chromiumembedded/issues/detail?id=1023 here].*
 
 ==== Development ====
 
