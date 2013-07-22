@@ -260,7 +260,10 @@ After building both Debug and Release configurations you can use the make_distri
 
 {{{
 cd /path/to/chromium/src/cef/tools
+# If using default system build tools:
 ./make_distrib.sh
+# If using a Ninja build:
+./make_distrib.sh --ninja-build
 }}}
 
 If the process succeeds a binary distribution package will be created in the /path/to/chromium/src/cef/binary_distrib directory.
