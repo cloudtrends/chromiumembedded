@@ -60,10 +60,9 @@ To build Chromium and CEF from source code you must start by configuring your bu
 
 1. Install the build prerequisites for your operating system and development environment.
 
-  * Windows - http://www.chromium.org/developers/how-tos/build-instructions-windows
+  * Windows - http://www.chromium.org/developers/how-tos/build-instructions-windows. Use a version 1.6.x SVN client as some people have reported problems with version 1.7.x. Version 1.6.x is included with depot_tools on Windows. A 1.6.X version of TortoiseSVN for Windows can be downloaded [http://sourceforge.net/projects/tortoisesvn/files/1.6.16/Application/ here].
   * Mac OS-X - http://code.google.com/p/chromium/wiki/MacBuildInstructions
   * Linux - http://code.google.com/p/chromium/wiki/LinuxBuildInstructions. Starting with CEF3 revision 1294 a dependency on the libgtkglext1-dev package has been added to support the off-screen rendering example in cefclient.
-  * Use a version 1.6.x SVN client as some people have reported problems with version 1.7.x. Version 1.6.x is included with depot_tools on Windows. A 1.6.X version of TortoiseSVN for Windows can be downloaded here: http://sourceforge.net/projects/tortoisesvn/files/1.6.16/Application/
 
 2. Configure environment settings that will effect the [http://code.google.com/p/gyp/ GYP] build.
 
@@ -71,11 +70,9 @@ To build Chromium and CEF from source code you must start by configuring your bu
   * Windows - Beginning in July 2012 most Chromium developers and testing infrastructure is using Visual Studio 2010. For this reason building Chromium with other compiler versions may result in compile or runtime errors. If multiple versions of Visual Studio are installed on your system you can set the GYP_MSVS_VERSION environment variable to create project files for that version. For example, set the value to "2010" for VS2010 or "2010e" for VS2010 Express. Check the Chromium documentation for the correct value when using other Visual Studio versions.
   * Mac OS-X - On Lion and higher, the 10.5 SDK is not available, so you must configure GYP to use the 10.6 SDK. Click [http://code.google.com/p/chromium/wiki/Xcode4Tips here] for more information.
 
-=== Automated Method ===
+=== Automated Method (SVN only) ===
 
 CEF provides tools for automatically downloading, building and packaging Chromium and CEF source code. This method can be used for both development (trunk) and release builds.
-
-*Only the SVN workflow is currently supported by the automated method.*
 
 To use the automated method:
 
@@ -101,15 +98,13 @@ This method also integrates nicely with automated build systems like [http://www
 
 Chromium and CEF can be downloaded and built as a manual process. This is more complicated and is not recommended for all users.
 
-*The below instructions apply to the SVN workflow. For users who prefer the Git workflow please see the Chromium instructions available [https://code.google.com/p/chromium/wiki/UsingGit here] and clone the appropriate Git SVN mirror as described [https://code.google.com/p/chromiumembedded/issues/detail?id=1023 here].*
-
-==== Development ====
+==== Development (SVN or Git) ====
 
 These download instructions apply only to the development (trunk) version of CEF1 and CEF3.
 
-1. Install depot_tools and download the Chromium source code. This can be done as described at http://dev.chromium.org/developers/how-tos/get-the-code or by following the below steps A-D. To avoid potential problems make sure that the depot_tools and chromium source download paths are as short as possible and do not contain spaces or special characters.
+1. Install depot_tools. To avoid potential problems make sure the path is as short as possible and does not contain spaces or special characters.
 
-A. Install a version 1.6.X SVN client (see above for a TortoiseSVN 1.6 link) and add it to your PATH.
+A. Windows only: Install a version 1.6.X SVN client (see above for a TortoiseSVN 1.6 link) and add it to your PATH.
 
 B. Download depot_tools via SVN.
 
@@ -119,36 +114,80 @@ svn co http://src.chromium.org/svn/trunk/tools/depot_tools
 
 C. Add the depot_tools directory to your PATH. On Windows the depot_tools path should come before the TortoiseSVN path.
 
-D. Create a chromium checkout directory (for example, /path/to/chromium) and configure gclient to use the trunk branch.
+2. Create a chromium checkout directory (for example, /path/to/chromium). To avoid potential problems make sure the path is as short as possible and does not contain spaces or special characters.
+
+3. View the CHROMIUM_BUILD_COMPATIBILITY.txt file in the CEF top-level directory to identify what Chromium revision you need. This will change over time as CEF is updated to work with newer Chromium revisions.
+
+===== SVN workflow (CEF1 and CEF3): =====
+
+This version of steps 4-6 applies to the SVN workflow only. The SVN workflow is recommended for most users. Complete instructions for using the SVN workflow in Chromium are available [http://dev.chromium.org/developers/how-tos/get-the-code here].
+
+4. Configure gclient to use the trunk branch.
 
 {{{
 cd /path/to/chromium
 gclient config http://src.chromium.org/chrome/trunk/src
 }}}
 
-2. View the CHROMIUM_BUILD_COMPATIBILITY.txt file in the CEF top-level directory to identify what Chromium revision you need. This will change over time as CEF is updated to work with newer Chromium revisions.
-
-3. Update the Chromium checkout to the appropriate revision.
+5. Update the Chromium checkout to the revision number discovered in step #3.
 
 {{{
 cd /path/to/chromium
 gclient sync --revision src@chromium_revision --jobs 8 --force
 }}}
 
-4. Download the CEF source code to a "cef" directory inside the Chromium "src" directory. You should download either CEF1 or CEF3 but not both. If Chromium code was downloaded to "/path/to/chromium/src" then CEF code should be downloaded to "/path/to/chromium/src/cef". Note that the directory must be named "cef" for both CEF1 and CEF3.
+6. Download CEF source code to a "cef" directory inside the Chromium "src" directory. You should download either CEF1 or CEF3 but not both. If Chromium code was downloaded to "/path/to/chromium/src" then CEF code should be downloaded to "/path/to/chromium/src/cef". Note that the directory must be named "cef" for both CEF1 and CEF3.
 
 {{{
 cd /path/to/chromium/src
 svn co http://chromiumembedded.googlecode.com/svn/trunk/cef1 cef
 }}}
 
-==== Release Branch ====
+===== Git workflow (CEF3 only): =====
 
-These download instructions apply only to release branches of CEF1 and CEF3.
+This version of steps 4-7 applies to the Git workflow only. Using Git is more complicated than using SVN and is not recommended for users unfamiliar with Git. Using Git on Windows is very slow and generally not recommended for anyone. Complete instructions for using the Git workflow in Chromium are available [https://code.google.com/p/chromium/wiki/UsingGit here].
 
-1. Install depot_tools but do not download the Chromium source code yet. This can be done as described at http://dev.chromium.org/developers/how-tos/get-the-code or by following the below steps A-C. To avoid potential problems make sure that the depot_tools and chromium source download paths are as short as possible and do not contain spaces or special characters.
+4. Download Chromium source code using the fetch tool included with depot_tools. This step only needs to be performed the first time Chromium code is checked out.
 
-A. Install a version 1.6.X SVN client (see above for a TortoiseSVN 1.6 link) and add it to your PATH.
+{{{
+cd /path/to/chromium
+fetch chromium --nosvn=True
+}}}
+
+5. Find the git commit hash for the SVN revision number discovered in step #3. This can be done using the command-line (warning: this may be slow)
+
+{{{
+cd /path/to/chromium/src
+git svn find-rev r<revision>
+}}}
+
+Or by using the [http://git.chromium.org/gitweb/?p=chromium%2Fsrc.git&a=search&h=HEAD&st=commit&s=%40123456 online search tool] to find "@revision" in the chromium/src.git repository, and then clicking on the search result to get the "commit" hash.
+
+6. Update the Chromium checkout to the required commit hash. DO NOT use 'git checkout commit_hash' directly because that will mess up the sub-project dependencies.
+
+{{{
+cd /path/to/chromium
+gclient sync --revision <commit_hash> --jobs 8 --force
+}}}
+
+See [https://code.google.com/p/chromium/wiki/UsingGit#If_gclient_sync_fails these instructions] if the 'gclient sync' command fails.
+
+7. Download CEF source code from the CEF Git repository to a "cef" directory inside the Chromium "src" directory. If Chromium code was downloaded to "/path/to/chromium/src" then CEF code should be downloaded to "/path/to/chromium/src/cef". Note that the directory must be named "cef".
+
+{{{
+cd /path/to/chromium/src
+git clone https://chromiumembedded@bitbucket.org/chromiumembedded/trunk-cef3.git cef
+}}}
+
+The CEF Git repository is a read-only mirror of the SVN repository and pull requests will not be accepted. To submit changes please attach patch files generated with 'git diff --no-prefix' to issues in the CEF issue tracker.
+
+==== Release Branch (SVN only) ====
+
+These download instructions apply only to release branches of CEF1 and CEF3. Complete instructions for using the SVN workflow in Chromium are available [http://dev.chromium.org/developers/how-tos/get-the-code here].
+
+1. Install depot_tools. To avoid potential problems make sure the path is as short as possible and does not contain spaces or special characters.
+
+A. Windows only: Install a version 1.6.X SVN client (see above for a TortoiseSVN 1.6 link) and add it to your PATH.
 
 B. Download depot_tools via SVN:
 
@@ -158,23 +197,25 @@ svn co http://src.chromium.org/svn/trunk/tools/depot_tools
 
 C. Add the depot_tools directory to your PATH. On Windows the depot_tools path should come before the TortoiseSVN path.
 
-2. View the CHROMIUM_BUILD_COMPATIBILITY.txt file in the CEF top-level directory to identify what Chromium release branch you need. This will change over time as CEF is updated to work with newer Chromium release branches.
+2. Create a chromium checkout directory (for example, /path/to/chromium). To avoid potential problems make sure the path is as short as possible and does not contain spaces or special characters.
 
-3. Create a chromium checkout directory (for example, /path/to/chromium) and configure gclient to use the required release branch. Make sure to use the release branch number discovered in step #2.
+3. View the CHROMIUM_BUILD_COMPATIBILITY.txt file in the CEF top-level directory to identify what Chromium release branch you need. This will change over time as CEF is updated to work with newer Chromium release branches.
+
+4. Configure gclient to use the release branch number discovered in step #3.
 
 {{{
 cd /path/to/chromium
 gclient config http://src.chromium.org/svn/releases/19.0.1084.9
 }}}
 
-4. Download the Chromium source code.
+5. Download the Chromium source code.
 
 {{{
 cd /path/to/chromium
 gclient sync --jobs 8 --force
 }}}
 
-5. Download the CEF source code to a "cef" directory inside the Chromium "src" directory. You should download either CEF1 or CEF3 but not both. If Chromium code was downloaded to "/path/to/chromium/src" then CEF code should be downloaded to "/path/to/chromium/src/cef". Note that the directory must be named "cef" for both CEF1 and CEF3.
+6. Download the CEF source code to a "cef" directory inside the Chromium "src" directory. You should download either CEF1 or CEF3 but not both. If Chromium code was downloaded to "/path/to/chromium/src" then CEF code should be downloaded to "/path/to/chromium/src/cef". Note that the directory must be named "cef" for both CEF1 and CEF3.
 
 {{{
 cd /path/to/chromium/src
@@ -200,7 +241,17 @@ Alternately, the build_projects script (.bat on Windows, .sh on OS-X and Linux) 
 
 {{{
 cd /path/to/chromium/src/cef/tools
-build_projects.sh Debug
+./build_projects.sh Debug
+}}}
+
+CEF3 can also be built on all platforms using  [https://code.google.com/p/chromium/wiki/NinjaBuild Ninja]. This may provide faster build times, especially on OS-X as compared to Xcode.
+
+{{{
+export GYP_GENERATORS='ninja'
+cd /path/to/chromium/src/cef
+./cef_create_projects.sh
+cd /path/to/chromium/src
+ninja -C out/Debug cefclient cef_unittests
 }}}
 
 === Manual Packaging ===
@@ -209,7 +260,7 @@ After building both Debug and Release configurations you can use the make_distri
 
 {{{
 cd /path/to/chromium/src/cef/tools
-make_distrib.sh
+./make_distrib.sh
 }}}
 
 If the process succeeds a binary distribution package will be created in the /path/to/chromium/src/cef/binary_distrib directory.
