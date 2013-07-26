@@ -273,7 +273,7 @@ cefclient.app/
 
 The "Chromium Embedded Framework.framework" is an [http://src.chromium.org/viewvc/chrome/trunk/src/build/mac/copy_framework_unversioned.sh?view=markup unversioned framework] that contains all CEF binaries and resources. Executables (cefclient, cefclient Helper, etc) are linked to libcef.dylib using [https://developer.apple.com/library/mac/documentation/Darwin/Reference/ManPages/man1/install_name_tool.1.html install_name_tool] and a path relative to @executable_path.
 
-The "cefclient Helper" apps are used for executing separate processes (renderer, plugin, etc) with [http://src.chromium.org/viewvc/chrome/trunk/src/build/mac/make_more_helpers.sh?view=markup different characteristics]. They need to have separate app bundles and Info.plist files so that, among other things, they don't show dock icons. The "EH" helper, which is used when launching plugin processes, has the MH_NO_HEAP_EXECUTION bit cleared to allow an executable heap. The "NP" helper, which is used when launching NaCl plugin processes only, has the MH_PIE bit cleared to disable ASLR. This is set up as part of the build process using scripts from the tools/ directory. Example the Xcode project included with the binary distribution or the originating cefclient.gyp file for a better idea of the script dependencies.
+The "cefclient Helper" apps are used for executing separate processes (renderer, plugin, etc) with [http://src.chromium.org/viewvc/chrome/trunk/src/build/mac/make_more_helpers.sh?view=markup different characteristics]. They need to have separate app bundles and Info.plist files so that, among other things, they don't show dock icons. The "EH" helper, which is used when launching plugin processes, has the MH_NO_HEAP_EXECUTION bit cleared to allow an executable heap. The "NP" helper, which is used when launching NaCl plugin processes only, has the MH_PIE bit cleared to disable ASLR. This is set up as part of the build process using scripts from the tools/ directory. Examine the Xcode project included with the binary distribution or the originating cefclient.gyp file for a better idea of the script dependencies.
 
 ==Application Structure==
 
@@ -384,7 +384,7 @@ CEF can also integrate with an existing application message loop instead of runn
 
 ===CefBrowser and CefFrame===
 
-The [http://magpcss.org/ceforum/apidocs3/projects/(default)/CefBrowserhtml CefBrowser] and [http://magpcss.org/ceforum/apidocs3/projects/(default)/CefFrame.html CefFrame] objects are used for sending commands to the browser and for retrieving state information in callback methods. Each CefBrowser object will have a single main CefFrame object representing the top-level frame and zero or more CefFrame objects representing sub-frames. For example, a browser that loads two iframes will have three CefFrame objects (the top-level frame and the two iframes).
+The [http://magpcss.org/ceforum/apidocs3/projects/(default)/CefBrowser.html CefBrowser] and [http://magpcss.org/ceforum/apidocs3/projects/(default)/CefFrame.html CefFrame] objects are used for sending commands to the browser and for retrieving state information in callback methods. Each CefBrowser object will have a single main CefFrame object representing the top-level frame and zero or more CefFrame objects representing sub-frames. For example, a browser that loads two iframes will have three CefFrame objects (the top-level frame and the two iframes).
 
 To load a URL in the browser main frame:
 
