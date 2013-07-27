@@ -286,7 +286,7 @@ Every CEF3 application has the same general structure.
 
 ===Entry-Point Function===
 
-As described in the “Processes” section a CEF3 application will run multiple processes. The processes can all use the same executable or a separate executable can be specified for the sub-processes. Execution of the process begins in the entry-point function.
+As described in the “Processes” section a CEF3 application will run multiple processes. The processes can all use the same executable or a separate executable can be specified for the sub-processes. Execution of the process begins in the entry-point function. Complete platform-specific examples for Windows, Linux and Mac OS-X are available in [https://code.google.com/p/chromiumembedded/source/browse/trunk/cef3/tests/cefclient/cefclient_win.cpp cefclient_win.cc], [https://code.google.com/p/chromiumembedded/source/browse/trunk/cef3/tests/cefclient/cefclient_gtk.cpp cefclient_gtk.cc] and [https://code.google.com/p/chromiumembedded/source/browse/trunk/cef3/tests/cefclient/cefclient_mac.mm cefclient_mac.mm] respectively.
 
 ====Single Executable====
 
@@ -295,7 +295,8 @@ When running as a single executable the entry-point function is required to diff
 {{{
 // Program entry-point function.
 int main(int argc, char* argv[]) {
-  // Structure for passing commmand-line arguments. The definition is platforms-specific.
+  // Structure for passing command-line arguments.
+  // The definition of this structure is platform-specific.
   CefMainArgs main_args(argc, argv);
 
   // Optional implementation of the CefApp interface.
@@ -334,7 +335,8 @@ Main application entry-point function:
 {{{
 // Program entry-point function.
 int main(int argc, char* argv[]) {
-  // Structure for passing commmand-line arguments. The definition is platforms-specific.
+  // Structure for passing command-line arguments.
+  // The definition of this structure is platform-specific.
   CefMainArgs main_args(argc, argv);
 
   // Optional implementation of the CefApp interface.
@@ -364,7 +366,8 @@ Sub-process application entry-point function:
 {{{
 // Program entry-point function.
 int main(int argc, char* argv[]) {
-  // Structure for passing commmand-line arguments. The definition is platforms-specific.
+  // Structure for passing command-line arguments.
+  // The definition of this structure is platform-specific.
   CefMainArgs main_args(argc, argv);
 
   // Optional implementation of the CefApp interface.
@@ -421,7 +424,7 @@ class Visitor : public CefStringVisitor {
  public:
   Visitor() {}
 
-  // Called synchronously when the HTML contents are available.
+  // Called asynchronously when the HTML contents are available.
   virtual void Visit(const CefString& string) OVERRIDE {
     // Do something with |string|...
   }
@@ -697,7 +700,7 @@ Browser life span begins with a call to CefBrowserHost::CreateBrowser() or CefBr
 
 {{{
 // Information about the window that will be created including parenting, size, etc.
-// The definition of this structure is platforms-specific.
+// The definition of this structure is platform-specific.
 CefWindowInfo info;
 // On Windows for example...
 info.SetAsChild(parent_hwnd, client_rect);
