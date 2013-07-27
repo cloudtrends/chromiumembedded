@@ -282,7 +282,7 @@ Every CEF3 application has the same general structure.
   * Provide an entry-point function that initializes CEF and runs either sub-process executable logic or the CEF message loop.
   * Provide an implementation of [http://magpcss.org/ceforum/apidocs3/projects/(default)/CefApp.html CefApp] to handle process-specific callbacks.
   * Provide an implementation of [http://magpcss.org/ceforum/apidocs3/projects/(default)/CefClient.html CefClient] to handle browser-instance-specific callbacks.
-  * Call CefBrowserHost::CreateBrowser() to create a browser instance and manage the browser life span using CefLifeSpanHandler.
+  * Call CefBrowserHost::CreateBrowser() to create a browser instance and manage the browser life span using [http://magpcss.org/ceforum/apidocs3/projects/(default)/CefLifeSpanHandler.html CefLifeSpanHandler].
 
 ===Entry-Point Function===
 
@@ -715,7 +715,7 @@ CefRefPtr<MyClient> client(new MyClient);
 CefBrowserHost::CreateBrowser(info, client.get(), “http://www.google.com”, settings);
 }}}
 
-The CefLifeSpanHandler class provides the callbacks necessary for managing browser life span. Below is an extract of the relevant methods and members.
+The [http://magpcss.org/ceforum/apidocs3/projects/(default)/CefLifeSpanHandler.html CefLifeSpanHandler] class provides the callbacks necessary for managing browser life span. Below is an extract of the relevant methods and members.
 
 {{{
 class MyClient : public CefClient,
@@ -1116,3 +1116,56 @@ The CefRequestHandler::GetResourceHandler() method supports the interception of 
 ===Other Callbacks===
 
 The [http://magpcss.org/ceforum/apidocs3/projects/(default)/CefRequestHandler.html CefRequestHandler] interface provides callbacks for various network-related events incuding authentication, cookie handling, external protocol handling, certificate errors and so on.
+
+===Proxy Resolution===
+
+Proxy settings are configured in CEF3 using the same command-line flags as Google Chrome.
+
+{{{
+--proxy-server=host:port
+      Specify the HTTP/SOCKS4/SOCKS5 proxy server to use for requests. An individual proxy
+      server is specified using the format:
+
+        [<proxy-scheme>://]<proxy-host>[:<proxy-port>]
+
+      Where <proxy-scheme> is the protocol of the proxy server, and is one of:
+
+        "http", "socks", "socks4", "socks5".
+
+      If the <proxy-scheme> is omitted, it defaults to "http". Also note that "socks" is equivalent to
+      "socks5".
+
+      Examples:
+
+        --proxy-server="foopy:99"
+            Use the HTTP proxy "foopy:99" to load all URLs.
+
+        --proxy-server="socks://foobar:1080"
+            Use the SOCKS v5 proxy "foobar:1080" to load all URLs.
+
+        --proxy-server="sock4://foobar:1080"
+            Use the SOCKS v4 proxy "foobar:1080" to load all URLs.
+
+        --proxy-server="socks5://foobar:66"
+            Use the SOCKS v5 proxy "foobar:66" to load all URLs.
+
+      It is also possible to specify a separate proxy server for different URL types, by prefixing
+      the proxy server specifier with a URL specifier:
+
+      Example:
+
+        --proxy-server="https=proxy1:80;http=socks4://baz:1080"
+            Load https://* URLs using the HTTP proxy "proxy1:80". And load http://*
+            URLs using the SOCKS v4 proxy "baz:1080".
+
+--no-proxy-server
+      Disables the proxy server.
+
+--proxy-auto-detect
+      Autodetect  proxy  configuration.
+
+--proxy-pac-url=URL
+      Specify proxy autoconfiguration URL.
+}}}
+
+Web content loading during application startup can be delayed due to network proxy resolution (for example, if "Automatically detect proxy settings" is checked on Windows). For best user experience consider designing your application to first show a static splash page and then redirect to the actual website using [http://en.wikipedia.org/wiki/Meta_refresh meta refresh] -- the redirect will be blocked until proxy resolution completes. For testing purposes proxy resolution can be disabled using the "--no-proxy-server" command-line flag. Proxy resolution delays can also be duplicated in Google Chrome by running "chrome --url=..." from the command line.
