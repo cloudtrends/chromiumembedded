@@ -288,6 +288,18 @@ Every CEF3 application has the same general structure.
 
 As described in the “Processes” section a CEF3 application will run multiple processes. The processes can all use the same executable or a separate executable can be specified for the sub-processes. Execution of the process begins in the entry-point function. Complete platform-specific examples for Windows, Linux and Mac OS-X are available in [https://code.google.com/p/chromiumembedded/source/browse/trunk/cef3/tests/cefclient/cefclient_win.cpp cefclient_win.cc], [https://code.google.com/p/chromiumembedded/source/browse/trunk/cef3/tests/cefclient/cefclient_gtk.cpp cefclient_gtk.cc] and [https://code.google.com/p/chromiumembedded/source/browse/trunk/cef3/tests/cefclient/cefclient_mac.mm cefclient_mac.mm] respectively.
 
+When launching sub-processes CEF will specify configuration information using the command-line that must be passed into the CefExecuteProcess function via the CefMainArgs structure. The definition of CefMainArgs is platform-specific. On Linux and Mac OS X it accepts the argc and argv values which are passed into the [https://en.wikipedia.org/wiki/Main_function main() function].
+
+{{{
+CefMainArgs main_args(argc, argv);
+}}}
+
+On Windows it accepts the instance handle (HINSTANCE) which is passed into the [http://msdn.microsoft.com/en-us/library/windows/desktop/ff381406(v=vs.85).aspx wWinMain() function]. The instance handle is also retrievable via GetModuleHandle(NULL).
+
+{{{
+CefMainArgs main_args(hInstance);
+}}}
+
 ====Single Executable====
 
 When running as a single executable the entry-point function is required to differentiate between the different process types. The single executable structure is supported on Windows and Linux but not on Mac OS X.
@@ -346,7 +358,7 @@ int main(int argc, char* argv[]) {
   CefSettings settings;
 
   // Specify the path for the sub-process executable.
-  CefString(&settings.browser_subprocess_path).FromASCII(“/path/to/subprocess”)
+  CefString(&settings.browser_subprocess_path).FromASCII(“/path/to/subprocess”);
 
   // Initialize CEF in the main process.
   CefInitialize(main_args, settings, app.get());
@@ -1448,6 +1460,27 @@ Proxy settings are configured in CEF3 using the same command-line flags as Googl
 
 --proxy-pac-url=URL
       Specify proxy autoconfiguration URL.
+}}}
+
+If the proxy requires authentication the CefRequestHandler::GetAuthCredentials() callback will be executed with an |isProxy| value of true to retrieve the username and password.
+
+{{{
+bool MyHandler::GetAuthCredentials(
+    CefRefPtr<CefBrowser> browser,
+    CefRefPtr<CefFrame> frame,
+    bool isProxy,
+    const CefString& host,
+    int port,
+    const CefString& realm,
+    const CefString& scheme,
+    CefRefPtr<CefAuthCallback> callback) {
+  if (isProxy) {
+    // Provide credentials for the proxy server connection.
+    callback->Continue("myuser", "mypass");
+    return true;
+  }
+  return false;
+}
 }}}
 
 Web content loading during application startup can be delayed due to network proxy resolution (for example, if "Automatically detect proxy settings" is checked on Windows). For best user experience consider designing your application to first show a static splash page and then redirect to the actual website using [http://en.wikipedia.org/wiki/Meta_refresh meta refresh] -- the redirect will be blocked until proxy resolution completes. For testing purposes proxy resolution can be disabled using the "--no-proxy-server" command-line flag. Proxy resolution delays can also be duplicated in Google Chrome by running "chrome --url=..." from the command line.
