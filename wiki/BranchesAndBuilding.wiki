@@ -126,7 +126,7 @@ This version of steps 4-6 applies to the SVN workflow only. The SVN workflow is 
 
 {{{
 cd /path/to/chromium
-gclient config http://src.chromium.org/chrome/trunk/src
+gclient config http://src.chromium.org/svn/trunk/src
 }}}
 
 5. Update the Chromium checkout to the revision number discovered in step #3.
