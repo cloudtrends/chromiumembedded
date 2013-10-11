@@ -10,8 +10,9 @@ Ongoing development of CEF occurs in [http://code.google.com/p/chromiumembedded/
 
 The following URLs should be used for downloading development versions of CEF.
 
-  * CEF1 - http://chromiumembedded.googlecode.com/svn/trunk/cef1
   * CEF3 - http://chromiumembedded.googlecode.com/svn/trunk/cef3
+
+CEF1 is no longer actively developed. Any future security and/or bug fixes for CEF1 will be applied to the 1453 release branch. See the [http://magpcss.org/ceforum/viewtopic.php?f=10&t=10647 CEF1 Retirement Plan] for details.
 
 == Release Branches ==
 
