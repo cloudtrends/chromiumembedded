@@ -81,18 +81,18 @@ To use the automated method:
 1. Download the automate.py tool.
 
 {{{
-svn checkout http://chromiumembedded.googlecode.com/svn/trunk/cef1/tools/automate /path/to/automate
+svn checkout http://chromiumembedded.googlecode.com/svn/trunk/cef3/tools/automate /path/to/automate
 }}}
 
 2. Run the automate.py script at whatever interval is appropriate (for each CEF commit, once per day, once per week, etc). Use the correct URL for the CEF version that you want to download and build.
 
 {{{
-python /path/to/automate/automate.py --download-dir=/path/to/download --url=http://chromiumembedded.googlecode.com/svn/branches/1084/cef1
+python /path/to/automate/automate.py --download-dir=/path/to/download --url=http://chromiumembedded.googlecode.com/svn/branches/1547/cef3
 }}}
 
 If the process succeeds a binary distribution package will be created in the /path/to/download/chromium/src/cef/binary_distrib directory.
 
-See [http://code.google.com/p/chromiumembedded/source/browse/trunk/cef1/tools/automate/automate.README.txt automate.README.txt] for complete usage instructions.
+See [http://code.google.com/p/chromiumembedded/source/browse/trunk/cef3/tools/automate/automate.README.txt automate.README.txt] for complete usage instructions.
 
 This method also integrates nicely with automated build systems like [http://www.jetbrains.com/teamcity/ TeamCity].
 
@@ -142,7 +142,7 @@ gclient sync --revision src@chromium_revision --jobs 8 --force
 
 {{{
 cd /path/to/chromium/src
-svn co http://chromiumembedded.googlecode.com/svn/trunk/cef1 cef
+svn co http://chromiumembedded.googlecode.com/svn/trunk/cef3 cef
 }}}
 
 ===== Git workflow (CEF3 only): =====
@@ -207,7 +207,7 @@ C. Add the depot_tools directory to your PATH. On Windows the depot_tools path s
 
 {{{
 cd /path/to/chromium
-gclient config http://src.chromium.org/svn/releases/19.0.1084.9
+gclient config http://src.chromium.org/svn/releases/29.0.1547.80
 }}}
 
 5. Download the Chromium source code.
@@ -221,7 +221,7 @@ gclient sync --jobs 8 --force
 
 {{{
 cd /path/to/chromium/src
-svn co http://chromiumembedded.googlecode.com/svn/branches/1084/cef1 cef
+svn co http://chromiumembedded.googlecode.com/svn/branches/1547/cef3 cef
 }}}
 
 === Manual Building ===
@@ -270,4 +270,4 @@ cd /path/to/chromium/src/cef/tools
 
 If the process succeeds a binary distribution package will be created in the /path/to/chromium/src/cef/binary_distrib directory.
 
-See the [http://code.google.com/p/chromiumembedded/source/browse/trunk/cef1/tools/make_distrib.py#140 make_distrib.py] script for additional usage options.
+See the [http://code.google.com/p/chromiumembedded/source/browse/trunk/cef3/tools/make_distrib.py#140 make_distrib.py] script for additional usage options.
