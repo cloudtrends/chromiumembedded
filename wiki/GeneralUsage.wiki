@@ -26,8 +26,8 @@ This document introduces the general concepts involved when developing an applic
 
 Binary distributions of CEF3 are available from the [http://www.magpcss.net/cef_downloads/ project Downloads page]. They contain all files necessary to build a particular version of CEF3 on a particular platform (Windows, Mac OS X or Linux). No matter the platform they all share the same general structure:
 
-  * *cefclient* contains the cefclient sample application configured to build using the files in the binary distribution.
-  * *Debug* contains a debug build the CEF shared library (libcef) and any other libraries required to run on the platform.
+  * *cefclient* contains the cefclient sample application configured to build using the files in the binary distribution. This application demonstrates a wide range of CEF functionalities.
+  * *Debug* contains a debug build the CEF shared library (libcef) and any other libraries required to run on the platform. This application demonstrates the minimal functionality required to create a browser window.
   * *include* contains all required CEF header files.
   * *libcef_dll* contains the source code for the libcef_dll_wrapper static library that all applications using the CEF C++ API must link against. See the “C++ Wrapper” section for more information.
   * *Release* contains a release build the CEF shared library (libcef) and any other libraries required to run on the platform.
@@ -37,6 +37,8 @@ Binary distributions of CEF3 are available from the [http://www.magpcss.net/cef_
 Each binary distribution also contains a README.txt file that describes the platform-specific distribution in greater detail and a LICENSE.txt file that contains CEF’s BSD license. When distributing an application based on CEF you should include the license text somewhere in your application’s distribution. For example, you can list it on an “About” or “Credits” page in your application’s UI, or in the documentation bundled with your application. License and credit information is also available inside of a CEF3 browser window by loading “about:license” and “about:credits” respectively.
 
 Applications based on CEF binary distributions can be built using standard platform build tools. This includes Visual Studio on Windows, Xcode on Mac OS X and gcc/make on Linux. The project Downloads page contains information about the OS and build tool versions required for specific binary releases. When building on Linux also pay careful attention to the listed package dependencies.
+
+See the [Tutorial Tutorial] Wiki page for detailed instructions on how to create a simple application using the CEF3 binary distribution.
 
 ===Building from Source Code===
 
@@ -771,8 +773,8 @@ The [http://magpcss.org/ceforum/apidocs3/projects/(default)/CefLifeSpanHandler.h
 
 {{{
 class MyClient : public CefClient,
-                  public CefLifeSpanHandler,
-                  ... {
+                 public CefLifeSpanHandler,
+                 ... {
   // CefClient methods.
   virtual CefRefPtr<CefLifeSpanHandler> GetLifeSpanHandler() OVERRIDE {
     return this;
