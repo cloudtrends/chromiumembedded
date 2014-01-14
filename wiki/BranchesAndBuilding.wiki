@@ -26,18 +26,18 @@ CEF provides release branches that track specific [http://src.chromium.org/viewv
 
 CEF release version numbers have the format X.Y.Z where X is the CEF version (1 or 3), Y is the release branch and Z is the CEF revision number. Detailed Chromium and CEF version information is available in the include/cef_version.h header file that will be created during the build process.
 
-Current CEF release branches are as follows.
+Current CEF release branches and associated platform build requirements are as follows.
 
-|| Release Branch || Chromium Version || CEF1 Support || CEF3 Support ||
-|| [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Fbranches%2F963 963] || 17 || Yes || No ||
-|| [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Fbranches%2F1025 1025] || 18 || Yes || No ||
-|| [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Fbranches%2F1084 1084] || 19 || Yes || No ||
-|| [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Fbranches%2F1180 1180] || 21 || Yes || Yes ||
-|| [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Fbranches%2F1271 1271] || 23 || Yes || Yes ||
-|| [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Fbranches%2F1364 1364] || 25 || Yes || Yes ||
-|| [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Fbranches%2F1453 1453] || 27 || Yes || Yes ||
-|| [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Fbranches%2F1547 1547] || 29 || No  || Yes ||
-|| [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Fbranches%2F1650 1650] || 31 || No  || Yes ||
+|| Branch Date || Release Branch || Chromium Version || CEF1 || CEF3 || Windows Build Requirements || Mac OS X Build Requirements || Linux Build Requirements ||
+|| Dec 2011 || [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Fbranches%2F963 963] || 17 || Yes || No || WinXP+, VS2008, Win7 SDK || OS X 10.6-10.7, 10.5+ SDK, Xcode 3.2.6 || Ubuntu 10.04+, Debian Squeeze+ ||
+|| Feb 2012 || [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Fbranches%2F1025 1025] || 18 || Yes || No || WinXP+, VS2008, Win7 SDK || OS X 10.6-10.7, 10.5+ SDK, Xcode 3.2.6-4.x || Ubuntu 10.04+, Debian Squeeze+ ||
+|| Apr 2012 || [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Fbranches%2F1084 1084] || 19 || Yes || No || WinXP+, VS2008, Win7 SDK || OS X 10.6-10.7, 10.5+ SDK, Xcode 3.2.6-4.x || Ubuntu 10.04+, Debian Squeeze+ ||
+|| Aug 2012 || [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Fbranches%2F1180 1180] || 21 || Yes || Yes || WinXP+, VS2010, Win7 SDK || OS X 10.6-10.7, 10.5+ SDK, Xcode 3.2.6-4.x || Ubuntu 12.04+, Debian Squeeze+ ||
+|| Oct 2012 || [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Fbranches%2F1271 1271] || 23 || Yes || Yes || WinXP+, VS2010, Win7 SDK || OS X 10.6-10.8, 10.6+ SDK, Xcode 3.2.6-4.x || Ubuntu 12.04+, Debian Squeeze+ ||
+|| Jan 2013 || [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Fbranches%2F1364 1364] || 25 || Yes || Yes || WinXP+, VS2010, Win8 SDK, Ninja (optional) || OS X 10.6-10.8, Xcode 3.2.6-4.x, Ninja (optional) || Ubuntu 12.04+, Debian Squeeze+, Ninja (optional) ||
+|| Apr 2013 || [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Fbranches%2F1453 1453] || 27 || Yes || Yes || WinXP+, VS2010, Win8 SDK, Ninja (optional) || OS X 10.6-10.8, 10.6+ SDK, Xcode 3.2.6-4.x, Ninja (optional) || Ubuntu 12.04+, Debian Squeeze+, Ninja (optional) ||
+|| Jul 2013 || [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Fbranches%2F1547 1547] || 29 || No  || Yes || WinXP+, VS2010-2012, Win8 SDK, Ninja (optional) || OS X 10.6-10.8, 10.6+ SDK, Xcode 3.2.6-4.x, Ninja (optional) || Ubuntu 12.04+, Debian Squeeze+, Ninja ||
+|| Oct 2013 || [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Fbranches%2F1650 1650] || 31 || No  || Yes || WinXP+, VS2010-2012, Win8 SDK, Ninja (optional) || OS X 10.6-10.9, 10.6+ SDK, Xcode 3.2.6-5.x, Ninja || Ubuntu 12.04+, Debian Wheezy+, Ninja ||
 
 The following URLs should be used for downloading release verisons of CEF where YYYY is the release branch number.
 
@@ -50,27 +50,34 @@ Information about how CEF release branches are created is available [http://code
 
 == Building from Source ==
 
-Building from source code is currently supported on Windows, Mac OS-X and Linux environments.
+Building from source code is currently supported on Windows, Mac OS X and Linux environments.
 
   * Building on most platforms will require at least 4GB of system memory.
-  * Mac OS-X - 10.6 (Snow Leopard) and 10.7 (Lion) are the only Mac build platforms currently supported.
-    * If built using 10.6 the resulting executables will run on 10.5, 10.6 and 10.7.
-    * If built using 10.7 the resulting executables will run on 10.6 and 10.7.
-  * Linux - CEF has been tested to build successfully on Ubuntu 10.04 32bit, Ubuntu 11.10 64bit, Ubuntu 12.04 64bit and Debian Squeeze 64bit. It should also theoretically build on other 32bit and 64bit versions of Ubuntu, Debian, Fedora and openSUSE but your mileage may vary.
+  * Mac OS X - The combination of build OS version and SDK version will determine the platforms supported by the resulting binaries.
+    * If built on 10.6 using the 10.5 SDK the resulting executables will run on 10.5+.
+    * If built on 10.7+ using the 10.6 SDK the resulting executables will run on 10.6+.
+  * Linux - CEF is developed and tested using Ubuntu and Debian. It should be possible to build and run CEF on other compatible Linux distributions but this is untested.
 
 To build Chromium and CEF from source code you must start by configuring your build environment.
 
 1. Install the build prerequisites for your operating system and development environment.
 
-  * Windows - http://www.chromium.org/developers/how-tos/build-instructions-windows. Use a version 1.6.x SVN client as some people have reported problems with version 1.7.x. Version 1.6.x is included with depot_tools on Windows. A 1.6.X version of TortoiseSVN for Windows can be downloaded [http://sourceforge.net/projects/tortoisesvn/files/1.6.16/Application/ here].
-  * Mac OS-X - http://code.google.com/p/chromium/wiki/MacBuildInstructions
-  * Linux - http://code.google.com/p/chromium/wiki/LinuxBuildInstructions. Starting with CEF3 revision 1294 a dependency on the libgtkglext1-dev package has been added to support the off-screen rendering example in cefclient.
+  * Windows - http://www.chromium.org/developers/how-tos/build-instructions-windows.
+    * Use a version 1.6.x SVN client as some people have reported problems with version 1.7.x. Version 1.6.x is included with depot_tools on Windows. A 1.6.X version of TortoiseSVN for Windows can be downloaded [http://sourceforge.net/projects/tortoisesvn/files/1.6.16/Application/ here].
+  * Mac OS X - http://code.google.com/p/chromium/wiki/MacBuildInstructions
+  * Linux - http://code.google.com/p/chromium/wiki/LinuxBuildInstructions.
+    * Starting with CEF3 revision 1294 (June 2013) a dependency on the libgtkglext1-dev package has been added to support the off-screen rendering example in cefclient. This is only a requirement for cefclient and not a requirement for other applications using CEF.
 
 2. Configure environment settings that will effect the [http://code.google.com/p/gyp/ GYP] build.
 
   * CEF does not currently support component builds.
-  * Windows - Beginning in July 2012 most Chromium developers and testing infrastructure is using Visual Studio 2010. For this reason building Chromium with other compiler versions may result in compile or runtime errors. If multiple versions of Visual Studio are installed on your system you can set the GYP_MSVS_VERSION environment variable to create project files for that version. For example, set the value to "2010" for VS2010 or "2010e" for VS2010 Express. Check the Chromium documentation for the correct value when using other Visual Studio versions.
-  * Mac OS-X - On Lion and higher, the 10.5 SDK is not available, so you must configure GYP to use the 10.6 SDK. Click [http://code.google.com/p/chromium/wiki/Xcode4Tips here] for more information.
+  * All newer branches (>=1364) and platforms support building with [https://code.google.com/p/chromium/wiki/NinjaBuild Ninja]. It is recommended to use Ninja when building CEF/Chromium instead of platform build tools like Visual Studio, Xcode or make. Set `GYP_GENERATORS=ninja` to manually create a Ninja build or pass the “--ninja-build” command-line flag to automate.py (see below).
+  * Windows -
+    * If multiple versions of Visual Studio are installed on your system you can set the GYP_MSVS_VERSION environment variable to create project files for that version. For example, set the value to "2010" for VS2010 or "2010e" for VS2010 Express. Check the Chromium documentation for the correct value when using other Visual Studio versions.
+    * Beginning in July 2012 most Chromium developers and testing infrastructure is using Visual Studio 2010. For this reason building Chromium with other compiler versions may result in compile or runtime errors. 
+    * Beginning with trunk revision 1571 (January 2014) Visual Studio 2013 Professional can be used to build CEF/Chromium. You must use Ninja when building with VS2013 (set `GYP_GENERATORS=ninja` and `GYP_MSVS_VERSION=2013`).
+    * If you wish to use Visual Studio for debugging and compiling in combination with a Ninja build you can set `GYP_GENERATORS=ninja,ninja-msvs` to generate both Ninja files and VS project files that will compile using Ninja.
+  * Mac OS X - When building on OS X 10.6+ the 10.5 SDK is no longer available. Older branches (<=1180) require that you set `GYP_DEFINES=mac_sdk=10.6` to use the 10.6 SDK. See [http://code.google.com/p/chromium/wiki/Xcode4Tips here] for more information.
 
 === Automated Method (SVN only) ===
 
@@ -78,16 +85,16 @@ CEF provides tools for automatically downloading, building and packaging Chromiu
 
 To use the automated method:
 
-1. Download the automate.py tool.
+1. Download the automate.py tool for the branch that you’re building.
 
 {{{
-svn checkout http://chromiumembedded.googlecode.com/svn/trunk/cef3/tools/automate /path/to/automate
+svn checkout http://chromiumembedded.googlecode.com/svn/1650/cef3/tools/automate /path/to/automate
 }}}
 
 2. Run the automate.py script at whatever interval is appropriate (for each CEF commit, once per day, once per week, etc). Use the correct URL for the CEF version that you want to download and build.
 
 {{{
-python /path/to/automate/automate.py --download-dir=/path/to/download --url=http://chromiumembedded.googlecode.com/svn/branches/1547/cef3
+python /path/to/automate/automate.py --download-dir=/path/to/download --url=http://chromiumembedded.googlecode.com/svn/branches/1650/cef3 --ninja-build
 }}}
 
 If the process succeeds a binary distribution package will be created in the /path/to/download/chromium/src/cef/binary_distrib directory.
@@ -207,7 +214,7 @@ C. Add the depot_tools directory to your PATH. On Windows the depot_tools path s
 
 {{{
 cd /path/to/chromium
-gclient config http://src.chromium.org/svn/releases/29.0.1547.80
+gclient config http://src.chromium.org/svn/releases/31.0.1650.57
 }}}
 
 5. Download the Chromium source code.
@@ -221,12 +228,12 @@ gclient sync --jobs 8 --force
 
 {{{
 cd /path/to/chromium/src
-svn co http://chromiumembedded.googlecode.com/svn/branches/1547/cef3 cef
+svn co http://chromiumembedded.googlecode.com/svn/branches/1650/cef3 cef
 }}}
 
 === Manual Building ===
 
-1. Run the cef_create_projects script (.bat on Windows, .sh on OS-X and Linux) to generate the build files based on the [http://code.google.com/p/gyp/ GYP] configuration.
+1. Run the cef_create_projects script (.bat on Windows, .sh on OS X and Linux) to generate the build files based on the [http://code.google.com/p/gyp/ GYP] configuration.
 
 {{{
 cd /path/to/chromium/src/cef
@@ -235,18 +242,7 @@ cd /path/to/chromium/src/cef
 
 2. Build CEF.
 
-  * Windows - Open the Visual Studio solution file and build.
-  * Mac OS-X - Open the Xcode project file and build.
-  * Linux - Run "make -j4 cefclient" from the Chromium "src" directory.
-
-Alternately, the build_projects script (.bat on Windows, .sh on OS-X and Linux) can be used to build on the command line using the default system tools.
-
-{{{
-cd /path/to/chromium/src/cef/tools
-./build_projects.sh Debug
-}}}
-
-CEF3 can also be built on all platforms using  [https://code.google.com/p/chromium/wiki/NinjaBuild Ninja]. This may provide faster build times, especially on OS-X as compared to Xcode.
+Ninja is now the recommended and supported method for building CEF3/Chromium on all platforms when using newer release branches (>=1453) and trunk.
 
 {{{
 export GYP_GENERATORS='ninja'
@@ -256,9 +252,22 @@ cd /path/to/chromium/src
 ninja -C out/Debug cefclient cef_unittests
 }}}
 
+Older release branches (<=1547) support building with the system build tools.
+
+  * Windows - Open the Visual Studio solution file and build.
+  * Mac OS X - Open the Xcode project file and build.
+  * Linux - Run "make -j4 cefclient" from the Chromium "src" directory.
+
+Alternately, older release branches (<=1547) can use the build_projects script (.bat on Windows, .sh on OS X and Linux) to build on the command line using the default system build tools.
+
+{{{
+cd /path/to/chromium/src/cef/tools
+./build_projects.sh Debug
+}}}
+
 === Manual Packaging ===
 
-After building both Debug and Release configurations you can use the make_distrib tool (.bat on Windows, .sh on OS-X and Linux) to create a binary distribution.
+After building both Debug and Release configurations you can use the make_distrib tool (.bat on Windows, .sh on OS X and Linux) to create a binary distribution.
 
 {{{
 cd /path/to/chromium/src/cef/tools
