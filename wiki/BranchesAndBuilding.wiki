@@ -76,7 +76,7 @@ To build Chromium and CEF from source code you must start by configuring your bu
     * If multiple versions of Visual Studio are installed on your system you can set the GYP_MSVS_VERSION environment variable to create project files for that version. For example, set the value to "2010" for VS2010 or "2010e" for VS2010 Express. Check the Chromium documentation for the correct value when using other Visual Studio versions.
     * Beginning in July 2012 most Chromium developers and testing infrastructure is using Visual Studio 2010. For this reason building Chromium with other compiler versions may result in compile or runtime errors. 
     * Beginning with trunk revision 1571 (January 2014) Visual Studio 2013 Professional can be used to build CEF/Chromium. You must use Ninja when building with VS2013 (set `GYP_GENERATORS=ninja` and `GYP_MSVS_VERSION=2013`).
-    * If you wish to use Visual Studio for debugging and compiling in combination with a Ninja build you can set `GYP_GENERATORS=ninja,ninja-msvs` to generate both Ninja files and VS project files that will compile using Ninja.
+    * If you wish to use Visual Studio for debugging and compiling in combination with a Ninja build you can set `GYP_GENERATORS=ninja,msvs-ninja` to generate both Ninja files and VS project files that will compile using Ninja.
   * Mac OS X - When building on OS X 10.6+ the 10.5 SDK is no longer available. Older branches (<=1180) require that you set `GYP_DEFINES=mac_sdk=10.6` to use the 10.6 SDK. See [http://code.google.com/p/chromium/wiki/Xcode4Tips here] for more information.
 
 === Automated Method (SVN only) ===
