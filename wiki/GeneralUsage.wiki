@@ -1061,7 +1061,86 @@ CefRefPtr<CefFrame> frame = browser->GetFrame(frame_id);
 
 ===Asynchronous JavaScript Bindings===
 
-JavaScriptIntegration is implemented in the render process but frequently need to communicate with the browser process. The JavaScript APIs themselves should be designed to work asynchronously using [https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Closures closures] and [http://blogs.msdn.com/b/ie/archive/2011/09/11/asynchronous-programming-in-javascript-with-promises.aspx promises]. The communication logic can then work as follows:
+JavaScriptIntegration is implemented in the render process but frequently need to communicate with the browser process. The JavaScript APIs themselves should be designed to work asynchronously using [https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Closures closures] and [http://www.html5rocks.com/en/tutorials/es6/promises/ promises].
+
+====Generic Message Router====
+
+Starting with trunk revision 1574 CEF provides a generic implementation for routing asynchronous messages between JavaScript running in the renderer process and C++ running in the browser process. An application interacts with the router by passing it data from standard CEF C++ callbacks (OnBeforeBrowse, OnProcessMessageRecieved, OnContextCreated, etc). The renderer-side router supports generic JavaScript callback registration and execution while the browser-side router supports application-specific logic via one or more application-provided Handler instances.
+
+The JavaScript bindings look like this:
+
+{{{
+// Create and send a new query.
+var request_id = window.cefQuery({
+    request: 'my_request',
+    persistent: false,
+    onSuccess: function(response) {},
+    onFailure: function(error_code, error_message) {}
+});
+
+// Optionally cancel the query.
+window.cefQueryCancel(request_id);
+}}}
+
+The C++ handler looks like this:
+
+{{{
+class Callback : public CefBase {
+ public:
+  ///
+  // Notify the associated JavaScript onSuccess callback that the query has
+  // completed successfully with the specified |response|.
+  ///
+  virtual void Success(const CefString& response) =0;
+
+  ///
+  // Notify the associated JavaScript onFailure callback that the query has
+  // failed with the specified |error_code| and |error_message|.
+  ///
+  virtual void Failure(int error_code, const CefString& error_message) =0;
+};
+
+class Handler {
+ public:
+  ///
+  // Executed when a new query is received. |query_id| uniquely identifies the
+  // query for the life span of the router. Return true to handle the query
+  // or false to propagate the query to other registered handlers, if any. If
+  // no handlers return true from this method then the query will be
+  // automatically canceled with an error code of -1 delivered to the
+  // JavaScript onFailure callback. If this method returns true then a
+  // Callback method must be executed either in this method or asynchronously
+  // to complete the query.
+  ///
+  virtual bool OnQuery(CefRefPtr<CefBrowser> browser,
+                       CefRefPtr<CefFrame> frame,
+                       int64 query_id,
+                       const CefString& request,
+                       bool persistent,
+                       CefRefPtr<Callback> callback) {
+    return false;
+  }
+
+  ///
+  // Executed when a query has been canceled either explicitly using the
+  // JavaScript cancel function or implicitly due to browser destruction,
+  // navigation or renderer process termination. It will only be called for
+  // the single handler that returned true from OnQuery for the same
+  // |query_id|. No references to the associated Callback object should be
+  // kept after this method is called, nor should any Callback methods be
+  // executed.
+  ///
+  virtual void OnQueryCanceled(CefRefPtr<CefBrowser> browser,
+                               CefRefPtr<CefFrame> frame,
+                               int64 query_id) {}
+};
+}}}
+
+See [https://code.google.com/p/chromiumembedded/source/browse/trunk/cef3/include/wrapper/cef_message_router.h?spec=svn1574&r=1574 wrapper/cef_message_router.h] for complete usage documentation.
+
+====Custom Implementation====
+
+A CEF-based application can also provide its own custom implementation of asynchronous JavaScript bindings. A simplistic implementation could work as follows:
 
 1. The JavaScript binding in the render process is passed a callback function.
 
@@ -1159,8 +1238,6 @@ void MyHandler::OnContextReleased(CefRefPtr<CefBrowser> browser,
   }
 }
 }}}
-
-See the “JavaScript Binding” test in cefclient (implemented in binding.html, client_app.[cpp|h] and binding_test.[cpp|h]) for a complete working demonstration of this approach.
 
 ===Synchronous Requests===
 
