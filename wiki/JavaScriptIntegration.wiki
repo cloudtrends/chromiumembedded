@@ -2,39 +2,15 @@
 
 = Introduction =
 
-Chromium and CEF use the [http://code.google.com/p/v8/ V8 JavaScript Engine] for their internal JavaScript (JS) implementation. Each frame in a browser window has its own JS context that provides scope and security for JS code executing in that frame (see the "Working with Contexts" section for more information). CEF exposes a large number of JS features for integration in client applications.
+Chromium and CEF use the [http://code.google.com/p/v8/ V8 JavaScript Engine] for their internal JavaScript (JS) implementation. Each frame in a browser has its own JS context that provides scope and security for JS code executing in that frame (see the "Working with Contexts" section for more information). CEF exposes a large number of JS features for integration in client applications.
 
-All code that interacts with JS must be executed on the UI thread. To execute code on the UI thread with CEF1 use the CefPostTask() function.
+With CEF3 Blink (WebKit) and JS execution run in a separate renderer process. The main thread in a renderer process is identified as TID_RENDERER and all V8 execution must take place on this thread. Callbacks related to JS execution are exposed via the CefRenderProcessHandler interface. This interface is retrieved via CefApp::GetRenderProcessHandler() when a new renderer process is initialized.
 
-{{{
-#include "include/cef.h"
-#include "include/cef_runnable.h"
-
-// This method will be called on the UI thread.
-void UIT_InvokeScript(CefRefPtr<CefBrowser> browser)
-{
-  // Code here.
-}
-
-// This method may be called on any thread.
-void RunScript(CefRefPtr<CefBrowser> browser)
-{
-  if (CefCurrentlyOn(TID_UI)) {
-    UIT_InvokeScript(browser);
-  } else {
-    // Execute on the UI thread.
-    CefPostTask(TID_UI, NewCefRunnableFunction(&UIT_InvokeScript, browser));
-  }
-}
-}}}
-
-With CEF3 WebKit and JS execution run in a separate renderer process. The main thread in a renderer process is identified as TID_RENDERER and all V8 execution must take place on this thread. JS APIs that communicate between the browser and renderer processes should be designed using asynchronous callbacks. See http://www.chromium.org/developers/design-documents/extensions/how-the-extension-system-works/api-pattern-design-doc for an example.
-
-See the comments in cef_v8.h and examples in tests/unittests/v8_unittest.cc and tests/cefclient/cefclient.cpp for additional information beyond what is presented in this document.
+JS APIs that communicate between the browser and renderer processes should be designed using asynchronous callbacks. See the [https://code.google.com/p/chromiumembedded/wiki/GeneralUsage#Asynchronous_Bindings Asynchronous JavaScript Bindings] section of the GeneralUsage wiki page for more information.
 
 = ExecuteJavaScript =
 
-The simplest way to execute JS from a client application is using the CefFrame::ExecuteJavaScript() function.
+The simplest way to execute JS from a client application is using the CefFrame::ExecuteJavaScript() function. This function is available in both the browser process and the renderer process.
 
 {{{
 CefRefPtr<CefBrowser> browser = ...;
@@ -50,13 +26,13 @@ The ExecuteJavaScript() function can be used to interact with functions and vari
 
 = Window Binding =
 
-Window binding allows the client application to attach values to a frame's `window` object. Window bindings are implemented using the CefV8ContextHandler::OnContextCreated() method.
+Window binding allows the client application to attach values to a frame's `window` object. Window bindings are implemented using the CefRenderProcessHandler::OnContextCreated() method.
 
 {{{
-void MyHandler::OnContextCreated(CefRefPtr<CefBrowser> browser,
-                                 CefRefPtr<CefFrame> frame,
-                                 CefRefPtr<CefV8Context> context) OVERRIDE
-{
+void MyRenderProcessHandler::OnContextCreated(
+    CefRefPtr<CefBrowser> browser,
+    CefRefPtr<CefFrame> frame,
+    CefRefPtr<CefV8Context> context) {
   // Retrieve the context's window object.
   CefRefPtr<CefV8Value> object = context->GetGlobal();
 
@@ -81,20 +57,22 @@ Window bindings are reloaded each time a frame is reloaded giving the client app
 
 = Extensions =
 
-Extensions are like window bindings except they are loaded into the context for every frame and cannot be modified once loaded. Extensions are registered using the CefRegisterExtension() function.
+Extensions are like window bindings except they are loaded into the context for every frame and cannot be modified once loaded. The DOM does not exist when an extension is loaded and attempts to access the DOM during extension loading will result in a crash. Extensions are registered using the CefRegisterExtension() function which should be called from the CefRenderProcessHandler::OnWebKitInitialized() method.
 
 {{{
-// Define the extension contents.
-std::string extensionCode =
-  "var test;"
-  "if (!test)"
-  "  test = {};"
-  "(function() {"
-  "  test.myval = 'My Value!';"
-  "})();";
+void MyRenderProcessHandler::OnWebKitInitialized() {
+  // Define the extension contents.
+  std::string extensionCode =
+    "var test;"
+    "if (!test)"
+    "  test = {};"
+    "(function() {"
+    "  test.myval = 'My Value!';"
+    "})();";
 
-// Register the extension.
-CefRegisterExtension("v8/test", extensionCode, NULL);
+  // Register the extension.
+  CefRegisterExtension("v8/test", extensionCode, NULL);
+}
 }}}
 
 The string represented by `extensionCode` can be any valid JS code. JS in the frame can then interact with the extension code.
@@ -105,12 +83,9 @@ alert(test.myval); // Shows an alert box with "My Value!"
 </script>
 }}}
 
-Note that the above example with NULL as the 3rd argument to CefRegisterExtension() is only supported with CEF revision 389 and newer.
-
-
 = Basic JS Types =
 
-CEF supports the creation of basic JS data types including undefined, null, bool, int, double, date and string. These types are created using CefV8Value::Create`*`() static methods. For example, to create a new JS string value use the CreateString() method.
+CEF supports the creation of basic JS data types including undefined, null, bool, int, double, date and string. These types are created using the CefV8Value::Create`*`() static methods. For example, to create a new JS string value use the CreateString() method.
 
 {{{
 CefRefPtr<CefV8Value> str = CefV8Value::CreateString("My Value!");
@@ -135,27 +110,29 @@ CefString strVal = val.GetStringValue();
 
 = JS Arrays =
 
-Arrays are created using the CefV8Value::CreateArray() static method. Arrays can only be created and used from within a context (see the "Working with Contexts" section for more information).
+Arrays are created using the CefV8Value::CreateArray() static method which accepts a length argument. Arrays can only be created and used from within a context (see the "Working with Contexts" section for more information).
 
 {{{
-CefRefPtr<CefV8Value> arr = CefV8Value::CreateArray();
+// Create an array that can contain two values.
+CefRefPtr<CefV8Value> arr = CefV8Value::CreateArray(2);
 }}}
 
 Values are assigned to an array using the SetValue() method variant that takes an index as the first argument.
 
 {{{
-arr->SetValue(0, CefV8Value::CreateString("My String!"));
+// Add two values to the array.
+arr->SetValue(0, CefV8Value::CreateString("My First String!"));
+arr->SetValue(1, CefV8Value::CreateString("My Second String!"));
 }}}
 
 To test if a CefV8Value is an array use the IsArray() method. To get the length of an array use the GetArrayLength() method. To get a value from an array use the GetValue() variant that takes an index as the first argument.
 
-
 = JS Objects =
 
-Objects are created using the CefV8Value::CreateObject() static method. Objects can only be created and used from within a context (see the "Working with Contexts" section for more information).
+Objects are created using the CefV8Value::CreateObject() static method that takes an optional CefV8Accessor argument. Objects can only be created and used from within a context (see the "Working with Contexts" section for more information).
 
 {{{
-CefRefPtr<CefV8Value> obj = CefV8Value::CreateObject(NULL, NULL);
+CefRefPtr<CefV8Value> obj = CefV8Value::CreateObject(NULL);
 }}}
 
 Values are assigned to an object using the SetValue() method variant that takes a key string as the first argument.
@@ -166,25 +143,24 @@ obj->SetValue("myval", CefV8Value::CreateString("My String!"));
 
 == Objects with Accessors ==
 
-Objects can optionally have an associated accessor that provides a native implementation for getting and setting values.
+Objects can optionally have an associated CefV8Accessor that provides a native implementation for getting and setting values.
 
 {{{
-CefRefPtr<CefV8Value> obj = CefV8Value::CreateObject(NULL, accessor);
+CefRefPtr<CefV8Accessor> accessor = …;
+CefRefPtr<CefV8Value> obj = CefV8Value::CreateObject(accessor);
 }}}
 
-The |accessor| parameter is an implementation of the CefV8Accessor interface that must be provided by the client application.
+An implementation of the CefV8Accessor interface that must be provided by the client application.
 
 {{{
-class MyV8Accessor : public CefV8Accessor
-{
+class MyV8Accessor : public CefV8Accessor {
 public:
   MyV8Accessor() {}
 
   virtual bool Get(const CefString& name,
                    const CefRefPtr<CefV8Value> object,
                    CefRefPtr<CefV8Value>& retval,
-                   CefString& exception) OVERRIDE
-  {
+                   CefString& exception) OVERRIDE {
     if (name == "myval") {
       // Return the value.
       retval = CefV8Value::CreateString(myval_);
@@ -198,8 +174,7 @@ public:
   virtual bool Set(const CefString& name,
                    const CefRefPtr<CefV8Value> object,
                    const CefRefPtr<CefV8Value> value,
-                   CefString& exception) OVERRIDE
-  {
+                   CefString& exception) OVERRIDE {
     if (name == "myval") {
       if (value.IsString()) {
         // Store the value.
@@ -232,17 +207,17 @@ obj->SetValue("myval", V8_ACCESS_CONTROL_DEFAULT,
 
 = JS Functions =
 
-CEF supports the creation of JS functions with native implementations. Functions are created using the CefV8Value::CreateFunction() static method. Functions can only be created and used from within a context (see the "Working with Contexts" section for more information).
+CEF supports the creation of JS functions with native implementations. Functions are created using the CefV8Value::CreateFunction() static method that accepts name and CefV8Handler arguments. Functions can only be created and used from within a context (see the "Working with Contexts" section for more information).
 
 {{{
+CefRefPtr<CefV8Handler> handler = …;
 CefRefPtr<CefV8Value> func = CefV8Value::CreateFunction("myfunc", handler);
 }}}
 
-The |handler| parameter is an implementation of the CefV8Handler interface that must be provided by the client application.
+An implementation of the CefV8Handler interface that must be provided by the client application.
 
 {{{
-class MyV8Handler : public CefV8Handler
-{
+class MyV8Handler : public CefV8Handler {
 public:
   MyV8Handler() {}
 
@@ -250,8 +225,7 @@ public:
                        CefRefPtr<CefV8Value> object,
                        const CefV8ValueList& arguments,
                        CefRefPtr<CefV8Value>& retval,
-                       CefString& exception) OVERRIDE
-  {
+                       CefString& exception) OVERRIDE {
     if (name == "myfunc") {
       // Return my string value.
       retval = CefV8Value::CreateString("My Value!");
@@ -272,10 +246,10 @@ public:
 Functions can be used to create complex window bindings.
 
 {{{
-void MyHandler::OnContextCreated(CefRefPtr<CefBrowser> browser,
-                                 CefRefPtr<CefFrame> frame,
-                                 CefRefPtr<CefV8Context> context) OVERRIDE
-{
+void MyRenderProcessHandler::OnContextCreated(
+    CefRefPtr<CefBrowser> browser,
+    CefRefPtr<CefFrame> frame,
+    CefRefPtr<CefV8Context> context) {
   // Retrieve the context's window object.
   CefRefPtr<CefV8Value> object = context->GetGlobal();
 
@@ -301,23 +275,25 @@ alert(window.myfunc()); // Shows an alert box with "My Value!"
 Functions can be used to create complex extensions. Note the use of the "native function" forward declaration which is required when using extensions.
 
 {{{
-// Define the extension contents.
-std::string extensionCode =
-  "var test;"
-  "if (!test)"
-  "  test = {};"
-  "(function() {"
-  "  test.myfunc = function() {"
-  "    native function myfunc();"
-  "    return myfunc();"
-  "  };"
-  "})();";
+void MyRenderProcessHandler::OnWebKitInitialized() {
+  // Define the extension contents.
+  std::string extensionCode =
+    "var test;"
+    "if (!test)"
+    "  test = {};"
+    "(function() {"
+    "  test.myfunc = function() {"
+    "    native function myfunc();"
+    "    return myfunc();"
+    "  };"
+    "})();";
 
-// Create an instance of my CefV8Handler object.
-CefRefPtr<CefV8Handler> handler = new MyV8Handler();
+  // Create an instance of my CefV8Handler object.
+  CefRefPtr<CefV8Handler> handler = new MyV8Handler();
 
-// Register the extension.
-CefRegisterExtension("v8/test", extensionCode, handler);
+  // Register the extension.
+  CefRegisterExtension("v8/test", extensionCode, handler);
+}
 }}}
 
 {{{
@@ -329,7 +305,7 @@ alert(test.myfunc()); // Shows an alert box with "My Value!"
 
 = Working with Contexts =
 
-Each frame in a browser window has its own V8 context. The context defines the scope for all variables, objects and functions defined in that frame. V8 will be inside a context if the current code location has a CefV8Handler, CefV8Accessor or CefJSBindingHandler callback higher in the call stack.
+Each frame in a browser window has its own V8 context. The context defines the scope for all variables, objects and functions defined in that frame. V8 will be inside a context if the current code location has a CefV8Handler, CefV8Accessor or OnContextCreated()/OnContextReleased() callback higher in the call stack.
 
 The OnContextCreated() and OnContextReleased() methods define the complete life span for the V8 context associated with a frame. You should be careful to follow the below rules when using these methods:
 
@@ -356,10 +332,10 @@ When registering a JS function callback with native code the application should 
 1. Create a "register" function in OnJSBinding().
 
 {{{
-void MyHandler::OnContextCreated(CefRefPtr<CefBrowser> browser,
-                                 CefRefPtr<CefFrame> frame,
-                                 CefRefPtr<CefV8Context> context) OVERRIDE
-{
+void MyRenderProcessHandler::OnContextCreated(
+    CefRefPtr<CefBrowser> browser,
+    CefRefPtr<CefFrame> frame,
+    CefRefPtr<CefV8Context> context) {
   // Retrieve the context's window object.
   CefRefPtr<CefV8Value> object = context->GetGlobal();
 
@@ -373,12 +349,11 @@ void MyHandler::OnContextCreated(CefRefPtr<CefBrowser> browser,
 2. In the MyV8Handler::Execute() implementation for the "register" function keep a reference to both the context and the function.
 
 {{{
-virtual bool Execute(const CefString& name,
-                     CefRefPtr<CefV8Value> object,
-                     const CefV8ValueList& arguments,
-                     CefRefPtr<CefV8Value>& retval,
-                     CefString& exception) OVERRIDE
-{
+bool MyV8Handler::Execute(const CefString& name,
+                          CefRefPtr<CefV8Value> object,
+                          const CefV8ValueList& arguments,
+                          CefRefPtr<CefV8Value>& retval,
+                          CefString& exception) {
   if (name == "register") {
     if (arguments.size() == 1 && arguments[0]->IsFunction()) {
       callback_func_ = arguments[0];
@@ -417,62 +392,11 @@ if (callback_func_->ExecuteFunctionWithContext(callback_context_, NULL, args, re
 }
 }}}
 
-See the V8Test.Exception test in tests/unittests/v8_unittest.cc for a complete example of using callbacks.
-
-== General Usage ==
-
-Consider the following example from tests/cefclient/cefclient.cpp.
-
-{{{
-void UIT_InvokeScript(CefRefPtr<CefBrowser> browser)
-{
-  REQUIRE_UI_THREAD();
-
-  CefRefPtr<CefFrame> frame = browser->GetMainFrame();
-  CefRefPtr<CefV8Context> v8Context = frame->GetV8Context();
-  CefString url = frame->GetURL();
-
-  if (!v8Context.get()) {
-    frame->ExecuteJavaScript("alert('Failed to get V8 context!');", url, 0);
-  } else if (v8Context->Enter()) {
-    CefRefPtr<CefV8Value> globalObj = v8Context->GetGlobal();
-    CefRefPtr<CefV8Value> evalFunc = globalObj->GetValue("eval");
-
-    CefRefPtr<CefV8Value> arg0 = CefV8Value::CreateString("1+2");
-
-    CefV8ValueList args;
-    args.push_back(arg0);
-
-    CefRefPtr<CefV8Value> retVal;
-    CefRefPtr<CefV8Exception> exception;
-    if (evalFunc->ExecuteFunctionWithContext(v8Context, globalObj, args, retVal,
-                                             exception, false)) {
-      if (retVal.get()) {
-        frame->ExecuteJavaScript(
-            std::string("alert('InvokeScript returns ") +
-            retVal->GetStringValue().ToString() + "!');",
-            url, 0);
-      } else {
-        frame->ExecuteJavaScript(
-            std::string("alert('InvokeScript returns exception: ") +
-            exception->GetMessage().ToString() + "!');",
-            url, 0);
-      }
-    } else {
-      frame->ExecuteJavaScript("alert('Failed to execute function!');", url, 0);
-    }
-
-    v8Context->Exit();
-  } else {
-    frame->ExecuteJavaScript("alert('Failed to enter into V8 context!');",
-        url, 0);
-  }
-}
-}}}
+See the [https://code.google.com/p/chromiumembedded/wiki/GeneralUsage#Asynchronous_Bindings Asynchronous JavaScript Bindings] section of the GeneralUsage wiki page for more information on using callbacks.
 
 == Rethrowing Exceptions ==
 
-If the `rethrow_exception` argument to ExecuteFunction`*`() is true any exceptions generated by V8 will be immediately rethrown. If an exception is rethrown any native code needs to immediately return. Exceptions should only be rethrown if there is a JS call higher in the call stack. For example, consider the following call stacks where "JS" is a JS function and "EF" is a native ExecuteFunction call:
+If CefV8Value::SetRethrowExceptions(true) is called before CefV8Value::ExecuteFunction`*`() then any exceptions generated by V8 during function execution will be immediately rethrown. If an exception is rethrown any native code needs to immediately return. Exceptions should only be rethrown if there is a JS call higher in the call stack. For example, consider the following call stacks where "JS" is a JS function and "EF" is a native ExecuteFunction call:
 
 Stack 1: JS1 -> EF1 -> JS2 -> EF2
 
