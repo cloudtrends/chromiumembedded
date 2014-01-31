@@ -23,19 +23,18 @@ webkit/tools/test_shell/*
 With CEF3 the following files should be evaluated for changes:
 
 {{{
-content/content_shell/*
+content/shell/*
 content/content_shell.gypi
+chrome/browser/printing/*
 }}}
 
 On Windows you can create a batch script called "diff.bat" in the CEF directory:
 
 {{{
 @echo off
-set TARGET="%1-%2.diff"
-call svn diff -r %1:%2 ../content/browser/in_process_webkit >> %TARGET%
-call svn diff -r %1:%2 ../webkit/glue/webpreferences.h >> %TARGET%
-call svn diff -r %1:%2 ../webkit/support/simple_database_system.* >> %TARGET%
-call svn diff -r %1:%2 ../webkit/tools/test_shell >> %TARGET%
+call svn diff ..\content\shell -r %1:%2 > diff_%1-%2.diff
+call svn diff ..\content\content_shell.gypi -r %1:%2 >> diff_%1-%2.diff
+call svn diff ..\chrome\browser\printing -r %1:%2 >> diff_%1-%2-2.diff
 }}}
 
 And run it as follows:
