@@ -237,7 +237,7 @@ void CefRenderWidgetHostViewOSR::DidUpdateBackingStore(
     const gfx::Rect& scroll_rect,
     const gfx::Vector2d& scroll_delta,
     const std::vector<gfx::Rect>& copy_rects,
-    const std::vector<ui::LatencyInfo>& latency_info) {
+    const ui::LatencyInfo& latency_info) {
   if (!scroll_rect.IsEmpty()) {
     std::vector<gfx::Rect> dirty_rects(copy_rects);
     dirty_rects.push_back(scroll_rect);
@@ -321,7 +321,8 @@ gfx::Rect CefRenderWidgetHostViewOSR::GetBoundsInRootWindow() {
   return gfx::Rect();
 }
 
-void CefRenderWidgetHostViewOSR::CreateBrowserAccessibilityManagerIfNeeded() {
+void CefRenderWidgetHostViewOSR::OnAccessibilityEvents(
+    const std::vector<AccessibilityHostMsg_EventParams>& params) {
 }
 
 void CefRenderWidgetHostViewOSR::Destroy() {

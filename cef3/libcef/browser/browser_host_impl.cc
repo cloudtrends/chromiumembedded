@@ -504,19 +504,6 @@ CefRefPtr<CefBrowserHostImpl> CefBrowserHostImpl::GetBrowserForHost(
 }
 
 // static
-CefRefPtr<CefBrowserHostImpl> CefBrowserHostImpl::GetBrowserForHost(
-    const content::RenderFrameHost* host) {
-  DCHECK(host);
-  CEF_REQUIRE_UIT();
-  content::WebContents* web_contents =
-      content::WebContents::FromRenderFrameHost(
-          const_cast<content::RenderFrameHost*>(host));
-  if (web_contents)
-    return static_cast<CefBrowserHostImpl*>(web_contents->GetDelegate());
-  return NULL;
-}
-
-// static
 CefRefPtr<CefBrowserHostImpl> CefBrowserHostImpl::GetBrowserForContents(
     content::WebContents* contents) {
   DCHECK(contents);
@@ -530,16 +517,21 @@ CefRefPtr<CefBrowserHostImpl> CefBrowserHostImpl::GetBrowserForRequest(
   DCHECK(request);
   CEF_REQUIRE_IOT();
   int render_process_id = -1;
-  int render_frame_id = MSG_ROUTING_NONE;
+  int render_view_id = MSG_ROUTING_NONE;
 
-  if (!content::ResourceRequestInfo::GetRenderFrameForRequest(
-          request, &render_process_id, &render_frame_id) ||
+  if (!content::ResourceRequestInfo::GetRenderViewForRequest(
+          request, &render_process_id, &render_view_id) ||
       render_process_id == -1 ||
-      render_frame_id == MSG_ROUTING_NONE) {
+      render_view_id == MSG_ROUTING_NONE) {
     return NULL;
   }
 
-  return GetBrowserForFrame(render_process_id, render_frame_id);
+  if (render_view_id == 0) {
+    // Request is originating from a CefURLRequest in the renderer process.
+    return NULL;
+  }
+
+  return GetBrowserForView(render_process_id, render_view_id);
 }
 
 // static
@@ -566,39 +558,6 @@ CefRefPtr<CefBrowserHostImpl> CefBrowserHostImpl::GetBrowserForView(
       if (!browser.get()) {
         LOG(WARNING) << "Found browser id " << info->browser_id() <<
                         " but no browser object matching view process id " <<
-                        render_process_id << " and routing id " <<
-                        render_routing_id;
-      }
-      return browser;
-    }
-    return NULL;
-  }
-}
-
-// static
-CefRefPtr<CefBrowserHostImpl> CefBrowserHostImpl::GetBrowserForFrame(
-    int render_process_id, int render_routing_id) {
-  if (render_process_id == -1 || render_routing_id == MSG_ROUTING_NONE)
-    return NULL;
-
-  if (CEF_CURRENTLY_ON_UIT()) {
-    // Use the non-thread-safe but potentially faster approach.
-    content::RenderFrameHost* render_frame_host =
-        content::RenderFrameHost::FromID(render_process_id, render_routing_id);
-    if (!render_frame_host)
-      return NULL;
-    return GetBrowserForHost(render_frame_host);
-  } else {
-    // Use the thread-safe approach.
-    scoped_refptr<CefBrowserInfo> info =
-        CefContentBrowserClient::Get()->GetBrowserInfoForFrame(
-            render_process_id,
-            render_routing_id);
-    if (info.get()) {
-      CefRefPtr<CefBrowserHostImpl> browser = info->browser();
-      if (!browser.get()) {
-        LOG(WARNING) << "Found browser id " << info->browser_id() <<
-                        " but no browser object matching frame process id " <<
                         render_process_id << " and routing id " <<
                         render_routing_id;
       }
@@ -1952,7 +1911,7 @@ void CefBrowserHostImpl::WebContentsCreated(
       CefContentBrowserClient::Get()->GetOrCreateBrowserInfo(
           view_host->GetProcess()->GetID(),
           view_host->GetRoutingID(),
-          main_frame_host->GetProcess()->GetID(),
+          view_host->GetProcess()->GetID(),
           main_frame_host->GetRoutingID());
 
   if (source_contents) {
@@ -2062,14 +2021,16 @@ void CefBrowserHostImpl::RequestMediaAccessPermission(
 
 void CefBrowserHostImpl::RenderFrameCreated(
     content::RenderFrameHost* render_frame_host) {
-  browser_info_->add_render_frame_id(render_frame_host->GetProcess()->GetID(),
-                                     render_frame_host->GetRoutingID());
+  browser_info_->add_render_frame_id(
+      web_contents()->GetRenderProcessHost()->GetID(),
+      render_frame_host->GetRoutingID());
 }
 
 void CefBrowserHostImpl::RenderFrameDeleted(
     content::RenderFrameHost* render_frame_host) {
-  browser_info_->remove_render_frame_id(render_frame_host->GetProcess()->GetID(),
-                                        render_frame_host->GetRoutingID());
+  browser_info_->remove_render_frame_id(
+      web_contents()->GetRenderProcessHost()->GetID(),
+      render_frame_host->GetRoutingID());
 }
 
 void CefBrowserHostImpl::RenderViewCreated(

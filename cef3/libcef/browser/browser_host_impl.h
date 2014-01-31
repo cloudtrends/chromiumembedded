@@ -104,9 +104,6 @@ class CefBrowserHostImpl : public CefBrowserHost,
   // Returns the browser associated with the specified RenderViewHost.
   static CefRefPtr<CefBrowserHostImpl> GetBrowserForHost(
       const content::RenderViewHost* host);
-  // Returns the browser associated with the specified RenderFrameHost.
-  static CefRefPtr<CefBrowserHostImpl> GetBrowserForHost(
-      const content::RenderFrameHost* host);
   // Returns the browser associated with the specified WebContents.
   static CefRefPtr<CefBrowserHostImpl> GetBrowserForContents(
       content::WebContents* contents);
@@ -115,9 +112,6 @@ class CefBrowserHostImpl : public CefBrowserHost,
       net::URLRequest* request);
   // Returns the browser associated with the specified view routing IDs.
   static CefRefPtr<CefBrowserHostImpl> GetBrowserForView(
-      int render_process_id, int render_routing_id);
-  // Returns the browser associated with the specified frame routing IDs.
-  static CefRefPtr<CefBrowserHostImpl> GetBrowserForFrame(
       int render_process_id, int render_routing_id);
 
   // Returns true if window rendering is disabled in CefWindowInfo.

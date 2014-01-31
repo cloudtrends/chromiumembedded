@@ -84,7 +84,7 @@ class CefContentBrowserClient : public content::ContentBrowserClient {
   virtual content::WebContentsViewPort* OverrideCreateWebContentsView(
       content::WebContents* web_contents,
       content::RenderViewHostDelegateView** rvhdv) OVERRIDE;
-  virtual void RenderProcessWillLaunch(
+  virtual void RenderProcessHostCreated(
       content::RenderProcessHost* host) OVERRIDE;
   virtual net::URLRequestContextGetter* CreateRequestContext(
       content::BrowserContext* browser_context,

@@ -52,9 +52,9 @@ const int64 kInvalidFrameId = -1;
 blink::WebString FilePathStringToWebString(
     const base::FilePath::StringType& str) {
 #if defined(OS_POSIX)
-  return base::WideToUTF16Hack(base::SysNativeMBToWide(str));
+  return WideToUTF16Hack(base::SysNativeMBToWide(str));
 #elif defined(OS_WIN)
-  return base::WideToUTF16Hack(str);
+  return WideToUTF16Hack(str);
 #endif
 }
 

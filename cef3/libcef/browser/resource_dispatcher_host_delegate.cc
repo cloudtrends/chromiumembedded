@@ -21,14 +21,14 @@ namespace {
 bool NavigationOnUIThread(
     int64 frame_id,
     CefRefPtr<CefRequestImpl> request,
-    content::WebContents* source,
+    content::RenderViewHost* source,
     const navigation_interception::NavigationParams& params) {
   CEF_REQUIRE_UIT();
 
   bool ignore_navigation = false;
 
   CefRefPtr<CefBrowserHostImpl> browser =
-      CefBrowserHostImpl::GetBrowserForContents(source);
+      CefBrowserHostImpl::GetBrowserForHost(source);
   DCHECK(browser.get());
   if (browser.get()) {
     CefRefPtr<CefClient> client = browser->GetClient();

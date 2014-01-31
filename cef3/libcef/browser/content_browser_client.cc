@@ -556,7 +556,7 @@ CefContentBrowserClient::OverrideCreateWebContentsView(
   return view;
 }
 
-void CefContentBrowserClient::RenderProcessWillLaunch(
+void CefContentBrowserClient::RenderProcessHostCreated(
     content::RenderProcessHost* host) {
   host->GetChannel()->AddFilter(new CefBrowserMessageFilter(host));
   host->AddFilter(new PrintingMessageFilter(host->GetID()));
