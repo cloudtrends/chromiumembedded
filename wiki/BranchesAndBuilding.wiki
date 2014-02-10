@@ -253,6 +253,8 @@ cd /path/to/chromium/src
 ninja -C out/Debug cefclient cef_unittests
 }}}
 
+Linux only: When using the 1750 branch or newer you must also build the chrome_sandbox target and install it as described on the [https://code.google.com/p/chromium/wiki/LinuxSUIDSandboxDevelopment LinuxSUIDSandboxDevelopment] wiki page.
+
 Older release branches (<=1547) support building with the system build tools.
 
   * Windows - Open the Visual Studio solution file and build.
