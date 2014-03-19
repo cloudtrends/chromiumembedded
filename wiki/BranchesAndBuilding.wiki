@@ -89,7 +89,7 @@ To use the automated method:
 1. Download the automate.py tool for the branch that you’re building.
 
 {{{
-svn checkout http://chromiumembedded.googlecode.com/svn/1650/cef3/tools/automate /path/to/automate
+svn checkout http://chromiumembedded.googlecode.com/svn/branches/1650/cef3/tools/automate /path/to/automate
 }}}
 
 2. Run the automate.py script at whatever interval is appropriate (for each CEF commit, once per day, once per week, etc). Use the correct URL for the CEF version that you want to download and build.
