@@ -37,8 +37,9 @@ Current CEF release branches and associated platform build requirements are as f
 || Jan 2013 || [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Fbranches%2F1364 1364] || 25 || Yes || Yes || WinXP+, VS2010, Win8 SDK, Ninja (optional) || OS X 10.6-10.8, Xcode 3.2.6-4.x, Ninja (optional) || Ubuntu 12.04+, Debian Squeeze+, Ninja (optional) ||
 || Apr 2013 || [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Fbranches%2F1453 1453] || 27 || Yes || Yes || WinXP+, VS2010, Win8 SDK, Ninja (optional) || OS X 10.6-10.8, 10.6+ SDK, Xcode 3.2.6-4.x, Ninja (optional) || Ubuntu 12.04+, Debian Squeeze+, Ninja (optional) ||
 || Jul 2013 || [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Fbranches%2F1547 1547] || 29 || No  || Yes || WinXP+, VS2010-2012, Win8 SDK, Ninja (optional) || OS X 10.6-10.8, 10.6+ SDK, Xcode 3.2.6-4.x, Ninja (optional) || Ubuntu 12.04+, Debian Squeeze+, Ninja ||
-|| Oct 2013 || [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Fbranches%2F1650 1650] || 31 || No  || Yes || WinXP+, VS2010-2013, Win8 SDK, Ninja (optional) || OS X 10.6-10.9, 10.6+ SDK, Xcode 3.2.6-5.x, Ninja || Ubuntu 12.04+, Debian Wheezy+, Ninja ||
-|| Jan 2014 || [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Fbranches%2F1750 1750] || 33 || No  || Yes || WinXP+, VS2010-2012, Win8 SDK, Ninja || OS X 10.6-10.9, 10.6+ SDK, Xcode 3.2.6-5.x, Ninja || Ubuntu 12.04+, Debian Wheezy+, Ninja ||
+|| Oct 2013 || [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Fbranches%2F1650 1650] || 31 || No  || Yes || WinXP+, VS2010-2012, Win8 SDK, Ninja (optional) || OS X 10.6-10.9, 10.6+ SDK, Xcode 3.2.6-5.x, Ninja || Ubuntu 12.04+, Debian Wheezy+, Ninja ||
+|| Jan 2014 || [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Fbranches%2F1750 1750] || 33 || No  || Yes || WinXP+, VS2010-2013, Win8 SDK, Ninja || OS X 10.6-10.9, 10.6+ SDK, Xcode 3.2.6-5.x, Ninja || Ubuntu 12.04+, Debian Wheezy+, Ninja ||
+|| Apr 2014 || [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Fbranches%2F1916 1916] || 35 || No  || Yes || WinXP+, VS2013, Win8 SDK, Ninja || OS X 10.6-10.9, 10.6+ SDK, Xcode 3.2.6-5.x, Ninja || Ubuntu 12.04+, Debian Wheezy+, Ninja ||
 
 The following URLs should be used for downloading release verisons of CEF where YYYY is the release branch number.
 
