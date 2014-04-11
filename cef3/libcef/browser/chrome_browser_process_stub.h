@@ -49,6 +49,7 @@ class ChromeBrowserProcessStub : public BrowserProcess {
   virtual IconManager* icon_manager() OVERRIDE;
   virtual GLStringManager* gl_string_manager() OVERRIDE;
   virtual GpuModeManager* gpu_mode_manager() OVERRIDE;
+  virtual AutomationProviderList* GetAutomationProviderList() OVERRIDE;
   virtual void CreateDevToolsHttpProtocolHandler(
       chrome::HostDesktopType host_desktop_type,
       const std::string& ip,

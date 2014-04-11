@@ -114,6 +114,12 @@ GpuModeManager* ChromeBrowserProcessStub::gpu_mode_manager() {
   return NULL;
 }
 
+AutomationProviderList*
+  ChromeBrowserProcessStub::GetAutomationProviderList() {
+  NOTIMPLEMENTED();
+  return NULL;
+}
+
 void ChromeBrowserProcessStub::CreateDevToolsHttpProtocolHandler(
     chrome::HostDesktopType host_desktop_type,
     const std::string& ip,
