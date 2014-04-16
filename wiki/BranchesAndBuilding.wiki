@@ -131,7 +131,7 @@ C. Add the depot_tools directory to your PATH. On Windows the depot_tools path s
 
 ===== SVN workflow (CEF1 and CEF3): =====
 
-This version of steps 4-6 applies to the SVN workflow only. The SVN workflow is recommended for most users. Complete instructions for using the SVN workflow in Chromium are available [http://dev.chromium.org/developers/how-tos/get-the-code here].
+This version of steps 4-6 applies to the SVN workflow only. The SVN workflow is recommended for most users.
 
 4. Configure gclient to use the trunk branch.
 
@@ -144,7 +144,7 @@ gclient config http://src.chromium.org/svn/trunk/src
 
 {{{
 cd /path/to/chromium
-gclient sync --revision src@chromium_revision --jobs 8 --force
+gclient sync --revision src@chromium_revision --jobs 16
 }}}
 
 6. Download CEF source code to a "cef" directory inside the Chromium "src" directory. You should download either CEF1 or CEF3 but not both. If Chromium code was downloaded to "/path/to/chromium/src" then CEF code should be downloaded to "/path/to/chromium/src/cef". Note that the directory must be named "cef" for both CEF1 and CEF3.
@@ -156,13 +156,13 @@ svn co http://chromiumembedded.googlecode.com/svn/trunk/cef3 cef
 
 ===== Git workflow (CEF3 only): =====
 
-This version of steps 4-7 applies to the Git workflow only. Using Git is more complicated than using SVN and is not recommended for users unfamiliar with Git. Using Git on Windows is very slow and generally not recommended for anyone. Complete instructions for using the Git workflow in Chromium are available [https://code.google.com/p/chromium/wiki/UsingGit here].
+This version of steps 4-7 applies to the Git workflow only. Complete instructions for using the Git workflow in Chromium are available [https://sites.google.com/a/chromium.org/dev/developers/how-tos/get-the-code here].
 
 4. Download Chromium source code using the fetch tool included with depot_tools. This step only needs to be performed the first time Chromium code is checked out.
 
 {{{
 cd /path/to/chromium
-fetch chromium --nosvn=True
+fetch --nohooks chromium --nosvn=True
 }}}
 
 5. Find the git commit hash for the SVN revision number discovered in step #3. This can be done using the command-line (warning: this may be slow)
@@ -178,10 +178,8 @@ Or by using the [http://git.chromium.org/gitweb/?p=chromium%2Fsrc.git&a=search&h
 
 {{{
 cd /path/to/chromium
-gclient sync --revision <commit_hash> --jobs 8 --force
+gclient sync --revision <commit_hash> --jobs 16
 }}}
-
-See [https://code.google.com/p/chromium/wiki/UsingGit#If_gclient_sync_fails these instructions] if the 'gclient sync' command fails.
 
 7. Download CEF source code from the CEF Git repository to a "cef" directory inside the Chromium "src" directory. If Chromium code was downloaded to "/path/to/chromium/src" then CEF code should be downloaded to "/path/to/chromium/src/cef". Note that the directory must be named "cef".
 
@@ -192,9 +190,9 @@ git clone https://chromiumembedded@bitbucket.org/chromiumembedded/trunk-cef3.git
 
 The CEF Git repository is a read-only mirror of the SVN repository and pull requests will not be accepted. To submit changes please attach patch files generated with 'git diff --no-prefix' to issues in the CEF issue tracker.
 
-==== Release Branch (SVN only) ====
+==== Release Branch (SVN or Git) ====
 
-These download instructions apply only to release branches of CEF1 and CEF3. Complete instructions for using the SVN workflow in Chromium are available [http://dev.chromium.org/developers/how-tos/get-the-code here].
+These download instructions apply only to release branches of CEF1 and CEF3.
 
 1. Install depot_tools. To avoid potential problems make sure the path is as short as possible and does not contain spaces or special characters.
 
@@ -212,6 +210,10 @@ C. Add the depot_tools directory to your PATH. On Windows the depot_tools path s
 
 3. View the CHROMIUM_BUILD_COMPATIBILITY.txt file in the CEF top-level directory to identify what Chromium release branch you need. This will change over time as CEF is updated to work with newer Chromium release branches.
 
+===== SVN workflow (CEF1 and CEF3): =====
+
+This version of steps 4-6 applies to the SVN workflow only. The SVN workflow is recommended for most users.
+
 4. Configure gclient to use the release branch number discovered in step #3.
 
 {{{
@@ -223,7 +225,7 @@ gclient config http://src.chromium.org/svn/releases/31.0.1650.57
 
 {{{
 cd /path/to/chromium
-gclient sync --jobs 8 --force
+gclient sync --jobs 16
 }}}
 
 6. Download the CEF source code to a "cef" directory inside the Chromium "src" directory. You should download either CEF1 or CEF3 but not both. If Chromium code was downloaded to "/path/to/chromium/src" then CEF code should be downloaded to "/path/to/chromium/src/cef". Note that the directory must be named "cef" for both CEF1 and CEF3.
@@ -232,6 +234,49 @@ gclient sync --jobs 8 --force
 cd /path/to/chromium/src
 svn co http://chromiumembedded.googlecode.com/svn/branches/1650/cef3 cef
 }}}
+
+===== Git workflow (CEF3 only): =====
+
+This version of steps 4-7 applies to the Git workflow only. Complete instructions for using the Git workflow in Chromium are available [https://sites.google.com/a/chromium.org/dev/developers/how-tos/get-the-code here].
+
+4. Download Chromium source code using the fetch tool included with depot_tools. This step only needs to be performed the first time Chromium code is checked out.
+
+{{{
+cd /path/to/chromium
+fetch --nohooks chromium --nosvn=True
+}}}
+
+5. Download additional branch and tag information.
+
+{{{
+cd /path/to/chromium/src
+gclient sync --nohooks --with_branch_heads
+git fetch
+}}}
+
+6. Check out the Chromium version discovered in step #3 and run gclient to update the third-party dependencies.
+
+{{{
+cd /path/to/chromium/src
+
+# Check out a specific release version. This tag may not be immediately available for new releases.
+git checkout refs/tags/35.0.1916.27
+
+# Alternately, check out the release branch HEAD revision. CEF may not build cleanly against this revision.
+git checkout refs/remotes/branch-heads/1916
+
+# Update third-party dependencies.
+gclient sync --jobs 16
+}}}
+
+7. Download CEF source code from the CEF Git repository to a "cef" directory inside the Chromium "src" directory. If Chromium code was downloaded to "/path/to/chromium/src" then CEF code should be downloaded to "/path/to/chromium/src/cef". Note that the directory must be named "cef".
+
+{{{
+cd /path/to/chromium/src
+git clone https://chromiumembedded@bitbucket.org/chromiumembedded/branches-1916-cef3.git cef
+}}}
+
+The CEF Git repository is a read-only mirror of the SVN repository and pull requests will not be accepted. To submit changes please attach patch files generated with 'git diff --no-prefix' to issues in the CEF issue tracker.
 
 === Manual Building ===
 
