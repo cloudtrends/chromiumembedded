@@ -81,11 +81,15 @@ To build Chromium and CEF from source code you must start by configuring your bu
     * If you wish to use Visual Studio for debugging and compiling in combination with a Ninja build you can set `GYP_GENERATORS=ninja,msvs-ninja` to generate both Ninja files and VS project files that will compile using Ninja.
   * Mac OS X - When building on OS X 10.6+ the 10.5 SDK is no longer available. Older branches (<=1180) require that you set `GYP_DEFINES=mac_sdk=10.6` to use the 10.6 SDK. See [http://code.google.com/p/chromium/wiki/Xcode4Tips here] for more information.
 
-=== Automated Method (SVN only) ===
+=== Automated Method (SVN or Git) ===
 
-CEF provides tools for automatically downloading, building and packaging Chromium and CEF source code. This method can be used for both development (trunk) and release builds.
+CEF provides tools for automatically downloading, building and packaging Chromium and CEF source code. These tools can be used locally or integrated with automated build systems like [http://www.jetbrains.com/teamcity/ TeamCity] or [http://jenkins-ci.org/ Jenkins].
 
-To use the automated method:
+===== SVN workflow (CEF1 and CEF3): =====
+
+These steps apply to the SVN workflow only. This workflow is recommended for most users and can be used for both development (trunk) and release builds of CEF1 and CEF3.
+
+To use the SVN workflow:
 
 1. Download the automate.py tool for the branch that you’re building.
 
@@ -101,9 +105,29 @@ python /path/to/automate/automate.py --download-dir=/path/to/download --url=http
 
 If the process succeeds a binary distribution package will be created in the /path/to/download/chromium/src/cef/binary_distrib directory.
 
-See [http://code.google.com/p/chromiumembedded/source/browse/trunk/cef3/tools/automate/automate.README.txt automate.README.txt] for complete usage instructions.
+Add the “--help” command-line switch to output usage instructions.
 
-This method also integrates nicely with automated build systems like [http://www.jetbrains.com/teamcity/ TeamCity].
+===== Git workflow (CEF3 trunk only): =====
+
+These steps apply to the Git workflow only. This workflow currently only supports the development (trunk) build of CEF3.
+
+To use the Git workflow:
+
+1. Download the automate-git.py tool.
+
+{{{
+svn checkout http://chromiumembedded.googlecode.com/svn/trunk/cef3/tools/automate /path/to/automate
+}}}
+
+2. Run the automate-git.py script at whatever interval is appropriate (for each CEF commit, once per day, once per week, etc).
+
+{{{
+python /path/to/automate/automate-git.py --download-dir=/path/to/download
+}}}
+
+If the process succeeds a binary distribution package will be created in the /path/to/download/chromium/src/cef/binary_distrib directory.
+
+Add the “--help” command-line switch to output usage instructions.
 
 === Manual Downloading  ===
 
@@ -165,7 +189,9 @@ cd /path/to/chromium
 fetch --nohooks chromium --nosvn=True
 }}}
 
-5. Find the git commit hash for the SVN revision number discovered in step #3. This can be done using the command-line (warning: this may be slow)
+5. Find the git commit hash for the SVN revision number discovered in step #3. Newer CEF3 trunk revisions include the required hash as the “chromium_checkout” value in CHROMIUM_BUILD_COMPATIBILITY.txt.
+
+The required hash can also be found using the command-line (warning: this may be slow)
 
 {{{
 cd /path/to/chromium/src
@@ -174,7 +200,7 @@ git svn find-rev r<revision>
 
 Or by using the [http://git.chromium.org/gitweb/?p=chromium%2Fsrc.git&a=search&h=HEAD&st=commit&s=%40123456 online search tool] to find "@revision" in the chromium/src.git repository, and then clicking on the search result to get the "commit" hash.
 
-6. Update the Chromium checkout to the required commit hash. DO NOT use 'git checkout commit_hash' directly because that will mess up the sub-project dependencies.
+6. Update the Chromium checkout to the required commit hash. DO NOT use 'git checkout commit_hash' directly because the sub-project dependencies will not be updated.
 
 {{{
 cd /path/to/chromium
@@ -239,6 +265,8 @@ svn co http://chromiumembedded.googlecode.com/svn/branches/1650/cef3 cef
 
 This version of steps 4-7 applies to the Git workflow only. Complete instructions for using the Git workflow in Chromium are available [https://sites.google.com/a/chromium.org/dev/developers/how-tos/get-the-code here].
 
+*WARNING: This workflow can only be used for building the release branch HEAD revision and cannot be used for building specific release versions. It is not a recommended for most users.*
+
 4. Download Chromium source code using the fetch tool included with depot_tools. This step only needs to be performed the first time Chromium code is checked out.
 
 {{{
@@ -254,20 +282,12 @@ gclient sync --nohooks --with_branch_heads
 git fetch
 }}}
 
-6. Check out the Chromium version discovered in step #3 and run gclient to update the third-party dependencies.
+6. Check out the release branch HEAD revision and update the third-party dependencies.
 
 {{{
 cd /path/to/chromium/src
 
-# Check out a specific release version. This tag may not be immediately available for new releases.
-# You must checkout the commit immediately before the desired version tag.
-# Newer CEF branches (1750+) list the required commit as ‘chromium_checkout’ in CHROMIUM_BUILD_COMPATIBILITY.txt.
-git checkout refs/tags/35.0.1916.27
-# HEAD is now at 4cab0bc... Publish DEPS for Chromium 35.0.1916.27
-git checkout HEAD~
-# HEAD is now at 575d428... Incrementing VERSION to 35.0.1916.27
-
-# Alternately, check out the release branch HEAD revision. CEF may not build cleanly against this revision.
+# Check out the release branch HEAD revision. CEF may not build cleanly against this revision.
 git checkout refs/remotes/branch-heads/1916
 
 # Update third-party dependencies.
