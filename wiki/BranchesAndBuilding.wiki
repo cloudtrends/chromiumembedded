@@ -260,7 +260,12 @@ git fetch
 cd /path/to/chromium/src
 
 # Check out a specific release version. This tag may not be immediately available for new releases.
+# You must checkout the commit immediately before the desired version tag.
+# Newer CEF branches (1750+) list the required commit as ‘chromium_checkout’ in CHROMIUM_BUILD_COMPATIBILITY.txt.
 git checkout refs/tags/35.0.1916.27
+# HEAD is now at 4cab0bc... Publish DEPS for Chromium 35.0.1916.27
+git checkout HEAD~
+# HEAD is now at 575d428... Incrementing VERSION to 35.0.1916.27
 
 # Alternately, check out the release branch HEAD revision. CEF may not build cleanly against this revision.
 git checkout refs/remotes/branch-heads/1916
