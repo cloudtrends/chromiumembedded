@@ -199,14 +199,12 @@ fetch --nohooks chromium --nosvn=True
 
 5. Find the git commit hash for the SVN revision number discovered in step #3. Newer CEF3 trunk revisions include the required hash as the “chromium_checkout” value in CHROMIUM_BUILD_COMPATIBILITY.txt.
 
-The required hash can also be found using the command-line (warning: this may be slow)
+The required hash can also be found using the command-line. In this example the desired SVN revision is “123456”:
 
 {{{
 cd /path/to/chromium/src
-git svn find-rev r<revision>
+git log --grep=@123456 origin/master
 }}}
-
-Or by using the [http://git.chromium.org/gitweb/?p=chromium%2Fsrc.git&a=search&h=HEAD&st=commit&s=%40123456 online search tool] to find "@revision" in the chromium/src.git repository, and then clicking on the search result to get the "commit" hash.
 
 6. Update the Chromium checkout to the required commit hash. DO NOT use 'git checkout commit_hash' directly because the sub-project dependencies will not be updated.
 
