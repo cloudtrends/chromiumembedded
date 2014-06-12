@@ -2,6 +2,33 @@
 
 Not all revisions are listed here. View the [http://code.google.com/p/chromiumembedded/source/list Changes list] to see the complete list of revisions.
 
+*June 12, 2014:* Version 3.1750.1738 for Windows, Mac OS X and Linux includes the following enhancements and bug fixes.
+
+  * Update to Chromium version 33.0.1750.170
+  * Add the cefsimple sample application which demonstrates the minimal functionality required to create a browser window.
+  * Windows: Switch to aura/views architecture for content window creation (issue #180).
+  * Windows: Support non-ASCII paths for CefStream file access (issue #481).
+  * Add sandbox support (issue #524).
+    * The sandbox is now enabled by default on all platforms. Use the CefSettings.no_sandbox option or the "no-sandbox" command-line flag to disable sandbox support.
+    * Windows: See cef_sandbox_win.h for requirements to enable sandbox support and usage of CEF_ENABLE_SANDBOX define in cefclient/cefsimple.
+    * Windows: If Visual Studio isn't installed in the standard location set the CEF_VCVARS environment variable before running make_distrib.py or automate.py (see msvs_env.bat).
+    * Linux: For binary distributions a new chrome-sandbox executable with SUID permissions must be placed next to the CEF executable. See https://code.google.com/p/chromium/wiki/LinuxSUIDSandboxDevelopment for details on setting up the development environment when building CEF from source code.
+  * Support DevTools without remote debugging via CefBrowserHost::ShowDevTools and CloseDevTools methods (issue #659).
+  * Fix crash when using asynchronous continuation with a custom resource handler (issue #1066).
+  * Windows: Support building with Visual Studio 2013 (issue #1094).
+  * Add a CefGetMimeType function for retrieving the mime type of a file extension (issue #1098).
+  * Enable print option in context menu (issue #1127).
+  * Add breakpad support (issue #1131).
+    * General usage instructions are available at https://sites.google.com/a/chromium.org/dev/developers/testing/webkit-layout-tests/using-breakpad-with-content-shell.
+    * Mac: Generate "Chromium Embedded Framework.framework" using a new cef_framework target (the libcef target is now only used on Windows and Linux). Rename "Libraries/libcef.dylib" to "Chromium Embedded Framework". Distribute Release and Debug builds of the "Chromium Embedded Framework.framework" folder as part of the binary distribution.
+    * Mac: Fix the Xcode target compiler setting for the binary distribution so that it no longer needs to be set manually.
+  * Remove the built-in about:tracing UI (issue #1146). Traces generated with CEF can be loaded in Google Chrome about:tracing.
+  * Fix C compiler errors when using the C API (issue #1165).
+  * Provide a generic JavaScript message router implementation (issue #1183).
+  * Add MayBlock() method to stream classes which is used as a hint when determining the thread to access the stream from (issue #1187).
+  * Mac: Change shutdown-related code to match Chromium (issue #1203)
+  * Fix delivery of focus/blur events (issue #1301)
+
 *January 13, 2014:* Version 3.1650.1562 for Windows, Mac OS X and Linux includes the following enhancements and bug fixes.
 
   * Update to Chromium version 31.0.1650.57
