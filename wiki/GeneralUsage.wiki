@@ -70,18 +70,49 @@ CEF3 supports a single-process run mode for debugging purposes via the "--single
 
 Each process in CEF3 runs multiple threads. For a complete list of threads see the [http://magpcss.org/ceforum/apidocs3/projects/(default)/cef_thread_id_t.html cef_thread_id_t] enumeration. The browser process for example contains the following commonly-referenced threads:
 
-  * *TID_UI* thread is the main thread in the browser. This will be the same as the main application thread if CefInitialize() is called with a CefSettings.multi_threaded_message_loop value of false.
-  * *TID_IO* thread is used to process IPC and network messages.
-  * *TID_FILE* thread is used to interact with the file system.
+  * *TID_UI* thread is the main thread in the browser process. This will be the same as the main application thread if CefInitialize() is called with a CefSettings.multi_threaded_message_loop value of false.
+  * *TID_IO* thread is used in the browser process to process IPC and network messages.
+  * *TID_FILE* thread is used in the browser process to interact with the file system.
+  * *TID_RENDERER* thread is the main thread in the renderer process.
 
-Due to the multi-threaded nature of CEF it’s important to use locking or message passing to protect data members from access on multiple threads. The IMPLEMENT_LOCKING macro provides Lock() and Unlock() methods and an AutoLock scoped object for synchronizing access to blocks of code. The CefPostTask family of functions support easy asynchronous message passing between threads. See the “Posting Tasks” section for more information.
+Due to the multi-threaded nature of CEF it’s important to use locking or message passing to protect data members from access on multiple threads. The IMPLEMENT_LOCKING macro (deprecated -- see below) provides Lock() and Unlock() methods and an AutoLock scoped object for synchronizing access to blocks of code. The CefPostTask family of functions support easy asynchronous message passing between threads. See the “Posting Tasks” section for more information.
 
-The current thread can be verified using the CefCurrentlyOn() function. The cefclient application uses the following defines to verify that methods are executed on the expected thread:
+The current thread can be verified using the CefCurrentlyOn() function. The cefclient application uses the following defines to verify that methods are executed on the expected thread. With trunk revision 1769 and newer these defines are included in the [https://code.google.com/p/chromiumembedded/source/browse/trunk/cef3/include/wrapper/cef_helpers.h include/wrapper/cef_helpers.h] header file.
 
 {{{
-#define REQUIRE_UI_THREAD()   ASSERT(CefCurrentlyOn(TID_UI));
-#define REQUIRE_IO_THREAD()   ASSERT(CefCurrentlyOn(TID_IO));
-#define REQUIRE_FILE_THREAD() ASSERT(CefCurrentlyOn(TID_FILE));
+#define CEF_REQUIRE_UI_THREAD()       DCHECK(CefCurrentlyOn(TID_UI));
+#define CEF_REQUIRE_IO_THREAD()       DCHECK(CefCurrentlyOn(TID_IO));
+#define CEF_REQUIRE_FILE_THREAD()     DCHECK(CefCurrentlyOn(TID_FILE));
+#define CEF_REQUIRE_RENDERER_THREAD() DCHECK(CefCurrentlyOn(TID_RENDERER));
+}}}
+
+Starting with trunk revision 1769 the IMPLEMENT_LOCKING macro has been deprecated in favor of Chromium’s base::Lock and base::AutoLock types. These types are now exposed in CEF via the include/base folder. For example:
+
+{{{
+// Include the necessary header.
+#include "include/base/cef_lock.h"
+
+// Class declaration.
+class MyClass : public CefBase {
+ public:
+  MyClass() : value_(0) {}
+  // Method that may be called on multiple threads.
+  void IncrementValue();
+ private:
+  // Value that may be accessed on multiple theads.
+  int value_;
+  // Lock used to protect access to |value_|.
+  base::Lock lock_;
+  IMPLEMENT_REFCOUNTING(MyClass);
+};
+
+// Class implementation.
+void MyClass::IncrementValue() {
+  // Acquire the lock for the scope of this method.
+  base::AutoLock lock_scope(lock_);
+  // |value_| can now be modified safely.
+  value_++;
+}
 }}}
 
 ===Reference Counting===
@@ -795,8 +826,8 @@ class MyClient : public CefClient,
   int m_BrowserCount;
   bool m_bIsClosing;
 
-  IMPLEMENT_REFCOUNTING(MyHandler);
-  IMPLEMENT_LOCKING(MyHandler);
+  IMPLEMENT_REFCOUNTING(MyClient);
+  IMPLEMENT_LOCKING(MyClient);  // Deprecated -- see the “Threads” section.
 };
 }}}
 
@@ -807,7 +838,7 @@ void MyClient::OnAfterCreated(CefRefPtr<CefBrowser> browser) {
   // Must be executed on the UI thread.
   REQUIRE_UI_THREAD();
   // Protect data members from access on multiple threads.
-  AutoLock lock_scope(this);
+  AutoLock lock_scope(this);  // Deprecated -- see the “Threads” section.
 
   if (!m_Browser.get())   {
     // Keep a reference to the main browser.
@@ -987,13 +1018,51 @@ To execute the MyFunction function on the IO thread and pass it two parameters:
 CefPostTask(TID_IO, NewCefRunnableFunction(MyFunction, param1, param2));
 }}}
 
-See the [https://code.google.com/p/chromiumembedded/source/browse/trunk/cef3/include/cef_runnable.h cef_runnable.h] header file for more information on the NewCefRunnable templates.
+See the [https://code.google.com/p/chromiumembedded/source/browse/trunk/cef3/include/cef_runnable.h cef_runnable.h] header file for more information on the NewCefRunnable templates (deprecated -- see below).
 
 If the host application needs to keep a reference to a run loop it can use the CefTaskRunner class. For example, to get the task runner for the UI thread:
 
 {{{
 CefRefPtr<CefTaskRunner> task_runner = CefTaskRunner::GetForThread(TID_UI);
 }}}
+
+Starting with trunk revision 1769 cef_runnable.h has been deprecated in favor of Chromium’s base::Bind and base::Callback types. These types are now exposed in CEF via the include/base folder. For example:
+
+{{{
+// Include the necessary headers.
+#include "include/base/cef_bind.h"
+#include "include/wrapper/cef_closure_task.h"
+
+// To execute a bound function:
+
+// Define a function.
+void MyFunc(int arg) { /* do something with |arg| on the UI thread */ }
+
+// Post a task that will execute MyFunc on the UI thread and pass an |arg|
+// value of 5.
+CefPostTask(TID_UI, base::Bind(&MyFunc, 5));
+
+// To execute a bound method:
+
+// Define a class.
+class MyClass : public CefBase {
+ public:
+  MyClass() {}
+  void MyMethod(int arg) { /* do something with |arg| on the UI thread */ }
+ private:
+  IMPLEMENT_REFCOUNTING(MyClass);
+};
+
+// Create an instance of MyClass.
+CefRefPtr<MyClass> instance = new MyClass();
+
+// Post a task that will execute MyClass::MyMethod on the UI thread and pass
+// an |arg| value of 5. |instance| will be kept alive until after the task
+// completes.
+CefPostTask(TID_UI, base::Bind(&MyClass::MyMethod, instance, 5));
+}}}
+
+The [https://code.google.com/p/chromiumembedded/source/browse/trunk/cef3/include/wrapper/cef_closure_task.h cef_closure_task.h] header provides helpers for converting a base::Closure to a CefTask. For complete base::Bind and base::Callback usage information see comments in the [https://code.google.com/p/chromiumembedded/source/browse/trunk/cef3/include/base/cef_callback.h#52 cef_callback.h] header.
 
 ==Inter-Process Communication (IPC)==
 
