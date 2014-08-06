@@ -2358,15 +2358,14 @@ void CefBrowserHostImpl::RenderProcessGone(base::TerminationStatus status) {
 }
 
 void CefBrowserHostImpl::DidCommitProvisionalLoadForFrame(
-    content::RenderFrameHost* render_frame_host,
+    int64 frame_id,
+    const base::string16& frame_unique_name,
     bool is_main_frame,
     const GURL& url,
-    content::PageTransition transition_type) {
-  CefRefPtr<CefFrame> frame = GetOrCreateFrame(
-      render_frame_host->GetRoutingID(),
-      CefFrameHostImpl::kUnspecifiedFrameId,
-      is_main_frame,
-      base::string16(),
+    content::PageTransition transition_type,
+    content::RenderViewHost* render_view_host) {
+  CefRefPtr<CefFrame> frame = GetOrCreateFrame(frame_id,
+      CefFrameHostImpl::kUnspecifiedFrameId, is_main_frame, base::string16(),
       url);
   OnLoadStart(frame, url, transition_type);
   if (is_main_frame)
@@ -2374,16 +2373,15 @@ void CefBrowserHostImpl::DidCommitProvisionalLoadForFrame(
 }
 
 void CefBrowserHostImpl::DidFailProvisionalLoad(
-    content::RenderFrameHost* render_frame_host,
+    int64 frame_id,
+    const base::string16& frame_unique_name,
     bool is_main_frame,
     const GURL& validated_url,
     int error_code,
-    const base::string16& error_description) {
-  CefRefPtr<CefFrame> frame = GetOrCreateFrame(
-      render_frame_host->GetRoutingID(),
-      CefFrameHostImpl::kUnspecifiedFrameId,
-      is_main_frame,
-      base::string16(),
+    const base::string16& error_description,
+    content::RenderViewHost* render_view_host) {
+  CefRefPtr<CefFrame> frame = GetOrCreateFrame(frame_id,
+      CefFrameHostImpl::kUnspecifiedFrameId, is_main_frame, base::string16(),
       GURL());
   OnLoadError(frame, validated_url, error_code, error_description);
 }

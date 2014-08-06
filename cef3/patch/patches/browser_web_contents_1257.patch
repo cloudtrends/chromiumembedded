@@ -1,8 +1,8 @@
 Index: web_contents_impl.cc
 ===================================================================
---- web_contents_impl.cc	(revision 280796)
+--- web_contents_impl.cc	(revision 286351)
 +++ web_contents_impl.cc	(working copy)
-@@ -1073,22 +1073,29 @@
+@@ -1066,22 +1066,29 @@
        params.browser_context, params.site_instance, params.routing_id,
        params.main_frame_routing_id);
  
@@ -46,7 +46,7 @@ Index: web_contents_impl.cc
    }
    CHECK(render_view_host_delegate_view_);
    CHECK(view_.get());
-@@ -1407,6 +1414,9 @@
+@@ -1398,6 +1405,9 @@
        static_cast<SessionStorageNamespaceImpl*>(session_storage_namespace);
    CHECK(session_storage_namespace_impl->IsFromContext(dom_storage_context));
  
@@ -56,7 +56,7 @@ Index: web_contents_impl.cc
    if (delegate_ &&
        !delegate_->ShouldCreateWebContents(this,
                                            route_id,
-@@ -1414,7 +1424,9 @@
+@@ -1405,7 +1415,9 @@
                                            params.frame_name,
                                            params.target_url,
                                            partition_id,
@@ -67,7 +67,7 @@ Index: web_contents_impl.cc
      if (route_id != MSG_ROUTING_NONE &&
          !RenderViewHost::FromID(render_process_id, route_id)) {
        // If the embedder didn't create a WebContents for this route, we need to
-@@ -1434,6 +1446,8 @@
+@@ -1425,6 +1437,8 @@
    create_params.main_frame_routing_id = main_frame_route_id;
    create_params.opener = this;
    create_params.opener_suppressed = params.opener_suppressed;

@@ -61,7 +61,7 @@ CefResourceDispatcherHostDelegate::~CefResourceDispatcherHostDelegate() {
 void CefResourceDispatcherHostDelegate::RequestBeginning(
     net::URLRequest* request,
     content::ResourceContext* resource_context,
-    content::AppCacheService* appcache_service,
+    appcache::AppCacheService* appcache_service,
     ResourceType::Type resource_type,
     int child_id,
     int route_id,
@@ -94,8 +94,7 @@ void CefResourceDispatcherHostDelegate::RequestBeginning(
 bool CefResourceDispatcherHostDelegate::HandleExternalProtocol(
     const GURL& url,
     int child_id,
-    int route_id,
-    bool initiated_by_user_gesture) {
+    int route_id) {
   CefRefPtr<CefBrowserHostImpl> browser =
       CefBrowserHostImpl::GetBrowserForView(child_id, route_id);
   if (browser.get())

@@ -408,16 +408,20 @@ class CefBrowserHostImpl : public CefBrowserHost,
   virtual void RenderViewReady() OVERRIDE;
   virtual void RenderProcessGone(base::TerminationStatus status) OVERRIDE;
   virtual void DidCommitProvisionalLoadForFrame(
-      content::RenderFrameHost* render_frame_host,
+      int64 frame_id,
+      const base::string16& frame_unique_name,
       bool is_main_frame,
       const GURL& url,
-      content::PageTransition transition_type) OVERRIDE;
+      content::PageTransition transition_type,
+      content::RenderViewHost* render_view_host) OVERRIDE;
   virtual void DidFailProvisionalLoad(
-      content::RenderFrameHost* render_frame_host,
+      int64 frame_id,
+      const base::string16& frame_unique_name,
       bool is_main_frame,
       const GURL& validated_url,
       int error_code,
-      const base::string16& error_description) OVERRIDE;
+      const base::string16& error_description,
+      content::RenderViewHost* render_view_host) OVERRIDE;
   virtual void DocumentAvailableInMainFrame() OVERRIDE;
   virtual void DidFailLoad(int64 frame_id,
                            const GURL& validated_url,

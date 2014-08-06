@@ -20,15 +20,14 @@ class CefResourceDispatcherHostDelegate
   virtual void RequestBeginning(
       net::URLRequest* request,
       content::ResourceContext* resource_context,
-      content::AppCacheService* appcache_service,
+      appcache::AppCacheService* appcache_service,
       ResourceType::Type resource_type,
       int child_id,
       int route_id,
       ScopedVector<content::ResourceThrottle>* throttles) OVERRIDE;
   virtual bool HandleExternalProtocol(const GURL& url,
                                       int child_id,
-                                      int route_id,
-                                      bool initiated_by_user_gesture) OVERRIDE;
+                                      int route_id) OVERRIDE;
   virtual void OnRequestRedirected(
       const GURL& redirect_url,
       net::URLRequest* request,

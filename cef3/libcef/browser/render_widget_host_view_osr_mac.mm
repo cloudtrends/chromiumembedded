@@ -10,7 +10,7 @@
 #include "libcef/browser/browser_host_impl.h"
 #include "libcef/browser/text_input_client_osr_mac.h"
 
-#include "content/browser/compositor/browser_compositor_view_private_mac.h"
+#include "content/browser/compositor/browser_compositor_view_mac.h"
 
 #if !defined(UNUSED)
 #define UNUSED(x)	((void)(x))	/* to avoid warnings */
@@ -260,8 +260,9 @@ void CefRenderWidgetHostViewOSR::PlatformCreateCompositorWidget() {
                                         styleMask:NSBorderlessWindowMask
                                           backing:NSBackingStoreBuffered
                                             defer:NO];
-  BrowserCompositorViewCocoa* view = [[BrowserCompositorViewCocoa alloc] init];
-  [window_ setContentView:view];
+  BrowserCompositorViewMac* view =
+      [[BrowserCompositorViewMac alloc]
+          initWithSuperview:[window_ contentView]];
   compositor_.reset([view compositor]);
   DCHECK(compositor_);
   compositor_widget_ = view;
@@ -270,7 +271,7 @@ void CefRenderWidgetHostViewOSR::PlatformCreateCompositorWidget() {
 void CefRenderWidgetHostViewOSR::PlatformDestroyCompositorWidget() {
   DCHECK(window_);
 
-  // Compositor is owned by and will be freed by BrowserCompositorViewCocoa.
+  // Compositor is owned by and will be freed by BrowserCompositorViewMac.
   ui::Compositor* compositor = compositor_.release();
   UNUSED(compositor);
 

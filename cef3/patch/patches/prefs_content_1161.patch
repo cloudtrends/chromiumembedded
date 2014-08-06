@@ -1,6 +1,6 @@
 Index: public/common/common_param_traits_macros.h
 ===================================================================
---- public/common/common_param_traits_macros.h	(revision 280796)
+--- public/common/common_param_traits_macros.h	(revision 286351)
 +++ public/common/common_param_traits_macros.h	(working copy)
 @@ -175,6 +175,7 @@
    IPC_STRUCT_TRAITS_MEMBER(initialize_at_minimum_page_scale)
@@ -12,7 +12,7 @@ Index: public/common/common_param_traits_macros.h
    IPC_STRUCT_TRAITS_MEMBER(spatial_navigation_enabled)
 Index: renderer/web_preferences.cc
 ===================================================================
---- renderer/web_preferences.cc	(revision 280796)
+--- renderer/web_preferences.cc	(revision 286351)
 +++ renderer/web_preferences.cc	(working copy)
 @@ -167,6 +167,8 @@
  

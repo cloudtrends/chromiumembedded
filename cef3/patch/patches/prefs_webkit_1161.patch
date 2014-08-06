@@ -1,6 +1,6 @@
 Index: common/webpreferences.cc
 ===================================================================
---- common/webpreferences.cc	(revision 280796)
+--- common/webpreferences.cc	(revision 286351)
 +++ common/webpreferences.cc	(working copy)
 @@ -112,6 +112,7 @@
        use_solid_color_scrollbars(false),
@@ -12,7 +12,7 @@ Index: common/webpreferences.cc
  #if defined(OS_ANDROID)
 Index: common/webpreferences.h
 ===================================================================
---- common/webpreferences.h	(revision 280796)
+--- common/webpreferences.h	(revision 286351)
 +++ common/webpreferences.h	(working copy)
 @@ -148,6 +148,7 @@
    bool use_solid_color_scrollbars;

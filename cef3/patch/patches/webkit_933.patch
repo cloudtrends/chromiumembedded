@@ -1,6 +1,6 @@
 Index: WebNode.cpp
 ===================================================================
---- WebNode.cpp	(revision 177271)
+--- WebNode.cpp	(revision 179174)
 +++ WebNode.cpp	(working copy)
 @@ -173,7 +173,7 @@
  void WebNode::addEventListener(const WebString& eventType, WebDOMEventListener* listener, bool useCapture)
