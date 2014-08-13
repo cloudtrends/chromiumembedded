@@ -6,7 +6,7 @@ This tutorial explains how to create a simple application using CEF3. It referen
 
 ==Getting Started==
 
-Begin by downloading a binary distribution for your platform from http://cefbuilds.com. For the purposes of this tutorial download from the dev channel (trunk). Currently supported platforms include Windows, Linux and Mac OS X. Each binary distribution contains all files necessary to build a particular version of CEF3 on a particular platform. See the included README.txt file or the [https://code.google.com/p/chromiumembedded/wiki/GeneralUsage#Getting_Started Getting Started] section of the GeneralUsage Wiki page for a detailed description of binary distribution contents.
+Begin by downloading a binary distribution for your platform from http://cefbuilds.com. For the purposes of this tutorial download the 1750 branch or newer. Currently supported platforms include Windows, Linux and Mac OS X. Each binary distribution contains all files necessary to build a particular version of CEF3 on a particular platform. See the included README.txt file or the [https://code.google.com/p/chromiumembedded/wiki/GeneralUsage#Getting_Started Getting Started] section of the GeneralUsage Wiki page for a detailed description of binary distribution contents.
 
 ===Building the Included Project===
 
@@ -40,6 +40,25 @@ Follow these steps to build the cefsimple application on OS X:
   # Build the “cefsimple” target.
   # If the build is successful an “xcodebuild/Debug” directory (or “Release” if you selected the release configuration) will be created.
   # Run “open out/Debug/cefsimple.app” to verify that it works.
+
+===Loading a Custom URL===
+
+The cefsimple application loads google.com by default but you can change it to load a custom URL instead. The easiest way to load a different URL is via the command-line.
+
+{{{
+# Load the local file “c:\example\example.html”
+cefsimple.exe --url=file://c:/example/example.html
+}}}
+
+You can also edit the source code in cefsimple/simple_app.cpp and recompile the application to load your custom URL by default.
+
+{{{
+# Load the local file “c:\example\example.html”
+…
+  if (url.empty())
+    url = "file://c:/example/example.html";
+…
+}}}
 
 ==Application Components==
 
