@@ -10,7 +10,7 @@ JS APIs that communicate between the browser and renderer processes should be de
 
 = ExecuteJavaScript =
 
-The simplest way to execute JS from a client application is using the CefFrame::ExecuteJavaScript() function. This function is available in both the browser process and the renderer process.
+The simplest way to execute JS from a client application is using the CefFrame::ExecuteJavaScript() function. This function is available in both the browser process and the renderer process and can safely be used from outside of a JS context.
 
 {{{
 CefRefPtr<CefBrowser> browser = ...;
