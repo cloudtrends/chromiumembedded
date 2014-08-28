@@ -6,10 +6,6 @@ The Chromium developers work very hard to introduce new features and capabilitie
 
 2. Create a diff of relevant directories between the last Chromium revision and new Chromium revision.
 
-{{{
-svn diff -r oldrev:newrev > diff_oldrev-newrev.txt
-}}}
-
 With CEF1 the following files should be evaluated for changes:
 
 {{{
@@ -28,19 +24,35 @@ content/content_shell.gypi
 chrome/browser/printing/*
 }}}
 
-On Windows you can create a batch script called "diff.bat" in the CEF directory:
+On Windows you can create a batch script called `diff.bat` in the directory that contains the `src` folder.
+
+When using a Chromium SVN checkout:
 
 {{{
 @echo off
-call svn diff ..\content\shell -r %1:%2 > diff_%1-%2.diff
-call svn diff ..\content\content_shell.gypi -r %1:%2 >> diff_%1-%2.diff
-call svn diff ..\chrome\browser\printing -r %1:%2 >> diff_%1-%2-2.diff
+cd src
+call svn diff content\shell -r %1:%2 > ..\diff_%1-%2.diff
+call svn diff content\content_shell.gypi -r %1:%2 >> ..\diff_%1-%2.diff
+call svn diff chrome\browser\printing -r %1:%2 >> ..\diff_%1-%2-2.diff
+cd ..
+}}}
+
+When using a Chromium Git checkout:
+
+{{{
+@echo off
+cd src
+call git diff --relative --no-prefix %1..%2 -- content/shell content/content_shell.gypi chrome/browser/printing > ../diff_%1-%2.diff
+cd ..
 }}}
 
 And run it as follows:
-
 {{{
+# SVN checkout
 diff.bat OLDREV NEWREV
+
+# Git checkout
+diff.bat OLDHASH NEWHASH
 }}}
 
 This will be your guide to identifying what has changed. CEF began life as a customized version of test_shell (CEF1) or content_shell (CEF3) and there's still a one-to-one relationship between many of the files.
