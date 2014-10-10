@@ -41,6 +41,7 @@ Current CEF release branches and associated platform build requirements are as f
 || Jan 2014 || [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Fbranches%2F1750 1750] || 33 || No  || Yes || WinXP+, VS2010-2013, Win8 SDK, Ninja || OS X 10.6-10.9, 10.6+ SDK, Xcode 3.2.6-5.x, Ninja || Ubuntu 12.04+, Debian Wheezy+, Ninja ||
 || Apr 2014 || [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Fbranches%2F1916 1916] || 35 || No  || Yes || WinXP+, VS2013, Win8 SDK, Ninja || OS X 10.6-10.9, 10.6+ SDK, Xcode 3.2.6-5.x, Ninja || Ubuntu 12.04+, Debian Wheezy+, Ninja ||
 || Aug 2014 || [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Fbranches%2F2062 2062] || 37 || No  || Yes || WinXP+, VS2013, Win8 SDK, Ninja || OS X 10.6-10.9, 10.6+ SDK, Xcode 3.2.6-5.x, Ninja || Ubuntu 12.04+, Debian Wheezy+, Ninja ||
+|| Oct 2014 || [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Fbranches%2F2171 2171] || 39 || No  || Yes || WinXP+, VS2013, Win8 SDK, Ninja || OS X 10.6-10.9, 10.6+ SDK, Xcode 3.2.6-5.x, Ninja || Ubuntu 12.04+, Debian Wheezy+, Ninja ||
 
 The following URLs should be used for downloading release verisons of CEF where YYYY is the release branch number.
 
