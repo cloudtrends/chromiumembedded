@@ -25,10 +25,10 @@ index ba67fc9..2c6a410 100644
    }
  
 diff --git renderer_host/render_widget_host_view_aura.cc renderer_host/render_widget_host_view_aura.cc
-index 6ad6e41..9f33679 100644
+index a1b5000..1e4fe4a 100644
 --- renderer_host/render_widget_host_view_aura.cc
 +++ renderer_host/render_widget_host_view_aura.cc
-@@ -1706,8 +1706,14 @@ void RenderWidgetHostViewAura::OnPaint(gfx::Canvas* canvas) {
+@@ -1708,8 +1708,14 @@ void RenderWidgetHostViewAura::OnPaint(gfx::Canvas* canvas) {
    // For non-opaque windows, we don't draw anything, since we depend on the
    // canvas coming from the compositor to already be initialized as
    // transparent.
