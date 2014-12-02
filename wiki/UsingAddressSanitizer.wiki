@@ -4,37 +4,66 @@
 
 [https://code.google.com/p/address-sanitizer/ AddressSanitizer] (ASan) is a fast memory error detector based on compiler instrumentation (LLVM). The below instructions relate to using ASan with CEF-based applications on Linux. ASan is also supported on OS X and Windows (experimental) but usage with CEF has not been tested on those platforms. For examples of ASan output see [https://code.google.com/p/chromiumembedded/issues/detail?id=1457 this bug], [https://code.google.com/p/chromiumembedded/issues/detail?id=1458 this bug] and [https://code.google.com/p/javachromiumembedded/issues/detail?id=137#c5 this bug].
 
-== Building CEF with ASan ==
+== System Setup ==
 
-To build Chromium/CEF with ASan enabled follow these steps:
+The below instructions are based on the CEF 2171 branch built on an Ubuntu 14 LTS 64-bit Linux system. To set up this system:
 
-1. Download Chromium and CEF source code without building (see [https://code.google.com/p/chromiumembedded/wiki/BranchesAndBuilding BranchesAndBuilding] for complete CEF build instructions).
+1. Install [http://www.ubuntu.com/download/desktop Ubuntu 14 LTS 64-bit]. This can be done using dedicated hardware or a [http://www.vmware.com/products/player VMware], [http://www.parallels.com/eu/products/desktop/download/ Parallels] or [https://www.virtualbox.org/wiki/Downloads VirtualBox] virtual machine. At least 6GB of RAM and 30GB of disk space are required to successfully build Chromium/CEF.
+
+2. Install the required build dependencies (full instructions are [https://code.google.com/p/chromium/wiki/LinuxBuildInstructionsPrerequisites here]).
+
+{{{
+# Download the install-build-deps.sh script at the correct revision (initially base64 encoded).
+wget -O install-build-deps.txt https://chromium.googlesource.com/chromium/src/+/fedbbb0aa762826ba2fc85a2b934dc9660639aa7/build/install-build-deps.sh?format=TEXT
+# Decode the script.
+python -m base64 -d install-build-deps.txt > install-build-deps.sh
+# Mark the script as executable.
+chmod 755 install-build-deps.sh
+
+# Run the script excluding unnecessary components.
+sudo ./install-build-deps.sh --no-lib32 --no-arm --no-chromeos-fonts --no-nacl
+
+# Install additional packages required by cefclient.
+sudo apt-get install libgtkglext1-dev
+}}}
+
+3. Download Chromium and CEF source code at the correct branch and without building (see [https://code.google.com/p/chromiumembedded/wiki/BranchesAndBuilding BranchesAndBuilding] for complete CEF build instructions).
 
 {{{
 python automate-git.py --download-dir=/path/to/chromium_git --depot-tools-dir=/path/to/depot_tools --no-distrib --no-build --force-clean --branch=2171
 }}}
 
-2. Configure Chromium to build using ASan (see [http://www.chromium.org/developers/testing/addresssanitizer Testing/AddressSanitizer] for complete Chromium-related ASan instructions).
+4. Add depot_tools to the PATH.
+
+{{{
+export PATH=/path/to/depot_tools:$PATH
+}}}
+
+== Building CEF with ASan ==
+
+To build Chromium/CEF with ASan enabled follow these steps:
+
+1. Configure Chromium to build using ASan (see [http://www.chromium.org/developers/testing/addresssanitizer Testing/AddressSanitizer] for complete Chromium-related ASan instructions).
 
 {{{
 export GYP_DEFINES='asan=1'
 }}}
 
-3. Generate CEF project files.
+2. Generate CEF project files.
 
 {{{
 cd /path/to/chromium_git/chromium/src/cef
 ./cef_create_projects.sh
 }}}
 
-4. Create a Release build of CEF. ASan must always be used with Release builds.
+3. Create a Release build of CEF. ASan must always be used with Release builds.
 
 {{{
 cd /path/to/chromium_git/chromium/src
-ninja -C out/Release cefclient cefsimple cef_unittests chrome_sandbox.
+ninja -C out/Release cefclient cefsimple cef_unittests chrome_sandbox
 }}}
 
-5. Run the resulting executable and pipe output to the ASan post-processing script so that stack traces will be symbolized.
+4. Run the resulting executable and pipe output to the ASan post-processing script so that stack traces will be symbolized.
 
 {{{
 cd /path/to/chromium_git/chromium/src
@@ -43,7 +72,7 @@ cd /path/to/chromium_git/chromium/src
 
 == Using CEF and ASan with third-party executables ==
 
-ASan on Linux is built as a static library by default. This works fine with applications like cefclient and cef_unittests that are built at the same time as libcef and specify the “-fsanitize=address” flag. However, in order to use libcef and ASan with pre-built third-party executables (e.g. Java and [https://code.google.com/p/javachromiumembedded/ JCEF]) it’s necessary to build ASan as a shared library (see [https://code.google.com/p/address-sanitizer/issues/detail?id=271 here] for more information). This works as follows (see step #8 below for an example):
+ASan on Linux is built as a static library by default. This works fine with applications like cefclient and cef_unittests that are built at the same time as libcef and consequently specify the “-fsanitize=address” flag. However, in order to use libcef and ASan with pre-built third-party executables (e.g. Java and [https://code.google.com/p/javachromiumembedded/ JCEF]) it’s necessary to build ASan as a shared library (see [https://code.google.com/p/address-sanitizer/issues/detail?id=271 here] for more information). This works as follows (see step #8 below for an example):
 
 A. The ASan library (“libclang_rt.asan-x86_64.so” on 64-bit Linux) is specified via LD_PRELOAD so that it will be loaded into the main executable at runtime.
 
@@ -51,15 +80,9 @@ B. The main executable delay loads “libcef.so” which depends on “libc++.so
 
 C. Output is piped to the ASan post-processing script in order to symbolize stack traces.
 
-To build ASan as a shared library the following changes are required to Chromium’s default Clang build and GYP configuration (the below patch files are based on the CEF 2171 branch and may not apply cleanly to other branches):
+To build ASan as a shared library the following changes are required to Chromium’s default Clang build and GYP configuration:
 
-1. Download Chromium and CEF source code without building (see [https://code.google.com/p/chromiumembedded/wiki/BranchesAndBuilding BranchesAndBuilding] for complete CEF build instructions).
-
-{{{
-python automate-git.py --download-dir=/path/to/chromium_git --depot-tools-dir=/path/to/depot_tools --no-distrib --no-build --force-clean --branch=2171
-}}}
-
-2. Create a custom build of Clang with ASan configured as a shared library.
+1. Create a custom build of Clang with ASan configured as a shared library.
 
 A. Edit the “tools/clang/scripts/update.sh” script and add "-DCOMPILER_RT_BUILD_SHARED_ASAN=ON" to all CMake command-lines (see [https://code.google.com/p/address-sanitizer/wiki/AsanAsDso AsanAsDso] and [https://code.google.com/p/address-sanitizer/wiki/HowToBuild HowToBuild] for more information).
 
@@ -119,9 +142,9 @@ cd /path/to/chromium_git/chromium/src
 
 This will create “libclang_rt.asan-x86_64.so” (assuming 64-bit Linux) in the “third_party/llvm-build/Release+Asserts/lib/clang/3.6.0/lib/linux” directory.
 
-3. Copy “libclang_rt.asan-x86_64.so” to the “out/Release/lib” directory so that binaries built as part of the Chromium build can find it.
+2. Copy “libclang_rt.asan-x86_64.so” to the “out/Release/lib” directory so that binaries built as part of the Chromium build can find it.
 
-4. Add '-shared-libasan' or modify related exclusions everywhere that ‘-fsanitize=address’ is mentioned for Linux in “build/common.gypi”, “build/sanitizers/sanitizers.gyp”, “sandbox/linux/sandbox_linux.gypi” and “third_party/libvpx/libvpx.gyp” (see [https://code.google.com/p/address-sanitizer/wiki/AsanAsDso AsanAsDso] for details). Also, specify '-mllvm -asan-globals=0' in “base/common.gypi” (see [https://code.google.com/p/address-sanitizer/issues/detail?id=82#c18 here] for details).
+3. Add '-shared-libasan' or modify related exclusions everywhere that ‘-fsanitize=address’ is mentioned for Linux in “build/common.gypi”, “build/sanitizers/sanitizers.gyp”, “sandbox/linux/sandbox_linux.gypi” and “third_party/libvpx/libvpx.gyp” (see [https://code.google.com/p/address-sanitizer/wiki/AsanAsDso AsanAsDso] for details). Also, specify '-mllvm -asan-globals=0' in “base/common.gypi” (see [https://code.google.com/p/address-sanitizer/issues/detail?id=82#c18 here] for details).
 
 {{{
 diff --git build/common.gypi build/common.gypi
@@ -204,10 +227,17 @@ index 4f8cb2b..19a179c 100644
            'msvs_settings': {
 }}}
 
-5. Configure Chromium to build using ASan (see [http://www.chromium.org/developers/testing/addresssanitizer Testing/AddressSanitizer] for complete Chromium-related ASan instructions).
+4. Configure Chromium to build using ASan (see [http://www.chromium.org/developers/testing/addresssanitizer Testing/AddressSanitizer] for complete Chromium-related ASan instructions).
 
 {{{
 export GYP_DEFINES='asan=1'
+}}}
+
+5. Generate CEF project files.
+
+{{{
+cd /path/to/chromium_git/chromium/src/cef
+./cef_create_projects.sh
 }}}
 
 6. Create a Release build of CEF. ASan must always be used with Release builds.
