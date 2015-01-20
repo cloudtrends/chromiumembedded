@@ -219,7 +219,13 @@ cef_string_from_ascii(path, strlen(path), &settings.log_file);
 
 ===Command Line Arguments===
 
-Many features in CEF3 and Chromium can be configured using command line arguments. These arguments take the form "--some-argument[=optional-param]" and are passed into CEF via CefExecuteProcess() and the CefMainArgs structure (see the “Application Structure” section below). To disable processing of arguments from the command line set CefSettings.command_line_args_disabled to true before passing the CefSettings structure into CefInitialize(). To specify command line arguments inside the host application implement the CefApp::OnBeforeCommandLineProcessing() method. See comments in [https://code.google.com/p/chromiumembedded/source/browse/trunk/cef3/tests/cefclient/client_switches.cpp client_switches.cpp] for more information on how to discover supported command line switches.
+Many features in CEF3 and Chromium can be configured using command line arguments. These arguments take the form "--some-argument[=optional-param]" and are passed into CEF via CefExecuteProcess() and the CefMainArgs structure (see the “Application Structure” section below).
+
+  * To disable processing of arguments from the command line set CefSettings.command_line_args_disabled to true before passing the CefSettings structure into CefInitialize().
+  * To specify CEF/Chromium command line arguments inside the host application implement the CefApp::OnBeforeCommandLineProcessing() method.
+  * To pass application-specific (non-CEF/Chromium) command line arguments to sub-processes implement the CefBrowserProcessHandler::OnBeforeChildProcessLaunch() method.
+
+See comments in [https://code.google.com/p/chromiumembedded/source/browse/trunk/cef3/tests/cefclient/client_switches.cpp client_switches.cpp] for more information on how to discover supported CEF/Chromium command line switches.
 
 ==Application Layout==
 
