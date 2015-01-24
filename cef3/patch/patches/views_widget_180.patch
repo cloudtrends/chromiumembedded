@@ -12,7 +12,7 @@ index a8e088c..838b6a0 100644
    return host ? host->GetAcceleratedWidget() : NULL;
  }
 diff --git desktop_aura/desktop_window_tree_host_win.cc desktop_aura/desktop_window_tree_host_win.cc
-index 1e8d67d..34b535a 100644
+index b54a643..5a589e5 100644
 --- desktop_aura/desktop_window_tree_host_win.cc
 +++ desktop_aura/desktop_window_tree_host_win.cc
 @@ -133,7 +133,9 @@ void DesktopWindowTreeHostWin::Init(aura::Window* content_window,
@@ -43,7 +43,7 @@ index 1e8d67d..34b535a 100644
    if (input_method)
      input_method->OnBlur();
 diff --git desktop_aura/desktop_window_tree_host_x11.cc desktop_aura/desktop_window_tree_host_x11.cc
-index 54d67ad..13e5163 100644
+index 2809f02..9a79223 100644
 --- desktop_aura/desktop_window_tree_host_x11.cc
 +++ desktop_aura/desktop_window_tree_host_x11.cc
 @@ -152,7 +152,8 @@ DesktopWindowTreeHostX11::DesktopWindowTreeHostX11(
@@ -56,7 +56,7 @@ index 54d67ad..13e5163 100644
  }
  
  DesktopWindowTreeHostX11::~DesktopWindowTreeHostX11() {
-@@ -355,7 +356,8 @@ void DesktopWindowTreeHostX11::CloseNow() {
+@@ -354,7 +355,8 @@ void DesktopWindowTreeHostX11::CloseNow() {
    // Actually free our native resources.
    if (ui::PlatformEventSource::GetInstance())
      ui::PlatformEventSource::GetInstance()->RemovePlatformEventDispatcher(this);
@@ -66,7 +66,7 @@ index 54d67ad..13e5163 100644
    xwindow_ = None;
  
    desktop_native_widget_aura_->OnHostClosed();
-@@ -449,6 +451,8 @@ void DesktopWindowTreeHostX11::GetWindowPlacement(
+@@ -448,6 +450,8 @@ void DesktopWindowTreeHostX11::GetWindowPlacement(
  }
  
  gfx::Rect DesktopWindowTreeHostX11::GetWindowBoundsInScreen() const {
@@ -75,7 +75,7 @@ index 54d67ad..13e5163 100644
    return bounds_;
  }
  
-@@ -461,6 +465,8 @@ gfx::Rect DesktopWindowTreeHostX11::GetClientAreaBoundsInScreen() const {
+@@ -460,6 +464,8 @@ gfx::Rect DesktopWindowTreeHostX11::GetClientAreaBoundsInScreen() const {
    // Attempts to calculate the rect by asking the NonClientFrameView what it
    // thought its GetBoundsForClientView() were broke combobox drop down
    // placement.
@@ -84,7 +84,7 @@ index 54d67ad..13e5163 100644
    return bounds_;
  }
  
-@@ -884,6 +890,8 @@ void DesktopWindowTreeHostX11::Hide() {
+@@ -883,6 +889,8 @@ void DesktopWindowTreeHostX11::Hide() {
  }
  
  gfx::Rect DesktopWindowTreeHostX11::GetBounds() const {
@@ -93,7 +93,7 @@ index 54d67ad..13e5163 100644
    return bounds_;
  }
  
-@@ -939,6 +947,8 @@ void DesktopWindowTreeHostX11::SetBounds(const gfx::Rect& requested_bounds) {
+@@ -938,6 +946,8 @@ void DesktopWindowTreeHostX11::SetBounds(const gfx::Rect& requested_bounds) {
  }
  
  gfx::Point DesktopWindowTreeHostX11::GetLocationOnNativeScreen() const {
@@ -102,7 +102,7 @@ index 54d67ad..13e5163 100644
    return bounds_.origin();
  }
  
-@@ -1058,10 +1068,14 @@ void DesktopWindowTreeHostX11::InitX11Window(
+@@ -1057,10 +1067,14 @@ void DesktopWindowTreeHostX11::InitX11Window(
      }
    }
  
@@ -118,7 +118,7 @@ index 54d67ad..13e5163 100644
        bounds_.x(), bounds_.y(),
        bounds_.width(), bounds_.height(),
        0,               // border width
-@@ -1698,6 +1712,10 @@ uint32_t DesktopWindowTreeHostX11::DispatchEvent(
+@@ -1697,6 +1711,10 @@ uint32_t DesktopWindowTreeHostX11::DispatchEvent(
        }
        break;
      }

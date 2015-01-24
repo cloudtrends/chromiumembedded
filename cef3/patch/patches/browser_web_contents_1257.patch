@@ -1,5 +1,5 @@
 diff --git web_contents_impl.cc web_contents_impl.cc
-index 0326fe5..5daf313 100644
+index f9ba939..5555235 100644
 --- web_contents_impl.cc
 +++ web_contents_impl.cc
 @@ -1164,22 +1164,29 @@ void WebContentsImpl::Init(const WebContents::CreateParams& params) {
