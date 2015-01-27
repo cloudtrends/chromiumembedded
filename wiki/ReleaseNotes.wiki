@@ -1,6 +1,37 @@
 #summary Notes for CEF releases
 
+*For more frequent updates download nightly builds from http://cefbuilds.com
+
 Not all revisions are listed here. View the [http://code.google.com/p/chromiumembedded/source/list Changes list] to see the complete list of revisions.
+
+*January 27, 2015:* Version 3.2171.1979 for Windows, Mac OS X and Linux includes the following enhancements and bug fixes.
+
+  * Update to Chromium version 39.0.2171.95
+  * Add spell checking support (issue #137).
+  * Remove the CefBrowserHost::ParentWindowWillClose method that was added for modal dialog support but never implemented (issue #519).
+  * Add support for DevTools inspect element via a new |inspect_element_at| parameter added to CefBrowserHost::ShowDevTools (issue #586).
+  * Linux: Fix crash due to Chromium modifying the |argv| passed to main() (issue #620).
+  * Windows: Fix assertion on shutdown when using multi-threaded-message-loop mode (issue #755).
+  * Remove CefDOMEvent and CefDOMEventListener which are no longer supported by Chromium (issue #933).
+  * Windows/Linux: Fix positioning of select popups and dismissal on window move/resize by calling new CefBrowserHost::NotifyMoveOrResizeStarted() method from client applications (issue #1208).
+  * Fix CefBrowser::GetFrameIdentifiers and GetFrameNames to return correct values in the renderer process (issue #1236).
+  * Re-implement off-screen rendering using the new delegated rendering approach (issue #1257). This implementation supports both GPU compositing and software compositing (used when GPU is not supported or when passing `--disable-gpu --disable-gpu-compositing` command-line flags). GPU-accelerated features (WebGL and 3D CSS) that did not work with the previous off-screen rendering implementation do work with this implementation when GPU support is available.
+  * Linux: Remove GTK+ dependency from libcef and switch to Aura/X11 implementation (issue #1258).
+  * Fix configuration of the User-Agent string during startup (issue #1275).
+  * Fix execution of OnBeforePluginLoad (issue #1284).
+  * Fix delivery of focus/blur events (issue #1301).
+  * Mac: Fix flash on resize (issue #1307).
+  * Bundle pepper PDF plugin on all platforms (issue #1331). The new pdf.dll is also required on Windows for printing.
+  * Move scaled resources from cef.pak into separate cef_100_percent.pak and cef_200_percent.pak files (issue #1331).
+  * Introduce the use of Chromium types in a new include/base folder (issue #1336). See associated changes in cefclient/cefsimple.
+  * Windows: Add wow_helper.exe to the 32-bit binary distribution for Vista 64-bit sandbox support (issue #1366).
+  * Reduce resource usage when the window is minimized (issue #1369). See associated changes in cefclient/cefsimple.
+  * Fix identification of the focused frame (issue #1381).
+  * Mac: Add NSSupportsAutomaticGraphicsSwitching to Info.plist so that the GPU is only triggered when needed (issue #1396).
+  * Call OnTitleChange after navigation/reload even if the title has not changed (issue #1441).
+  * Add CefBrowserHost::GetNavigationEntries for retrieving a snapshot of navigation history (issue #1442).
+  * Pass cursor type and custom cursor information to CefRenderHandler::OnCursorChange (issue #1443).
+  * Linux: Fix "No URLRequestContext for NSS HTTP handler" error (issue #1490).
 
 *June 12, 2014:* Version 3.1750.1738 for Windows, Mac OS X and Linux includes the following enhancements and bug fixes.
 
