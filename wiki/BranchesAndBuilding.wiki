@@ -42,7 +42,8 @@ Current CEF release branches and associated platform build requirements are as f
 || Apr 2014 || [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Fbranches%2F1916 1916] || 35 || No  || Yes || WinXP+, VS2013, Win8 SDK, Ninja || OS X 10.6-10.9, 10.6+ SDK, Xcode 3.2.6-5.x, Ninja || Ubuntu 12.04+, Debian Wheezy+, Ninja ||
 || Aug 2014 || [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Fbranches%2F2062 2062] || 37 || No  || Yes || WinXP+, VS2013, Win8 SDK, Ninja || OS X 10.6-10.9, 10.6+ SDK, Xcode 3.2.6-5.x, Ninja || Ubuntu 12.04+, Debian Wheezy+, Ninja ||
 || Oct 2014 || [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Fbranches%2F2171 2171] || 39 || No  || Yes || WinXP+, VS2013u4, Win8.1 SDK, Ninja || OS X 10.6-10.9, 10.6+ SDK, Xcode 3.2.6-5.x, Ninja || Ubuntu 12.04+, Debian Wheezy+, Ninja ||
-|| Jan 2015 || [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Fbranches%2F2272 2272] || 41 || No  || Yes || WinXP+, VS2013u4, Win8.1 SDK, Ninja || OS X 10.6-10.10, 10.6+ SDK, Xcode 3.2.6-5.x, Ninja || Ubuntu 12.04+, Debian Wheezy+, Ninja ||
+|| Jan 2015 || [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Fbranches%2F2272 2272] || 41 || No  || Yes || WinXP+, VS2013u4, Win8.1 SDK, Ninja || OS X 10.6-10.10, 10.6+ SDK, Xcode 3.2.6-5.x, Ninja, 64-bit only || Ubuntu 12.04+, Debian Wheezy+, Ninja ||
+
 
 The following URLs should be used for downloading release verisons of CEF where YYYY is the release branch number.
 
@@ -85,18 +86,22 @@ export GYP_GENERATORS=ninja
 
 # On OS X building a 64-bit build with Ninja and debugging using the console.
 export GYP_GENERATORS=ninja
+# Set target_arch with branch 2171 or older. OS X will generate 64-bit builds by default
+# starting with branch 2272.
 export GYP_DEFINES=target_arch=x64
 }}}
 
   * CEF does not currently support component builds.
   * All newer branches (>=1364) and platforms support building with [https://code.google.com/p/chromium/wiki/NinjaBuild Ninja]. It is recommended to use Ninja when building CEF/Chromium instead of platform build tools like Visual Studio, Xcode or make. Set `GYP_GENERATORS=ninja` to manually create a Ninja build or pass the “--ninja-build” command-line flag to automate.py (see below).
-  * When performing a 64-bit build on Windows or OS X set `GYP_DEFINES=target_arch=x64`. Linux by default will perform a built appropriate to the system (32-bit build on 32-bit system and 64-bit build on 64-bit system). To perform a 32-bit Linux build on a 64-bit Linux system see [https://code.google.com/p/chromium/wiki/LinuxBuild32On64 here].
+  * When performing a 64-bit build on Windows (any branch) or OS X (branch 2171 or older) set `GYP_DEFINES=target_arch=x64`. Linux by default will perform a built appropriate to the system (32-bit build on 32-bit system and 64-bit build on 64-bit system). To perform a 32-bit Linux build on a 64-bit Linux system see [https://code.google.com/p/chromium/wiki/LinuxBuild32On64 here].
   * Windows -
     * If multiple versions of Visual Studio are installed on your system you can set the GYP_MSVS_VERSION environment variable to create project files for that version. For example, set the value to "2010" for VS2010 or "2010e" for VS2010 Express. Check the Chromium documentation for the correct value when using other Visual Studio versions.
     * Beginning in July 2012 most Chromium developers and testing infrastructure is using Visual Studio 2010. For this reason building Chromium with other compiler versions may result in compile or runtime errors. 
     * Beginning with trunk revision 1571 and the 1750 branch (January 2014) Visual Studio 2013 Professional can be used to build CEF/Chromium. You must use Ninja when building with VS2013 (set `GYP_GENERATORS=ninja` and `GYP_MSVS_VERSION=2013`).
     * If you wish to use Visual Studio for debugging and compiling in combination with a Ninja build you can set `GYP_GENERATORS=ninja,msvs-ninja` to generate both Ninja files and VS project files that will compile using Ninja.
-  * Mac OS X - When building on OS X 10.6+ the 10.5 SDK is no longer available. Older branches (<=1180) require that you set `GYP_DEFINES=mac_sdk=10.6` to use the 10.6 SDK. See [http://code.google.com/p/chromium/wiki/Xcode4Tips here] for more information.
+  * Mac OS X -
+    * When building on OS X 10.6+ the 10.5 SDK is no longer available. Older branches (<=1180) require that you set `GYP_DEFINES=mac_sdk=10.6` to use the 10.6 SDK. See [http://code.google.com/p/chromium/wiki/Xcode4Tips here] for more information.
+    * 32-bit builds are no longer supported with 2272 branch and newer. See [https://groups.google.com/a/chromium.org/d/msg/chromium-dev/sdsDCkq_zwo/yep65H8Eg3sJ here] for the Chromium announcement.
 
 === Automated Method ===
 
