@@ -2,11 +2,11 @@
 
 <wiki:toc />
 
-== Background ==
+= Background =
 
 The CEF project is an extension of the Chromium project hosted at http://www.chromium.org. CEF maintains development and release branches that track Chromium branches. CEF source code can be built manually or with automated tools.
 
-== Development ==
+= Development =
 
 Ongoing development of CEF occurs in [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Ftrunk trunk]. This location tracks the current [http://src.chromium.org/viewvc/chrome/trunk/ Chromium trunk] and is not recommended for production use.
 
@@ -16,7 +16,7 @@ The following URLs should be used for downloading development versions of CEF.
 
 CEF1 is no longer actively developed or supported. See the [http://magpcss.org/ceforum/viewtopic.php?f=10&t=10647 CEF1 Retirement Plan] for details.
 
-== Release Branches ==
+= Release Branches =
 
 CEF provides release branches that track specific Chromium releases. Users developing applications for production environments are encouraged to use release branches for the following reasons:
 
@@ -56,7 +56,7 @@ Note that the 963 and 1025 branches contain only CEF1 source code (no "cef1" sub
 
 Information about how CEF release branches are created is available [http://code.google.com/p/chromiumembedded/issues/detail?id=325 here].
 
-== Building from Source ==
+= Building from Source =
 
 Building from source code is currently supported on Windows, Mac OS X and Linux environments.
 
@@ -105,11 +105,11 @@ export GYP_DEFINES=target_arch=x64
     * When building on OS X 10.6+ the 10.5 SDK is no longer available. Older branches (<=1180) require that you set `GYP_DEFINES=mac_sdk=10.6` to use the 10.6 SDK. See [http://code.google.com/p/chromium/wiki/Xcode4Tips here] for more information.
     * 32-bit builds are no longer supported with 2272 branch and newer. See [https://groups.google.com/a/chromium.org/d/msg/chromium-dev/sdsDCkq_zwo/yep65H8Eg3sJ here] for the Chromium announcement.
 
-=== Automated Method ===
+== Automated Method ==
 
 CEF provides tools for automatically downloading, building and packaging Chromium and CEF source code. These tools are the recommended way of building CEF locally and can also be integrated with automated build systems like [http://www.jetbrains.com/teamcity/ TeamCity] or [http://jenkins-ci.org/ Jenkins].
 
-===== Git workflow =====
+==== Automated Git workflow ====
 
 These steps apply to the Git workflow only. The Git workflow is recommended for all users and supports CEF3 trunk and newer CEF3 release branches (1750+).
 
@@ -141,7 +141,7 @@ If you receive Git errors when moving an existing checkout from one branch to an
 
 Add the “--help” command-line switch to output a complete list of supported command-line options.
 
-===== DEPRECATED SVN workflow (CEF1 and older CEF3 branches only) =====
+==== DEPRECATED Automated SVN workflow (CEF1 and older CEF3 branches only) ====
 
 These steps apply to the SVN workflow only. This workflow can be used for builds of CEF1 and older CEF3 release branches (<= 1650). Chromium development now uses Git instead of SVN so this workflow is no longer actively supported or tested and may break at any time.
 
@@ -163,11 +163,11 @@ If the process succeeds a binary distribution package will be created in the /pa
 
 Add the “--help” command-line switch to output a complete list of supported command-line options.
 
-=== Manual Downloading  ===
+== Manual Downloading  ==
 
 Chromium and CEF can be downloaded and built as a manual process. This is more complicated and is not recommended for all users.
 
-==== Development ====
+=== Development ===
 
 These instructions apply only to the development (trunk) version of CEF1 and CEF3.
 
@@ -177,7 +177,7 @@ These instructions apply only to the development (trunk) version of CEF1 and CEF
 
 3. View the CHROMIUM_BUILD_COMPATIBILITY.txt file in the CEF top-level directory to identify what Chromium revision you need. This will change over time as CEF is updated to work with newer Chromium revisions.
 
-===== Git workflow =====
+==== Development Git workflow ====
 
 This version of steps 4-7 applies to the Git workflow only. The Git workflow is recommended for all users and supports CEF3 trunk and newer CEF3 release branches (1750+). Complete instructions for using the Git workflow in Chromium are available [https://sites.google.com/a/chromium.org/dev/developers/how-tos/get-the-code here].
 
@@ -213,7 +213,7 @@ git clone https://chromiumembedded@bitbucket.org/chromiumembedded/trunk-cef3.git
 
 The CEF Git repository is a read-only mirror of the SVN repository and pull requests will not be accepted. To submit changes please attach patch files generated with 'git diff --no-prefix' to issues in the CEF issue tracker.
 
-===== DEPRECATED SVN workflow (CEF1 and older CEF3 branches only) =====
+==== DEPRECATED Development SVN workflow (CEF1 and older CEF3 branches only) ====
 
 This version of steps 4-6 applies to the SVN workflow only. This workflow can be used for builds of CEF1 and older CEF3 release branches (<= 1650). Chromium development now uses Git instead of SVN so this workflow is no longer actively supported or tested and may break at any time.
 
@@ -238,7 +238,7 @@ cd /path/to/chromium/src
 svn co http://chromiumembedded.googlecode.com/svn/branches/1650/cef3 cef
 }}}
 
-==== Release Branch ====
+=== Release Branch ===
 
 These instructions apply only to release branches of CEF1 and CEF3.
 
@@ -248,7 +248,7 @@ These instructions apply only to release branches of CEF1 and CEF3.
 
 3. View the CHROMIUM_BUILD_COMPATIBILITY.txt file in the CEF top-level directory to identify what Chromium release branch you need. This will change over time as CEF is updated to work with newer Chromium release branches.
 
-===== Git workflow =====
+==== Release Git workflow ====
 
 This version of steps 4-7 applies to the Git workflow only. The Git workflow supports CEF3 trunk and newer CEF3 release branches (1750+). Complete instructions for using the Git workflow in Chromium are available [https://sites.google.com/a/chromium.org/dev/developers/how-tos/get-the-code here].
 
@@ -290,7 +290,7 @@ git clone https://chromiumembedded@bitbucket.org/chromiumembedded/branches-1916-
 
 The CEF Git repository is a read-only mirror of the SVN repository and pull requests will not be accepted. To submit changes please attach patch files generated with 'git diff --no-prefix' to issues in the CEF issue tracker.
 
-===== DEPRECATED SVN workflow (CEF1 and older CEF3 branches only) =====
+==== DEPRECATED Release SVN workflow (CEF1 and older CEF3 branches only) ====
 
 This version of steps 4-6 applies to the SVN workflow only. This workflow can be used for builds of CEF1 and older CEF3 release branches (<= 1650). Chromium development now uses Git instead of SVN so this workflow is no longer actively supported or tested and may break at any time.
 
@@ -315,7 +315,7 @@ cd /path/to/chromium/src
 svn co http://chromiumembedded.googlecode.com/svn/branches/1650/cef3 cef
 }}}
 
-=== Manual Building ===
+== Manual Building ==
 
 1. Run the cef_create_projects script (.bat on Windows, .sh on OS X and Linux) to generate the build files based on the [http://code.google.com/p/gyp/ GYP] configuration.
 
@@ -351,7 +351,7 @@ cd /path/to/chromium/src/cef/tools
 ./build_projects.sh Debug
 }}}
 
-=== Manual Packaging ===
+== Manual Packaging ==
 
 After building both Debug and Release configurations you can use the make_distrib tool (.bat on Windows, .sh on OS X and Linux) to create a binary distribution.
 
