@@ -109,7 +109,7 @@ export GYP_DEFINES=target_arch=x64
 
 CEF provides tools for automatically downloading, building and packaging Chromium and CEF source code. These tools are the recommended way of building CEF locally and can also be integrated with automated build systems like [http://www.jetbrains.com/teamcity/ TeamCity] or [http://jenkins-ci.org/ Jenkins].
 
-==== Automated Git workflow ====
+=== Automated Git workflow ===
 
 These steps apply to the Git workflow only. The Git workflow is recommended for all users and supports CEF3 trunk and newer CEF3 release branches (1750+).
 
@@ -141,7 +141,7 @@ If you receive Git errors when moving an existing checkout from one branch to an
 
 Add the “--help” command-line switch to output a complete list of supported command-line options.
 
-==== DEPRECATED Automated SVN workflow (CEF1 and older CEF3 branches only) ====
+=== DEPRECATED Automated SVN workflow (CEF1 and older CEF3 branches only) ===
 
 These steps apply to the SVN workflow only. This workflow can be used for builds of CEF1 and older CEF3 release branches (<= 1650). Chromium development now uses Git instead of SVN so this workflow is no longer actively supported or tested and may break at any time.
 
