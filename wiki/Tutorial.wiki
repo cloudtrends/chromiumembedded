@@ -1,5 +1,7 @@
 #summary Tutorial explaining how to create a simple application using CEF3.
 
+<wiki:toc />
+
 ==Introduction==
 
 This tutorial explains how to create a simple application using CEF3. It references the [https://code.google.com/p/chromiumembedded/source/browse/#svn%2Ftrunk%2Fcef3%2Ftests%2Fcefsimple cefsimple example project] which is included with trunk revision 1535 and newer. For complete CEF3 usage information visit the [GeneralUsage GeneralUsage] Wiki page.
@@ -102,7 +104,7 @@ Your binary distribution may include newer versions of the below files. However,
 
 Execution begins in the browser process entry point function. This function is responsible for initializing CEF and any OS-related objects. For example, it initializes GTK on Linux and allocates the necessary Cocoa objects on OS X. OS X has a separate entry point function for helper processes (see the OS X section below).
 
-====Windows====
+====Windows Entry Point====
 
 {{{
 #include <windows.h>
@@ -175,7 +177,7 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
 }
 }}}
 
-====Linux====
+====Linux Entry Point====
 
 {{{
 // cefsimple_gtk.cpp
@@ -221,7 +223,7 @@ int main(int argc, char* argv[]) {
 }
 }}}
 
-====Mac OS X====
+====Mac OS X Entry Point====
 
 Browser process entry point:
 
@@ -353,7 +355,7 @@ int main(int argc, char* argv[]) {
 }
 }}}
 
-===SimpleApp===
+===`SimpleApp`===
 
 SimpleApp is responsible for handling process-level callbacks. It exposes some interfaces/methods that are shared by multiple processes and some that are only called in a particular process. The CefBrowserProcessHandler interface, for example, is only called in the browser process. There’s a separate CefRenderProcessHandler interface (not shown in this example) that is only called in the render process. Note that GetBrowserProcessHandler() must return |this| because SimpleApp implements both CefApp and CefBrowserProcessHandler. See the GeneralUsage Wiki page or API header files for additional information on CefApp and related interfaces.
 
@@ -426,7 +428,7 @@ void SimpleApp::OnContextInitialized() {
 }
 }}}
 
-===SimpleHandler===
+===`SimpleHandler`===
 
 SimpleHandler is responsible for handling browser-level callbacks. These callbacks are executed in the browser process. In this example we use the same CefClient instance for all browsers, but your application can use different CefClient instances as appropriate. See the GeneralUsage Wiki page or API header files for additional information on CefClient and related interfaces.
 
@@ -646,7 +648,7 @@ Build steps vary depending on the platform. Explore the project files included w
   # Compile the application source code files. Link against the libcef dynamic library and the libcef_dll_wrapper static library.
   # Copy libraries and resources to the output directory.
 
-===Windows===
+===Windows Build Steps===
 
   # Compile the libcef_dll_wrapper static library.
   # Compile/link cefsimple.exe.
@@ -671,7 +673,7 @@ Application/
     en-US.pak, … <= locale-specific resources and strings
 }}}
 
-===Linux==
+===Linux Build Steps==
 
   # Compile the libcef_dll_wrapper static library.
   # Compile/link cefsimple.
@@ -695,7 +697,7 @@ Application/
     en-US.pak, … <= locale-specific resources and strings
 }}}
 
-===Mac OS X===
+===Mac OS X Build Steps===
 
   # Compile the libcef_dll_wrapper static library.
   # Compile/link/package the “cefsimple Helper” app.
