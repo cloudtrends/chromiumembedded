@@ -1,5 +1,7 @@
 #summary How to use V8 JavaScript integration in client applications.
 
+<wiki:toc />
+
 = Introduction =
 
 Chromium and CEF use the [http://code.google.com/p/v8/ V8 JavaScript Engine] for their internal JavaScript (JS) implementation. Each frame in a browser has its own JS context that provides scope and security for JS code executing in that frame (see the "Working with Contexts" section for more information). CEF exposes a large number of JS features for integration in client applications.
@@ -8,7 +10,7 @@ With CEF3 Blink (WebKit) and JS execution run in a separate renderer process. Th
 
 JS APIs that communicate between the browser and renderer processes should be designed using asynchronous callbacks. See the [https://code.google.com/p/chromiumembedded/wiki/GeneralUsage#Asynchronous_Bindings Asynchronous JavaScript Bindings] section of the GeneralUsage wiki page for more information.
 
-= ExecuteJavaScript =
+= `ExecuteJavaScript` =
 
 The simplest way to execute JS from a client application is using the CefFrame::ExecuteJavaScript() function. This function is available in both the browser process and the renderer process and can safely be used from outside of a JS context.
 
