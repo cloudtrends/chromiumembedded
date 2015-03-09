@@ -2,19 +2,19 @@
 
 <wiki:toc />
 
-==Introduction==
+=Introduction=
 
 This tutorial explains how to create a simple application using CEF3. It references the [https://code.google.com/p/chromiumembedded/source/browse/#svn%2Ftrunk%2Fcef3%2Ftests%2Fcefsimple cefsimple example project] which is included with trunk revision 1535 and newer. For complete CEF3 usage information visit the [GeneralUsage GeneralUsage] Wiki page.
 
-==Getting Started==
+=Getting Started=
 
 Begin by downloading a binary distribution for your platform from http://cefbuilds.com. For the purposes of this tutorial download the 1750 branch or newer. Currently supported platforms include Windows, Linux and Mac OS X. Each binary distribution contains all files necessary to build a particular version of CEF3 on a particular platform. See the included README.txt file or the [https://code.google.com/p/chromiumembedded/wiki/GeneralUsage#Getting_Started Getting Started] section of the GeneralUsage Wiki page for a detailed description of binary distribution contents.
 
-===Building the Included Project===
+==Building the Included Project==
 
 Applications based on CEF binary distributions can be built using standard platform build tools. This includes Visual Studio on Windows, Xcode on Mac OS X and gcc/make on Linux. Each platform has a slightly different build process and requirements.
 
-====Windows====
+===Windows===
 
 Follow these steps to build the cefsimple application on Windows:
 
@@ -24,7 +24,7 @@ Follow these steps to build the cefsimple application on Windows:
   # If the build is successful an “out/Debug” directory (or “Release” if you selected the release configuration) will be created.
   # Run “out/Debug/cefsimple.exe” to verify that it works.
 
-====Linux====
+===Linux===
 
 Follow these steps to build the cefsimple application on Linux:
 
@@ -34,7 +34,7 @@ Follow these steps to build the cefsimple application on Linux:
   # If the build is successful an “out/Debug” directory (or “Release” if you selected the release configuration) will be created.
   # Run “./out/Debug/cefsimple” to verify that it works.
 
-====Mac OS X====
+===Mac OS X===
 
 Follow these steps to build the cefsimple application on OS X:
 
@@ -43,7 +43,7 @@ Follow these steps to build the cefsimple application on OS X:
   # If the build is successful an “xcodebuild/Debug” directory (or “Release” if you selected the release configuration) will be created.
   # Run “open out/Debug/cefsimple.app” to verify that it works.
 
-===Loading a Custom URL===
+==Loading a Custom URL==
 
 The cefsimple application loads google.com by default but you can change it to load a custom URL instead. The easiest way to load a different URL is via the command-line.
 
@@ -62,7 +62,7 @@ You can also edit the source code in cefsimple/simple_app.cpp and recompile the 
 …
 }}}
 
-==Application Components==
+=Application Components=
 
 All CEF applications have the following primary components:
 
@@ -73,7 +73,7 @@ All CEF applications have the following primary components:
 
 The CEF dynamic library, support libraries and resources will be the same for every CEF-based application. They are included in the Debug/Release or Resources directory of the binary distribution. See the README.txt file included in the binary distribution for details on which of these files are required and which can be safely left out. See below for a detailed description of the required application layout on each platform.
 
-==Architecture in 60 Seconds==
+=Architecture in 60 Seconds=
 
 The below list summarizes the items of primary importance for this tutorial:
 
@@ -84,7 +84,7 @@ The below list summarizes the items of primary importance for this tutorial:
 
 Read the GeneralUsage Wiki page for complete discussion of the above points.
 
-==Source Code==
+=Source Code=
 
 The cefsimple application initializes CEF and creates a single popup browser window. The application terminates when all browser windows have been closed. Program flow is as follows:
 
@@ -100,11 +100,11 @@ The cefsimple application initializes CEF and creates a single popup browser win
 
 Your binary distribution may include newer versions of the below files. However, the general concepts remain unchanged. 
 
-===Entry Point Function===
+==Entry Point Function==
 
 Execution begins in the browser process entry point function. This function is responsible for initializing CEF and any OS-related objects. For example, it initializes GTK on Linux and allocates the necessary Cocoa objects on OS X. OS X has a separate entry point function for helper processes (see the OS X section below).
 
-====Windows Entry Point====
+===Windows Entry Point===
 
 {{{
 #include <windows.h>
@@ -177,7 +177,7 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
 }
 }}}
 
-====Linux Entry Point====
+===Linux Entry Point===
 
 {{{
 // cefsimple_gtk.cpp
@@ -223,7 +223,7 @@ int main(int argc, char* argv[]) {
 }
 }}}
 
-====Mac OS X Entry Point====
+===Mac OS X Entry Point===
 
 Browser process entry point:
 
@@ -355,7 +355,7 @@ int main(int argc, char* argv[]) {
 }
 }}}
 
-===`SimpleApp`===
+==`SimpleApp`==
 
 SimpleApp is responsible for handling process-level callbacks. It exposes some interfaces/methods that are shared by multiple processes and some that are only called in a particular process. The CefBrowserProcessHandler interface, for example, is only called in the browser process. There’s a separate CefRenderProcessHandler interface (not shown in this example) that is only called in the render process. Note that GetBrowserProcessHandler() must return |this| because SimpleApp implements both CefApp and CefBrowserProcessHandler. See the GeneralUsage Wiki page or API header files for additional information on CefApp and related interfaces.
 
@@ -428,7 +428,7 @@ void SimpleApp::OnContextInitialized() {
 }
 }}}
 
-===`SimpleHandler`===
+==`SimpleHandler`==
 
 SimpleHandler is responsible for handling browser-level callbacks. These callbacks are executed in the browser process. In this example we use the same CefClient instance for all browsers, but your application can use different CefClient instances as appropriate. See the GeneralUsage Wiki page or API header files for additional information on CefClient and related interfaces.
 
@@ -640,7 +640,7 @@ void SimpleHandler::OnTitleChange(CefRefPtr<CefBrowser> browser,
 }
 }}}
 
-==Build Steps==
+=Build Steps=
 
 Build steps vary depending on the platform. Explore the project files included with the binary distribution for a complete understanding of all required steps. The build steps common to all platforms can generally be summarized as follows:
 
@@ -648,7 +648,7 @@ Build steps vary depending on the platform. Explore the project files included w
   # Compile the application source code files. Link against the libcef dynamic library and the libcef_dll_wrapper static library.
   # Copy libraries and resources to the output directory.
 
-===Windows Build Steps===
+==Windows Build Steps==
 
   # Compile the libcef_dll_wrapper static library.
   # Compile/link cefsimple.exe.
@@ -673,7 +673,7 @@ Application/
     en-US.pak, … <= locale-specific resources and strings
 }}}
 
-===Linux Build Steps==
+==Linux Build Steps==
 
   # Compile the libcef_dll_wrapper static library.
   # Compile/link cefsimple.
@@ -697,7 +697,7 @@ Application/
     en-US.pak, … <= locale-specific resources and strings
 }}}
 
-===Mac OS X Build Steps===
+==Mac OS X Build Steps==
 
   # Compile the libcef_dll_wrapper static library.
   # Compile/link/package the “cefsimple Helper” app.
