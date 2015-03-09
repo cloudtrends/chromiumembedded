@@ -1,5 +1,7 @@
 #summary Information about CEF branches and instructions for downloading, building and packaging source code.
 
+<wiki:toc />
+
 == Background ==
 
 The CEF project is an extension of the Chromium project hosted at http://www.chromium.org. CEF maintains development and release branches that track Chromium branches. CEF source code can be built manually or with automated tools.
