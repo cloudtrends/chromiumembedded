@@ -438,7 +438,7 @@ CEF can also integrate with an existing application message loop instead of runn
   # Call CefDoMessageLoopWork() on a regular basis instead of calling CefRunMessageLoop(). Each call to CefDoMessageLoopWork() will perform a single iteration of the CEF message loop. Caution should be used with this approach. Calling the method too infrequently will starve the CEF message loop and negatively impact browser performance. Calling the method too frequently will negatively impact CPU usage.
   # Set CefSettings.multi_threaded_message_loop = true (Windows only). This will cause CEF to run the browser UI thread on a separate thread from the main application thread. With this approach neither CefDoMessageLoopWork() nor CefRunMessageLoop() need to be called. CefInitialize() and CefShutdown() should still be called on the main application thread. You will need to provide your own mechanism for communicating with the main application thread (see for example the message window usage in cefclient_win.cpp). You can test this mode in cefclient on Windows by running with the “--multi-threaded-message-loop” command-line flag.
 
-===CefSettings===
+===`CefSettings`===
 
 The CefSettings structure allows configuration of application-wide CEF settings. Some commonly configured members include:
 
@@ -454,7 +454,7 @@ The CefSettings structure allows configuration of application-wide CEF settings.
   * *locales_dir_path* The fully qualified path for the locales directory. If this value is empty the locales directory must be located in the module directory. This value is ignored on Mac OS X where pack files are always loaded from the app bundle Resources directory. Also configurable using the "locales-dir-path" command-line switch.
   * *remote_debugging_port* Set to a value between 1024 and 65535 to enable remote debugging on the specified port. For example, if 8080 is specified the remote debugging URL will be http://localhost:8080. CEF can be remotely debugged from any CEF or Chrome browser window. Also configurable using the "remote-debugging-port" command-line switch.
 
-===CefBrowser and CefFrame===
+===`CefBrowser` and `CefFrame`===
 
 The [http://magpcss.org/ceforum/apidocs3/projects/(default)/CefBrowser.html CefBrowser] and [http://magpcss.org/ceforum/apidocs3/projects/(default)/CefFrame.html CefFrame] objects are used for sending commands to the browser and for retrieving state information in callback methods. Each CefBrowser object will have a single main CefFrame object representing the top-level frame and zero or more CefFrame objects representing sub-frames. For example, a browser that loads two iframes will have three CefFrame objects (the top-level frame and the two iframes).
 
@@ -498,7 +498,7 @@ CefWindowHandle window_handle = browser->GetHost()->GetWindowHandle();
 
 Other methods are available for history navigation, loading of strings and requests, sending edit commands, retrieving text/html contents, and more. See the documentation for the complete list of supported methods.
 
-===CefApp===
+===`CefApp`===
 
 The [http://magpcss.org/ceforum/apidocs3/projects/(default)/CefApp.html CefApp] interface provides access to process-specific callbacks. Important callbacks include:
 
@@ -584,7 +584,7 @@ class MyApp : public CefApp,
 };
 }}}
 
-===CefClient===
+===`CefClient`===
 
 The [http://magpcss.org/ceforum/apidocs3/projects/(default)/CefClient.html CefClient] interface provides access to browser-instance-specific callbacks. A single CefClient instance can be shared among any number of browsers. Important callbacks include:
 
