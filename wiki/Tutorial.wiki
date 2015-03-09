@@ -8,13 +8,21 @@ This tutorial explains how to create a simple application using CEF3. It referen
 
 =Getting Started=
 
-Begin by downloading a binary distribution for your platform from http://cefbuilds.com. For the purposes of this tutorial download the 1750 branch or newer. Currently supported platforms include Windows, Linux and Mac OS X. Each binary distribution contains all files necessary to build a particular version of CEF3 on a particular platform. See the included README.txt file or the [https://code.google.com/p/chromiumembedded/wiki/GeneralUsage#Getting_Started Getting Started] section of the GeneralUsage Wiki page for a detailed description of binary distribution contents.
+Begin by downloading a binary distribution for your platform from http://cefbuilds.com. For the purposes of this tutorial download the 2171 branch or newer. Currently supported platforms include Windows, Linux and Mac OS X. Each binary distribution contains all files necessary to build a particular version of CEF3 on a particular platform. See the included README.txt file or the [https://code.google.com/p/chromiumembedded/wiki/GeneralUsage#Getting_Started Getting Started] section of the GeneralUsage Wiki page for a detailed description of binary distribution contents.
 
 ==Building the Included Project==
 
 Applications based on CEF binary distributions can be built using standard platform build tools. This includes Visual Studio on Windows, Xcode on Mac OS X and gcc/make on Linux. Each platform has a slightly different build process and requirements.
 
-===Windows===
+===Using CMake===
+
+Starting with 2171 branch the CEF3 sample applications can be built using CMake, a cross-platform open-source build system that can generate project files in many different formats. See the comments at the top of the CMakeLists.txt file included with the binary distribution for platform-specific CMake usage instructions.
+
+===DEPRECATED Using Pre-Built Project Files===
+
+Pre-built project files are provided with 2171 branch and older versions of CEF3.
+
+====Windows====
 
 Follow these steps to build the cefsimple application on Windows:
 
@@ -24,7 +32,7 @@ Follow these steps to build the cefsimple application on Windows:
   # If the build is successful an “out/Debug” directory (or “Release” if you selected the release configuration) will be created.
   # Run “out/Debug/cefsimple.exe” to verify that it works.
 
-===Linux===
+====Linux====
 
 Follow these steps to build the cefsimple application on Linux:
 
@@ -34,7 +42,7 @@ Follow these steps to build the cefsimple application on Linux:
   # If the build is successful an “out/Debug” directory (or “Release” if you selected the release configuration) will be created.
   # Run “./out/Debug/cefsimple” to verify that it works.
 
-===Mac OS X===
+====Mac OS X====
 
 Follow these steps to build the cefsimple application on OS X:
 
@@ -102,22 +110,26 @@ Your binary distribution may include newer versions of the below files. However,
 
 ==Entry Point Function==
 
-Execution begins in the browser process entry point function. This function is responsible for initializing CEF and any OS-related objects. For example, it initializes GTK on Linux and allocates the necessary Cocoa objects on OS X. OS X has a separate entry point function for helper processes (see the OS X section below).
+Execution begins in the browser process entry point function. This function is responsible for initializing CEF and any OS-related objects. For example, it installs X11 error handlers on Linux and allocates the necessary Cocoa objects on OS X. OS X has a separate entry point function for helper processes (see the OS X section below).
 
 ===Windows Entry Point===
 
 {{{
+// cefsimple_win.cpp
 #include <windows.h>
 
 #include "cefsimple/simple_app.h"
 #include "include/cef_sandbox_win.h"
 
 
-// Set to 0 to disable sandbox support.
-#define CEF_ENABLE_SANDBOX 1
+// When generating projects with CMake the CEF_USE_SANDBOX value will be defined
+// automatically if using the required compiler version. Pass -DUSE_SANDBOX=OFF
+// to the CMake command-line to disable use of the sandbox.
+// Uncomment this line to manually enable sandbox support.
+// #define CEF_USE_SANDBOX 1
 
-#if CEF_ENABLE_SANDBOX
-// The cef_sandbox.lib static library is currently built with VS2010. It may not
+#if defined(CEF_USE_SANDBOX)
+// The cef_sandbox.lib static library is currently built with VS2013. It may not
 // link successfully with other VS versions.
 #pragma comment(lib, "cef_sandbox.lib")
 #endif
@@ -133,7 +145,7 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
 
   void* sandbox_info = NULL;
 
-#if CEF_ENABLE_SANDBOX
+#if defined(CEF_USE_SANDBOX)
   // Manage the life span of the sandbox information object. This is necessary
   // for sandbox support on Windows. See cef_sandbox_win.h for complete details.
   CefScopedSandboxInfo scoped_sandbox;
@@ -159,7 +171,7 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
   // Specify CEF global settings here.
   CefSettings settings;
 
-#if !CEF_ENABLE_SANDBOX
+#if !defined(CEF_USE_SANDBOX)
   settings.no_sandbox = true;
 #endif
 
@@ -180,10 +192,32 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
 ===Linux Entry Point===
 
 {{{
-// cefsimple_gtk.cpp
-#include <gtk/gtk.h>
-
+// cefsimple_linux.cpp
 #include "cefsimple/simple_app.h"
+
+#include <X11/Xlib.h>
+
+#include "include/base/cef_logging.h"
+
+namespace {
+
+int XErrorHandlerImpl(Display *display, XErrorEvent *event) {
+  LOG(WARNING)
+        << "X error received: "
+        << "type " << event->type << ", "
+        << "serial " << event->serial << ", "
+        << "error_code " << static_cast<int>(event->error_code) << ", "
+        << "request_code " << static_cast<int>(event->request_code) << ", "
+        << "minor_code " << static_cast<int>(event->minor_code);
+  return 0;
+}
+
+int XIOErrorHandlerImpl(Display *display) {
+  return 0;
+}
+
+}  // namespace
+
 
 // Entry point function for all processes.
 int main(int argc, char* argv[]) {
@@ -203,11 +237,13 @@ int main(int argc, char* argv[]) {
     return exit_code;
   }
 
-  // Initialize GTK.
-  gtk_init(&argc, &argv);
-
   // Specify CEF global settings here.
   CefSettings settings;
+
+  // Install xlib error handlers so that the application won't be terminated
+  // on non-fatal errors.
+  XSetErrorHandler(XErrorHandlerImpl);
+  XSetIOErrorHandler(XIOErrorHandlerImpl);
 
   // Initialize CEF for the browser process.
   CefInitialize(main_args, settings, app.get(), NULL);
@@ -233,8 +269,14 @@ Browser process entry point:
 
 #include "cefsimple/simple_app.h"
 #include "cefsimple/simple_handler.h"
-#include "cefsimple/util.h"
 #include "include/cef_application_mac.h"
+#include "include/wrapper/cef_helpers.h"
+
+// Receives notifications from the application.
+@interface SimpleAppDelegate : NSObject
+- (void)createApplication:(id)object;
+- (void)tryToTerminateApplication:(NSApplication*)app;
+@end
 
 // Provide the CefAppProtocol implementation required by CEF.
 @interface SimpleApplication : NSApplication<CefAppProtocol> {
@@ -256,18 +298,56 @@ Browser process entry point:
   CefScopedSendingEvent sendingEventScoper;
   [super sendEvent:event];
 }
-@end
 
-
-// Receives notifications from the application.
-@interface SimpleAppDelegate : NSObject
-- (void)createApp:(id)object;
+// |-terminate:| is the entry point for orderly "quit" operations in Cocoa. This
+// includes the application menu's quit menu item and keyboard equivalent, the
+// application's dock icon menu's quit menu item, "quit" (not "force quit") in
+// the Activity Monitor, and quits triggered by user logout and system restart
+// and shutdown.
+//
+// The default |-terminate:| implementation ends the process by calling exit(),
+// and thus never leaves the main run loop. This is unsuitable for Chromium
+// since Chromium depends on leaving the main run loop to perform an orderly
+// shutdown. We support the normal |-terminate:| interface by overriding the
+// default implementation. Our implementation, which is very specific to the
+// needs of Chromium, works by asking the application delegate to terminate
+// using its |-tryToTerminateApplication:| method.
+//
+// |-tryToTerminateApplication:| differs from the standard
+// |-applicationShouldTerminate:| in that no special event loop is run in the
+// case that immediate termination is not possible (e.g., if dialog boxes
+// allowing the user to cancel have to be shown). Instead, this method tries to
+// close all browsers by calling CloseBrowser(false) via
+// ClientHandler::CloseAllBrowsers. Calling CloseBrowser will result in a call
+// to ClientHandler::DoClose and execution of |-performClose:| on the NSWindow.
+// DoClose sets a flag that is used to differentiate between new close events
+// (e.g., user clicked the window close button) and in-progress close events
+// (e.g., user approved the close window dialog). The NSWindowDelegate
+// |-windowShouldClose:| method checks this flag and either calls
+// CloseBrowser(false) in the case of a new close event or destructs the
+// NSWindow in the case of an in-progress close event.
+// ClientHandler::OnBeforeClose will be called after the CEF NSView hosted in
+// the NSWindow is dealloc'ed.
+//
+// After the final browser window has closed ClientHandler::OnBeforeClose will
+// begin actual tear-down of the application by calling CefQuitMessageLoop.
+// This ends the NSApplication event loop and execution then returns to the
+// main() function for cleanup before application termination.
+//
+// The standard |-applicationShouldTerminate:| is not supported, and code paths
+// leading to it must be redirected.
+- (void)terminate:(id)sender {
+  SimpleAppDelegate* delegate =
+      static_cast<SimpleAppDelegate*>([NSApp delegate]);
+  [delegate tryToTerminateApplication:self];
+  // Return, don't exit. The application is responsible for exiting on its own.
+}
 @end
 
 @implementation SimpleAppDelegate
 
 // Create the application on the UI thread.
-- (void)createApp:(id)object {
+- (void)createApplication:(id)object {
   [NSApplication sharedApplication];
   [NSBundle loadNibNamed:@"MainMenu" owner:NSApp];
 
@@ -275,24 +355,16 @@ Browser process entry point:
   [NSApp setDelegate:self];
 }
 
-// Called when the application's Quit menu item is selected.
+- (void)tryToTerminateApplication:(NSApplication*)app {
+  SimpleHandler* handler = SimpleHandler::GetInstance();
+  if (handler && !handler->IsClosing())
+    handler->CloseAllBrowsers(false);
+}
+
 - (NSApplicationTerminateReply)applicationShouldTerminate:
       (NSApplication *)sender {
-  // Request that all browser windows close.
-  if (SimpleHandler* handler = SimpleHandler::GetInstance())
-    handler->CloseAllBrowsers(false);
-
-  // Cancel the termination. The application will exit after all windows have
-  // closed.
-  return NSTerminateCancel;
+  return NSTerminateNow;
 }
-
-// Sent immediately before the application terminates. This signal should not
-// be called because we cancel the termination.
-- (void)applicationWillTerminate:(NSNotification *)aNotification {
-  ASSERT(false);  // Not reached.
-}
-
 @end
 
 
@@ -319,7 +391,8 @@ int main(int argc, char* argv[]) {
   
   // Create the application delegate.
   NSObject* delegate = [[SimpleAppDelegate alloc] init];
-  [delegate performSelectorOnMainThread:@selector(createApp:) withObject:nil
+  [delegate performSelectorOnMainThread:@selector(createApplication:)
+                             withObject:nil
                           waitUntilDone:NO];
 
   // Run the CEF message loop. This will block until CefQuitMessageLoop() is
@@ -387,15 +460,15 @@ class SimpleApp : public CefApp,
 #include <string>
 
 #include "cefsimple/simple_handler.h"
-#include "cefsimple/util.h"
 #include "include/cef_browser.h"
 #include "include/cef_command_line.h"
+#include "include/wrapper/cef_helpers.h"
 
 SimpleApp::SimpleApp() {
 }
 
 void SimpleApp::OnContextInitialized() {
-  REQUIRE_UI_THREAD();
+  CEF_REQUIRE_UI_THREAD();
 
   // Information used when creating the native window.
   CefWindowInfo window_info;
@@ -423,8 +496,8 @@ void SimpleApp::OnContextInitialized() {
     url = "http://www.google.com";
 
   // Create the first browser window.
-  CefBrowserHost::CreateBrowserSync(window_info, handler.get(), url,
-                                    browser_settings, NULL);
+  CefBrowserHost::CreateBrowser(window_info, handler.get(), url,
+                                browser_settings, NULL);
 }
 }}}
 
@@ -599,24 +672,55 @@ void SimpleHandler::OnTitleChange(CefRefPtr<CefBrowser> browser,
 }
 
 
-// simple_handler_gtk.cc  -- Linux-specific code.
+// simple_handler_linux.cc  -- Linux-specific code.
 #include "cefsimple/simple_handler.h"
 
-#include <gtk/gtk.h>
+#include <X11/Xatom.h>
+#include <X11/Xlib.h>
 #include <string>
 
-#include "cefsimple/util.h"
 #include "include/cef_browser.h"
+#include "include/wrapper/cef_helpers.h"
 
 void SimpleHandler::OnTitleChange(CefRefPtr<CefBrowser> browser,
                                   const CefString& title) {
-  REQUIRE_UI_THREAD();
-
-  GtkWidget* window = gtk_widget_get_ancestor(
-      GTK_WIDGET(browser->GetHost()->GetWindowHandle()),
-      GTK_TYPE_WINDOW);
+  CEF_REQUIRE_UI_THREAD();
   std::string titleStr(title);
-  gtk_window_set_title(GTK_WINDOW(window), titleStr.c_str());
+
+  // Retrieve the X11 display shared with Chromium.
+  ::Display* display = cef_get_xdisplay();
+  DCHECK(display);
+
+  // Retrieve the X11 window handle for the browser.
+  ::Window window = browser->GetHost()->GetWindowHandle();
+  DCHECK(window != kNullWindowHandle);
+
+  // Retrieve the atoms required by the below XChangeProperty call.
+  const char* kAtoms[] = {
+    "_NET_WM_NAME",
+    "UTF8_STRING"
+  };
+  Atom atoms[2];
+  int result = XInternAtoms(display, const_cast<char**>(kAtoms), 2, false,
+                            atoms);
+  if (!result)
+    NOTREACHED();
+
+  // Set the window title.
+  XChangeProperty(display,
+                  window,
+                  atoms[0],
+                  atoms[1],
+                  8,
+                  PropModeReplace,
+                  reinterpret_cast<const unsigned char*>(titleStr.c_str()),
+                  titleStr.size());
+
+  // TODO(erg): This is technically wrong. So XStoreName and friends expect
+  // this in Host Portable Character Encoding instead of UTF-8, which I believe
+  // is Compound Text. This shouldn't matter 90% of the time since this is the
+  // fallback to the UTF8 property above.
+  XStoreName(display, browser->GetHost()->GetWindowHandle(), titleStr.c_str());
 }
 
 
@@ -642,7 +746,7 @@ void SimpleHandler::OnTitleChange(CefRefPtr<CefBrowser> browser,
 
 =Build Steps=
 
-Build steps vary depending on the platform. Explore the project files included with the binary distribution for a complete understanding of all required steps. The build steps common to all platforms can generally be summarized as follows:
+Build steps vary depending on the platform. Explore the CMake files included with the binary distribution for a complete understanding of all required steps. The build steps common to all platforms can generally be summarized as follows:
 
   # Compile the libcef_dll_wrapper static library.
   # Compile the application source code files. Link against the libcef dynamic library and the libcef_dll_wrapper static library.
@@ -653,7 +757,7 @@ Build steps vary depending on the platform. Explore the project files included w
   # Compile the libcef_dll_wrapper static library.
   # Compile/link cefsimple.exe.
     # Required source code files include: cefsimple_win.cpp, simple_app.cpp, simple_handler.cpp, simple_handler_win.cpp.
-    # Required link libraries include: comctl32.lib, shlwapi.lib, rcprt4.lib, libcef_dll_wrapper.lib, libcef.lib, cef_sandbox.lib. Note that cef_sandbox.lib (required for sandbox support) is a static library currently built with Visual Studio 2010 and it may not compile with other Visual Studio versions. You can disable sandbox support by setting CEF_ENABLE_SANDBOX to 0 in cefsimple_win.cpp.
+    # Required link libraries include: comctl32.lib, shlwapi.lib, rcprt4.lib, libcef_dll_wrapper.lib, libcef.lib, cef_sandbox.lib. Note that cef_sandbox.lib (required for sandbox support) is a static library currently built with Visual Studio 2013 and it may not compile with other Visual Studio versions. See comments in cefsimple_win.cpp for how to disable sandbox support.
     # Resource file is cefsimple.rc.
     # Manifest files are cefsimple.exe.manifest and compatibility.manifest.
   # Copy all files from the Resources directory to the output directory.
@@ -677,7 +781,7 @@ Application/
 
   # Compile the libcef_dll_wrapper static library.
   # Compile/link cefsimple.
-    # Required source code files include: cefsimple_gtk.cpp, simple_app.cpp, simple_handler.cpp, simple_handler_gtk.cpp.
+    # Required source code files include: cefsimple_linux.cpp, simple_app.cpp, simple_handler.cpp, simple_handler_linux.cpp.
     # Required link libraries include: libcef_dll_wrapper.so, libcef.so and dependencies (identified at build time using the “pkg-config” tool).
     # Configure the rpath to find libcef.so in the current directory (“-Wl,-rpath,.”) or use the LD_LIBRARY_PATH environment variable.
   # Copy all files from the Resources directory to the output directory.
