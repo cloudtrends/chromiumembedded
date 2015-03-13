@@ -66,7 +66,7 @@ By default the main application executable will be spawned multiple times to rep
 
 The separate processes spawned by CEF3 communicate using Inter-Process Communication (IPC). Application logic implemented in the browser and render processes can communicate by sending asynchronous messages back and forth. JavaScriptIntegration in the render process can expose asynchronous APIs that are handled in the browser process. See the “Inter-Process Communication” section for more information.
 
-CEF3 supports a single-process run mode for debugging purposes via the "--single-process" command-line flag. Platform-specific debugging tips are also available for [http://www.chromium.org/developers/how-tos/debugging Windows], [http://www.chromium.org/developers/debugging-on-os-x Mac OS X] and [https://code.google.com/p/chromium/wiki/LinuxDebugging Linux].
+Platform-specific debugging tips are also available for [http://www.chromium.org/developers/how-tos/debugging Windows], [http://www.chromium.org/developers/debugging-on-os-x Mac OS X] and [https://code.google.com/p/chromium/wiki/LinuxDebugging Linux].
 
 ==Threads==
 
