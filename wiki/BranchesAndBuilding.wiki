@@ -8,11 +8,11 @@ The CEF project is an extension of the Chromium project hosted at http://www.chr
 
 = Development =
 
-Ongoing development of CEF occurs in [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Ftrunk trunk]. This location tracks the current [http://src.chromium.org/viewvc/chrome/trunk/ Chromium trunk] and is not recommended for production use.
+Ongoing development of CEF occurs in the [https://bitbucket.org/chromiumembedded/cef/src CEF master branch]. This location tracks the current [https://chromium.googlesource.com/chromium/src.git Chromium master branch] and is not recommended for production use.
 
 The following URLs should be used for downloading development versions of CEF.
 
-  * CEF3 - http://chromiumembedded.googlecode.com/svn/trunk/cef3
+  * CEF3 - https://bitbucket.org/chromiumembedded/cef/src
 
 CEF1 is no longer actively developed or supported. See the [http://magpcss.org/ceforum/viewtopic.php?f=10&t=10647 CEF1 Retirement Plan] for details.
 
@@ -31,30 +31,29 @@ CEF release version numbers have the format X.Y.Z where X is the CEF version (1 
 Current CEF release branches and associated platform build requirements are as follows.
 
 || Branch Date || Release Branch || Chromium Version || CEF1 || CEF3 || Windows Build Requirements || Mac OS X Build Requirements || Linux Build Requirements ||
-|| Dec 2011 || [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Fbranches%2F963 963] || 17 || Yes || No || WinXP+, VS2008, Win7 SDK || OS X 10.6-10.7, 10.5+ SDK, Xcode 3.2.6 || Ubuntu 10.04+, Debian Squeeze+ ||
-|| Feb 2012 || [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Fbranches%2F1025 1025] || 18 || Yes || No || WinXP+, VS2008, Win7 SDK || OS X 10.6-10.7, 10.5+ SDK, Xcode 3.2.6-4.x || Ubuntu 10.04+, Debian Squeeze+ ||
-|| Apr 2012 || [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Fbranches%2F1084 1084] || 19 || Yes || No || WinXP+, VS2008, Win7 SDK || OS X 10.6-10.7, 10.5+ SDK, Xcode 3.2.6-4.x || Ubuntu 10.04+, Debian Squeeze+ ||
-|| Aug 2012 || [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Fbranches%2F1180 1180] || 21 || Yes || Yes || WinXP+, VS2010, Win7 SDK || OS X 10.6-10.7, 10.5+ SDK, Xcode 3.2.6-4.x || Ubuntu 12.04+, Debian Squeeze+ ||
-|| Oct 2012 || [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Fbranches%2F1271 1271] || 23 || Yes || Yes || WinXP+, VS2010, Win7 SDK || OS X 10.6-10.8, 10.6+ SDK, Xcode 3.2.6-4.x || Ubuntu 12.04+, Debian Squeeze+ ||
-|| Jan 2013 || [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Fbranches%2F1364 1364] || 25 || Yes || Yes || WinXP+, VS2010, Win8 SDK, Ninja (optional) || OS X 10.6-10.8, Xcode 3.2.6-4.x, Ninja (optional) || Ubuntu 12.04+, Debian Squeeze+, Ninja (optional) ||
-|| Apr 2013 || [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Fbranches%2F1453 1453] || 27 || Yes || Yes || WinXP+, VS2010, Win8 SDK, Ninja (optional) || OS X 10.6-10.8, 10.6+ SDK, Xcode 3.2.6-4.x, Ninja (optional) || Ubuntu 12.04+, Debian Squeeze+, Ninja (optional) ||
-|| Jul 2013 || [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Fbranches%2F1547 1547] || 29 || No  || Yes || WinXP+, VS2010-2012, Win8 SDK, Ninja (optional) || OS X 10.6-10.8, 10.6+ SDK, Xcode 3.2.6-4.x, Ninja (optional) || Ubuntu 12.04+, Debian Squeeze+, Ninja ||
-|| Oct 2013 || [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Fbranches%2F1650 1650] || 31 || No  || Yes || WinXP+, VS2010-2012, Win8 SDK, Ninja (optional) || OS X 10.6-10.9, 10.6+ SDK, Xcode 3.2.6-5.x, Ninja || Ubuntu 12.04+, Debian Wheezy+, Ninja ||
-|| Jan 2014 || [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Fbranches%2F1750 1750] || 33 || No  || Yes || WinXP+, VS2010-2013, Win8 SDK, Ninja || OS X 10.6-10.9, 10.6+ SDK, Xcode 3.2.6-5.x, Ninja || Ubuntu 12.04+, Debian Wheezy+, Ninja ||
-|| Apr 2014 || [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Fbranches%2F1916 1916] || 35 || No  || Yes || WinXP+, VS2013, Win8 SDK, Ninja || OS X 10.6-10.9, 10.6+ SDK, Xcode 3.2.6-5.x, Ninja || Ubuntu 12.04+, Debian Wheezy+, Ninja ||
-|| Aug 2014 || [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Fbranches%2F2062 2062] || 37 || No  || Yes || WinXP+, VS2013, Win8 SDK, Ninja || OS X 10.6-10.9, 10.6+ SDK, Xcode 3.2.6-5.x, Ninja || Ubuntu 12.04+, Debian Wheezy+, Ninja ||
-|| Oct 2014 || [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Fbranches%2F2171 2171] || 39 || No  || Yes || WinXP+, VS2013u4, Win8.1 SDK, Ninja || OS X 10.6-10.9, 10.6+ SDK, Xcode 3.2.6-5.x, Ninja || Ubuntu 12.04+, Debian Wheezy+, Ninja ||
-|| Jan 2015 || [http://code.google.com/p/chromiumembedded/source/browse/#svn%2Fbranches%2F2272 2272] || 41 || No  || Yes || WinXP+, VS2013u4, Win8.1 SDK, Ninja || OS X 10.6-10.10, 10.6+ SDK, Xcode 3.2.6-5.x, Ninja, 64-bit only || Ubuntu 12.04+, Debian Wheezy+, Ninja ||
+|| Dec 2011 || [https://bitbucket.org/chromiumembedded/cef/src/?at=963 963] || 17 || Yes || No || WinXP+, VS2008, Win7 SDK || OS X 10.6-10.7, 10.5+ SDK, Xcode 3.2.6 || Ubuntu 10.04+, Debian Squeeze+ ||
+|| Feb 2012 || [https://bitbucket.org/chromiumembedded/cef/src/?at=1025 1025] || 18 || Yes || No || WinXP+, VS2008, Win7 SDK || OS X 10.6-10.7, 10.5+ SDK, Xcode 3.2.6-4.x || Ubuntu 10.04+, Debian Squeeze+ ||
+|| Apr 2012 || [https://bitbucket.org/chromiumembedded/cef/src/?at=1084 1084] || 19 || Yes || No || WinXP+, VS2008, Win7 SDK || OS X 10.6-10.7, 10.5+ SDK, Xcode 3.2.6-4.x || Ubuntu 10.04+, Debian Squeeze+ ||
+|| Aug 2012 || [https://bitbucket.org/chromiumembedded/cef/src/?at=1180 1180] || 21 || Yes || Yes || WinXP+, VS2010, Win7 SDK || OS X 10.6-10.7, 10.5+ SDK, Xcode 3.2.6-4.x || Ubuntu 12.04+, Debian Squeeze+ ||
+|| Oct 2012 || [https://bitbucket.org/chromiumembedded/cef/src/?at=1271 1271] || 23 || Yes || Yes || WinXP+, VS2010, Win7 SDK || OS X 10.6-10.8, 10.6+ SDK, Xcode 3.2.6-4.x || Ubuntu 12.04+, Debian Squeeze+ ||
+|| Jan 2013 || [https://bitbucket.org/chromiumembedded/cef/src/?at=1364 1364] || 25 || Yes || Yes || WinXP+, VS2010, Win8 SDK, Ninja (optional) || OS X 10.6-10.8, Xcode 3.2.6-4.x, Ninja (optional) || Ubuntu 12.04+, Debian Squeeze+, Ninja (optional) ||
+|| Apr 2013 || [https://bitbucket.org/chromiumembedded/cef/src/?at=1453 1453] || 27 || Yes || Yes || WinXP+, VS2010, Win8 SDK, Ninja (optional) || OS X 10.6-10.8, 10.6+ SDK, Xcode 3.2.6-4.x, Ninja (optional) || Ubuntu 12.04+, Debian Squeeze+, Ninja (optional) ||
+|| Jul 2013 || [https://bitbucket.org/chromiumembedded/cef/src/?at=1547 1547] || 29 || No  || Yes || WinXP+, VS2010-2012, Win8 SDK, Ninja (optional) || OS X 10.6-10.8, 10.6+ SDK, Xcode 3.2.6-4.x, Ninja (optional) || Ubuntu 12.04+, Debian Squeeze+, Ninja ||
+|| Oct 2013 || [https://bitbucket.org/chromiumembedded/cef/src/?at=1650 1650] || 31 || No  || Yes || WinXP+, VS2010-2012, Win8 SDK, Ninja (optional) || OS X 10.6-10.9, 10.6+ SDK, Xcode 3.2.6-5.x, Ninja || Ubuntu 12.04+, Debian Wheezy+, Ninja ||
+|| Jan 2014 || [https://bitbucket.org/chromiumembedded/cef/src/?at=1750 1750] || 33 || No  || Yes || WinXP+, VS2010-2013, Win8 SDK, Ninja || OS X 10.6-10.9, 10.6+ SDK, Xcode 3.2.6-5.x, Ninja || Ubuntu 12.04+, Debian Wheezy+, Ninja ||
+|| Apr 2014 || [https://bitbucket.org/chromiumembedded/cef/src/?at=1916 1916] || 35 || No  || Yes || WinXP+, VS2013, Win8 SDK, Ninja || OS X 10.6-10.9, 10.6+ SDK, Xcode 3.2.6-5.x, Ninja || Ubuntu 12.04+, Debian Wheezy+, Ninja ||
+|| Aug 2014 || [https://bitbucket.org/chromiumembedded/cef/src/?at=2062 2062] || 37 || No  || Yes || WinXP+, VS2013, Win8 SDK, Ninja || OS X 10.6-10.9, 10.6+ SDK, Xcode 3.2.6-5.x, Ninja || Ubuntu 12.04+, Debian Wheezy+, Ninja ||
+|| Oct 2014 || [https://bitbucket.org/chromiumembedded/cef/src/?at=2171 2171] || 39 || No  || Yes || WinXP+, VS2013u4, Win8.1 SDK, Ninja || OS X 10.6-10.9, 10.6+ SDK, Xcode 3.2.6-5.x, Ninja || Ubuntu 12.04+, Debian Wheezy+, Ninja ||
+|| Jan 2015 || [https://bitbucket.org/chromiumembedded/cef/src/?at=2272 2272] || 41 || No  || Yes || WinXP+, VS2013u4, Win8.1 SDK, Ninja || OS X 10.6-10.10, 10.6+ SDK, Xcode 3.2.6-5.x, Ninja, 64-bit only || Ubuntu 12.04+, Debian Wheezy+, Ninja ||
 
 
-The following URLs should be used for downloading release verisons of CEF where YYYY is the release branch number.
+The following URL should be used for downloading release versions of CEF where YYYY is the release branch number.
 
-  * CEF1 - http://chromiumembedded.googlecode.com/svn/branches/YYYY/cef1
-  * CEF3 - http://chromiumembedded.googlecode.com/svn/branches/YYYY/cef3
+  * https://bitbucket.org/chromiumembedded/cef/src/?at=YYYY
 
-Note that the 963 and 1025 branches contain only CEF1 source code (no "cef1" subfolder exists for those branch directories).
+Note that 1025 and older branches contain only CEF1 source code and that 1547 and newer branches contain only CEF3 source code.
 
-Information about how CEF release branches are created is available [http://code.google.com/p/chromiumembedded/issues/detail?id=325 here].
+Information about how CEF release branches are created is available [https://bitbucket.org/chromiumembedded/cef/issue/325 here].
 
 = Building from Source =
 
@@ -71,7 +70,6 @@ To build Chromium and CEF from source code you must start by configuring your bu
 1. Install the build prerequisites for your operating system and development environment (do not download depot_tools or Chromium source code at this point).
 
   * Windows - http://www.chromium.org/developers/how-tos/build-instructions-windows.
-    * If performing an SVN checkout use a version 1.6.x SVN client as some people have reported problems with version 1.7.x. Version 1.6.x is included with depot_tools on Windows. A 1.6.X version of TortoiseSVN for Windows can be downloaded [http://sourceforge.net/projects/tortoisesvn/files/1.6.16/Application/ here].
   * Mac OS X - http://code.google.com/p/chromium/wiki/MacBuildInstructions
   * Linux - http://code.google.com/p/chromium/wiki/LinuxBuildInstructions.
     * Starting with CEF3 revision 1294 (June 2013) a dependency on the libgtkglext1-dev package has been added to support the off-screen rendering example in cefclient. This is only a requirement for cefclient and not a requirement for other applications using CEF.
@@ -115,7 +113,7 @@ These steps apply to the Git workflow only. The Git workflow is recommended for 
 
 To use the Git workflow:
 
-1. Download the automate-git.py script from [https://chromiumembedded.googlecode.com/svn/trunk/cef3/tools/automate/automate-git.py here].
+1. Download the [https://bitbucket.org/chromiumembedded/cef/raw/master/tools/automate/automate-git.py automate-git.py script].
 
 2. Run the automate-git.py script at whatever interval is appropriate (for each CEF commit, once per day, once per week, etc).
 
@@ -208,10 +206,8 @@ gclient sync --revision <commit_hash> --jobs 16
 
 {{{
 cd /path/to/chromium/src
-git clone https://chromiumembedded@bitbucket.org/chromiumembedded/trunk-cef3.git cef
+git clone https://chromiumembedded@bitbucket.org/chromiumembedded/cef.git
 }}}
-
-The CEF Git repository is a read-only mirror of the SVN repository and pull requests will not be accepted. To submit changes please attach patch files generated with 'git diff --no-prefix' to issues in the CEF issue tracker.
 
 ==== DEPRECATED Development SVN workflow (CEF1 and older CEF3 branches only) ====
 
@@ -285,10 +281,10 @@ gclient sync --jobs 16
 
 {{{
 cd /path/to/chromium/src
-git clone https://chromiumembedded@bitbucket.org/chromiumembedded/branches-1916-cef3.git cef
+git clone https://chromiumembedded@bitbucket.org/chromiumembedded/cef.git
+cd cef
+git checkout 1916
 }}}
-
-The CEF Git repository is a read-only mirror of the SVN repository and pull requests will not be accepted. To submit changes please attach patch files generated with 'git diff --no-prefix' to issues in the CEF issue tracker.
 
 ==== DEPRECATED Release SVN workflow (CEF1 and older CEF3 branches only) ====
 
