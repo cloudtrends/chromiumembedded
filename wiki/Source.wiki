@@ -1,0 +1,3 @@
+#summary The CEF source code repository has moved
+
+The CEF source code repository has moved to Git at https://bitbucket.org/chromiumembedded/cef/src/. The old SVN repository is now read-only and no longer updated.
