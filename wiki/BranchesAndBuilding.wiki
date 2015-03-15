@@ -8,11 +8,11 @@ The CEF project is an extension of the Chromium project hosted at http://www.chr
 
 = Development =
 
-Ongoing development of CEF occurs in the [https://bitbucket.org/chromiumembedded/cef/src CEF master branch]. This location tracks the current [https://chromium.googlesource.com/chromium/src.git Chromium master branch] and is not recommended for production use.
+Ongoing development of CEF occurs in the [https://bitbucket.org/chromiumembedded/cef/src?at=master CEF master branch]. This location tracks the current [https://chromium.googlesource.com/chromium/src.git Chromium master branch] and is not recommended for production use.
 
 The following URLs should be used for downloading development versions of CEF.
 
-  * CEF3 - https://bitbucket.org/chromiumembedded/cef/src
+  * CEF3 - https://bitbucket.org/chromiumembedded/cef/src?at=master
 
 CEF1 is no longer actively developed or supported. See the [http://magpcss.org/ceforum/viewtopic.php?f=10&t=10647 CEF1 Retirement Plan] for details.
 
