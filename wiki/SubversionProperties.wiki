@@ -1,5 +1,7 @@
 #summary Subversion properties to use when committing changes to CEF.
 
+*This Wiki page is obsolete and no longer maintained. Visit the new CEF project page at https://bitbucket.org/chromiumembedded/cef/ *
+
 == Subversion properties ==
 
 For CEF development, you should configure your Subversion config file to automatically set properties on new files as shown below. We do not use svn:eol-style=native because it makes it painful to move diff files across different platforms.
