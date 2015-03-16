@@ -1,5 +1,7 @@
 #summary Vim configuration file for editing CEF/Chromium code.
 
+*This Wiki page is obsolete and no longer maintained. Visit the new CEF project page at https://bitbucket.org/chromiumembedded/cef/ *
+
 == Vim Configuration ==
 
 The below vim configuration file enables a number of useful features for CEF/Chromium code editing.
